@@ -6,7 +6,7 @@ data Resource : Set where
   resource :
     (resourceExists : Request -> Bool)
     (serviceAvailable : Request -> Bool)
-    (isAuthorized : Request -> Bool)
+    (isAuthorized : Request -> AuthHead)
     (forbidden : Request -> Bool)
     -> Resource
 
@@ -16,7 +16,7 @@ resourceExists _ = true
 serviceAvailable : Request -> Bool
 serviceAvailable _ = true
 
-isAuthorized : Request -> Bool
+isAuthorized : Request -> AuthHead
 isAuthorized _ = true
 
 forbidden : Request -> Bool
