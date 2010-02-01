@@ -36,7 +36,7 @@ options : Request → List Header
 options _ = []
 
 allowedMethods : Request → List Method
-allowedMethods _ = HEAD ∷ GET ∷ []
+allowedMethods _ = HEAD ∷ [ GET ]
 
 deleteResource : Request → Bool
 deleteResource _ = false
@@ -53,5 +53,32 @@ createPath _ = nothing
 processPost : Request → Bool
 processPost _ = false
 
-contentTypesProvided : Request → MediaType × Handler
-contentTypesProvided _ = "text/html" , toHtml
+contentTypesProvided : Request → List (MediaType × Handler)
+contentTypesProvided _ = [ "text/html" , toHtml ]
+
+contentTypesAccepted : Request → List (MediaType × Handler)
+contentTypesAccepted _ = []
+
+charsetsProvided : Request → Maybe (Charset × CharsetConverter)
+charsetsProvided _ = nothing
+
+encodingsProvided : Request → List (Encoding × Encoder)
+encodingsProvided _ = [ "identity" , defaultEncoder ]
+
+variances : Request → List VaryHeader
+variances _ = []
+
+isConflict : Request → Bool
+isConflict _ = false
+
+multipleChoices : Request → Bool
+multipleChoices _ = false
+
+previouslyExisted : Request → Bool
+previouslyExisted _ = false
+
+movedPermanently : Request → Maybe MovedURI
+movedPermanently _ = nothing
+
+movedTemporarily : Request → Maybe MovedURI
+movedTemporarily _ = nothing
