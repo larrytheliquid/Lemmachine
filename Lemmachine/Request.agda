@@ -1,5 +1,9 @@
 module Lemmachine.Request where
+open import Data.Product
+open import Data.List
+open import Data.Maybe
 open import Data.Bool
+open import Data.Nat
 open import Data.String
 
 AuthHead = Bool
@@ -21,5 +25,28 @@ data ETag : Set where
 data Method : Set where
   HEAD GET PUT DELETE POST : Method
   TRACE CONNECT OPTIONS : Method
+Version = ℕ × ℕ
+IP = String
+LocalPath = String
 
-data Request : Set where
+RawPath = String
+Cookie = String
+QueryString = String
+Port = String
+
+-- TODO: pathInfo
+-- TODO: make Headers a Map?
+record Request : Set where
+  field
+    method : Method
+    version : Version
+    peer : IP
+    dispPath : LocalPath
+    path : Path
+    rawPath : RawPath
+    pathTokens : List String
+    reqHeaders : List Header
+    reqBody : Maybe String
+    reqCookie : Cookie
+    reqQS : QueryString
+    port : Port
