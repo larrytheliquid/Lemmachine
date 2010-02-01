@@ -8,6 +8,6 @@ Body = String
 
 record Response : Set where 
   field 
-    status : ∀ {n} -> Status n
+    status : ∀ {n} → Status n
     headers : Headers
     body : Body

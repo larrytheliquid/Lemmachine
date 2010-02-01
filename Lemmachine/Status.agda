@@ -1,7 +1,7 @@
 module Lemmachine.Status where
 open import Data.Nat
 
-data Status : ℕ -> Set where
+data Status : ℕ → Set where
   OK : Status 200
   Created : Status 201
   Accepted : Status 202
