@@ -82,3 +82,15 @@ movedPermanently _ = nothing
 
 movedTemporarily : Request → Maybe MovedURI
 movedTemporarily _ = nothing
+
+lastModified : Request → Maybe DateTime
+lastModified _ = nothing
+
+expires : Request → Maybe DateTime
+expires _ = nothing
+
+generateETag : Request → Maybe ETag
+generateETag _ = nothing
+
+finishRequest : Request → Bool
+finishRequest _ = true
