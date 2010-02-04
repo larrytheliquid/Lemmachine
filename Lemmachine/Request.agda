@@ -7,8 +7,8 @@ open import Data.Nat
 open import Data.String
 
 AuthHead = Bool
-Header = String
 Path = String
+RequestHeader = String × String
 MediaType = String
 data Handler : Set where
   toHtml : Handler
@@ -45,8 +45,8 @@ record Request : Set where
     path : Path
     rawPath : RawPath
     pathTokens : List String
-    reqHeaders : List Header
-    reqBody : Maybe String
-    reqCookie : Cookie
-    reqQS : QueryString
+    headers : List RequestHeader
+    body : Maybe String
+    cookie : Cookie
+    queryString : QueryString
     port : Port
