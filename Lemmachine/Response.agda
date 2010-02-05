@@ -8,6 +8,6 @@ ResponseHeader = String × String
 
 record Response : Set where 
   field 
-    status : ∀ {n} → Status n
+    status : Status
     headers : List ResponseHeader
     body : String

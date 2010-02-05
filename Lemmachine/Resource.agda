@@ -1,5 +1,6 @@
 module Lemmachine.Resource where
 open import Lemmachine.Request
+open import Lemmachine.Response
 open import Data.Maybe
 open import Data.List
 open import Data.Product
@@ -32,7 +33,7 @@ validContentHeaders _ = true
 validEntityLength : Request → Bool
 validEntityLength _ = true
 
-options : Request → List Header
+options : Request → List ResponseHeader
 options _ = []
 
 allowedMethods : Request → List Method
