@@ -25,6 +25,18 @@ data ETag : Set where
 data Method : Set where
   HEAD GET PUT DELETE POST : Method
   TRACE CONNECT OPTIONS : Method
+
+eqMethod : Method → Method → Bool
+eqMethod HEAD HEAD = true
+eqMethod GET GET = true
+eqMethod PUT PUT = true
+eqMethod DELETE DELETE = true
+eqMethod POST POST = true
+eqMethod TRACE TRACE = true
+eqMethod CONNECT CONNECT = true
+eqMethod OPTIONS OPTIONS = true
+eqMethod _ _ = false
+
 Version = ℕ × ℕ
 IP = String
 LocalPath = String

@@ -37,7 +37,10 @@ options : Request → List ResponseHeader
 options _ = []
 
 allowedMethods : Request → List Method
-allowedMethods _ = HEAD ∷ [ GET ]
+allowedMethods _ = HEAD ∷ GET ∷ []
+
+knownMethods : Request → List Method
+knownMethods _ = HEAD ∷ GET ∷ PUT ∷ DELETE ∷ POST ∷ TRACE ∷ CONNECT ∷ OPTIONS ∷ []
 
 deleteResource : Request → Bool
 deleteResource _ = false
