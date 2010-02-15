@@ -11,11 +11,24 @@ open import Data.List
 END : Request → Status
 END _ = OK
 
+B10 : Request → Status
+B10 r =
+  if any (eqMethod (Request.method r))
+         (allowedMethods r)
+  then END r
+  else MethodNotAllowed
+
+B11 : Request → Status
+B11 r = 
+  if uriTooLong r
+  then RequestURItooLong
+  else B10 r
+
 B12 : Request → Status
-B12 r = if any 
-           (eqMethod (Request.method r))
-           (knownMethods r)
-  then END r 
+B12 r = 
+  if any (eqMethod (Request.method r))
+         (knownMethods r)
+  then B11 r 
   else NotImplemented
 
 B13 : Request → Status
