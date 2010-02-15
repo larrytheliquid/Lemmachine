@@ -8,13 +8,38 @@ open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
 open import Data.List
 
+-- B7 : Request → Status
+-- B7 r with 
+-- ... | true  = 
+-- ... | false = 
+
 END : Request → Status
 END _ = OK
+
+B3 : Request → Status
+B3 r with Request.method r
+... | OPTIONS = OK
+... | _       = END r
+
+B4 : Request → Status
+B4 r with validEntityLength r
+... | true  = B3 r
+... | false = RequestEntityTooLarge
+
+B5 : Request → Status
+B5 r with knownContentType r
+... | true  = B4 r
+... | false = UnsupportedMediaType
+
+B6 : Request → Status
+B6 r with validContentHeaders r
+... | true  = END r
+... | false = NotImplemented
 
 B7 : Request → Status
 B7 r with forbidden r
 ... | true  = Forbidden
-... | false = END r
+... | false = B6 r
 
 B8 : Request → Status
 B8 r with isAuthorized r
