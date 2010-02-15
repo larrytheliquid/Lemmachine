@@ -21,6 +21,9 @@ forbidden _ = false
 allowMissingPost : Request → Bool
 allowMissingPost _ = false
 
+malformedRequest : Request → Bool
+malformedRequest _ = false
+
 uriTooLong : Request → Bool
 uriTooLong _ = false
 
