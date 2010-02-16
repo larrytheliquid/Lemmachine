@@ -61,7 +61,7 @@ processPost : Request → Bool
 processPost _ = false
 
 contentTypesProvided : Request → List (MediaType × Handler)
-contentTypesProvided _ = [ "text/html" , toHtml ]
+contentTypesProvided _ = [ "text/html" , "toHtml" ]
 
 contentTypesAccepted : Request → List (MediaType × Handler)
 contentTypesAccepted _ = []

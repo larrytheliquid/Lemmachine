@@ -10,8 +10,9 @@ AuthHead = Bool
 Path = String
 RequestHeader = String × String
 MediaType = String
-data Handler : Set where
-  toHtml : Handler
+Handler = String
+-- data Handler : Set where
+--   toHtml : Handler
 Charset = String
 data CharsetConverter : Set where
 Encoding = String

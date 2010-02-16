@@ -2,34 +2,29 @@ module Lemmachine.DecisionCore where
 open import Lemmachine.Resource
 open import Lemmachine.Request
 open import Lemmachine.Status
+open import Lemmachine.Utils
 open import Data.Bool
 open import Data.Nat
 open import Data.String
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
+open import Data.Maybe
 open import Data.List
-open import Data.List.Any renaming (any to any₂)
-open Membership-≡
 open import Data.Product
 
 postulate D4 : Request → Status
 
-C4 : Request → Status
-C4 r with any (λ c → "TODO" == proj₁ c)
-              (contentTypesProvided r)
-... | true  = D4 r
-... | false = NotAcceptable
-
-C3 : Request → Status
-C3 r with any (λ h → "Accept" == proj₁ h)
-              (Request.headers r)
-... | true  = C4 r
-... | false = D4 r
+C3+C4 : Request → Status
+C3+C4 r with detect "Accept" (Request.headers r)
+... | nothing = D4 r
+... | just contentType with detect contentType (contentTypesProvided r)
+... | just _ = D4 r
+... | nothing = NotAcceptable
 
 B3 : Request → Status
 B3 r with Request.method r
 ... | OPTIONS = OK
-... | _       = C3 r
+... | _       = C3+C4 r
 
 B4 : Request → Status
 B4 r with validEntityLength r
