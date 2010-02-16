@@ -4,9 +4,11 @@ open import Lemmachine.Request
 open import Lemmachine.Status
 open import Data.Bool
 open import Data.Nat
+open import Data.String
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
 open import Data.List
+open import Data.Product
 
 -- B7 : Request → Status
 -- B7 r with 
@@ -15,6 +17,12 @@ open import Data.List
 
 END : Request → Status
 END _ = OK
+
+C3 : Request → Status
+C3 r with any (λ h → "Accept" == proj₁ h)
+              (Request.headers r)
+... | true  = END r
+... | false = END r
 
 B3 : Request → Status
 B3 r with Request.method r
