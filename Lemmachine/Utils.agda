@@ -8,8 +8,8 @@ open import Data.List hiding (any)
 open import Data.List.Any
 open Membership-≡
 
-detect : String → List (String × String) → Maybe String
-detect x xs with any (_≟_ x ∘ proj₁) xs
+fetch : String → List (String × String) → Maybe String
+fetch x xs with any (_≟_ x ∘ proj₁) xs
 ... | yes p = just (proj₂ (proj₁ (find p)))
 ... | no _ = nothing
 

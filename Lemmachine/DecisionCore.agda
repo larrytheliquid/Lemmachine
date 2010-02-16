@@ -12,33 +12,44 @@ open import Data.Maybe
 open import Data.List
 open import Data.Product
 
-postulate G7 : Request → Status
+postulate G8 : Request → Status
+postulate I7 : Request → Status
+
+H7 : Request → Status
+H7 r with fetch "If-Match" (Request.headers r)
+... | just _  = PreconditionFailed
+... | nothing = I7 r
+
+G7 : Request → Status
+G7 r with resourceExists r
+... | true  = G8 r
+... | false = H7 r
 
 F6+F7 : Request → Status
-F6+F7 r with detect "Accept-Encoding" (Request.headers r)
+F6+F7 r with fetch "Accept-Encoding" (Request.headers r)
 ... | nothing = G7 r
-... | just encoding with detect encoding (encodingsProvided r)
+... | just encoding with fetch encoding (encodingsProvided r)
 ... | just _  = G7 r
 ... | nothing = NotAcceptable
 
 E5+E6 : Request → Status
-E5+E6 r with detect "Accept-Charset" (Request.headers r)
+E5+E6 r with fetch "Accept-Charset" (Request.headers r)
 ... | nothing = F6+F7 r
-... | just charset with detect charset (charsetsProvided r)
+... | just charset with fetch charset (charsetsProvided r)
 ... | just _  = F6+F7 r
 ... | nothing = NotAcceptable
 
 D4+D5 : Request → Status
-D4+D5 r with detect "Accept-Language" (Request.headers r)
+D4+D5 r with fetch "Accept-Language" (Request.headers r)
 ... | nothing = E5+E6 r
 ... | just language with languageAvailable r
 ... | true    = E5+E6 r
 ... | false   = NotAcceptable
 
 C3+C4 : Request → Status
-C3+C4 r with detect "Accept" (Request.headers r)
+C3+C4 r with fetch "Accept" (Request.headers r)
 ... | nothing = D4+D5 r
-... | just contentType with detect contentType (contentTypesProvided r)
+... | just contentType with fetch contentType (contentTypesProvided r)
 ... | just _  = D4+D5 r
 ... | nothing = NotAcceptable
 
