@@ -14,10 +14,12 @@ Handler = String
 -- data Handler : Set where
 --   toHtml : Handler
 Charset = String
-data CharsetConverter : Set where
+CharsetConverter = String
+-- data CharsetConverter : Set where
 Encoding = String
-data Encoder : Set where
-  defaultEncoder : Encoder
+Encoder = String
+-- data Encoder : Set where
+--   defaultEncoder : Encoder
 data VaryHeader : Set where
 MovedURI = String
 data DateTime : Set where

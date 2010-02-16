@@ -63,14 +63,17 @@ processPost _ = false
 contentTypesProvided : Request → List (MediaType × Handler)
 contentTypesProvided _ = [ "text/html" , "toHtml" ]
 
+languageAvailable : Request → Bool
+languageAvailable _ = true
+
 contentTypesAccepted : Request → List (MediaType × Handler)
 contentTypesAccepted _ = []
 
-charsetsProvided : Request → Maybe (Charset × CharsetConverter)
-charsetsProvided _ = nothing
+charsetsProvided : Request → List (Charset × CharsetConverter)
+charsetsProvided _ = []
 
 encodingsProvided : Request → List (Encoding × Encoder)
-encodingsProvided _ = [ "identity" , defaultEncoder ]
+encodingsProvided _ = [ "identity" , "defaultEncoder" ]
 
 variances : Request → List VaryHeader
 variances _ = []

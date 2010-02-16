@@ -12,13 +12,34 @@ open import Data.Maybe
 open import Data.List
 open import Data.Product
 
-postulate D4 : Request → Status
+postulate G7 : Request → Status
+
+F6+F7 : Request → Status
+F6+F7 r with detect "Accept-Encoding" (Request.headers r)
+... | nothing = G7 r
+... | just encoding with detect encoding (encodingsProvided r)
+... | just _  = G7 r
+... | nothing = NotAcceptable
+
+E5+E6 : Request → Status
+E5+E6 r with detect "Accept-Charset" (Request.headers r)
+... | nothing = F6+F7 r
+... | just charset with detect charset (charsetsProvided r)
+... | just _  = F6+F7 r
+... | nothing = NotAcceptable
+
+D4+D5 : Request → Status
+D4+D5 r with detect "Accept-Language" (Request.headers r)
+... | nothing = E5+E6 r
+... | just language with languageAvailable r
+... | true    = E5+E6 r
+... | false   = NotAcceptable
 
 C3+C4 : Request → Status
 C3+C4 r with detect "Accept" (Request.headers r)
-... | nothing = D4 r
+... | nothing = D4+D5 r
 ... | just contentType with detect contentType (contentTypesProvided r)
-... | just _ = D4 r
+... | just _  = D4+D5 r
 ... | nothing = NotAcceptable
 
 B3 : Request → Status
