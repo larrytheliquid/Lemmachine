@@ -8,26 +8,28 @@ open import Data.String
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
 open import Data.List
+open import Data.List.Any renaming (any to any₂)
+open Membership-≡
 open import Data.Product
 
--- B7 : Request → Status
--- B7 r with 
--- ... | true  = 
--- ... | false = 
+postulate D4 : Request → Status
 
-END : Request → Status
-END _ = OK
+C4 : Request → Status
+C4 r with any (λ c → "TODO" == proj₁ c)
+              (contentTypesProvided r)
+... | true  = D4 r
+... | false = NotAcceptable
 
 C3 : Request → Status
 C3 r with any (λ h → "Accept" == proj₁ h)
               (Request.headers r)
-... | true  = END r
-... | false = END r
+... | true  = C4 r
+... | false = D4 r
 
 B3 : Request → Status
 B3 r with Request.method r
 ... | OPTIONS = OK
-... | _       = END r
+... | _       = C3 r
 
 B4 : Request → Status
 B4 r with validEntityLength r
@@ -41,7 +43,7 @@ B5 r with knownContentType r
 
 B6 : Request → Status
 B6 r with validContentHeaders r
-... | true  = END r
+... | true  = B5 r
 ... | false = NotImplemented
 
 B7 : Request → Status
