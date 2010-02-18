@@ -23,7 +23,8 @@ Encoder = String
 data VaryHeader : Set where
 MovedURI = String
 data DateTime : Set where
-data ETag : Set where
+ETag = String
+-- data ETag : Set where
 
 data Method : Set where
   HEAD GET PUT DELETE POST : Method

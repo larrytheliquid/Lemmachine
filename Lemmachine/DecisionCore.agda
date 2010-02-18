@@ -12,8 +12,19 @@ open import Data.Maybe
 open import Data.List
 open import Data.Product
 
-postulate G8 : Request → Status
+postulate H10 : Request → Status
 postulate I7 : Request → Status
+
+G8+G9+G11 : Request → Status
+G8+G9+G11 r with fetch "If-Match" (Request.headers r)
+... | nothing = H10 r
+... | just clientETag with "*" == clientETag
+... | true  = H10 r
+... | false with generateETag r
+... | nothing = PreconditionFailed
+... | just serverETag with clientETag == serverETag
+... | true = H10 r
+... | false = PreconditionFailed
 
 H7 : Request → Status
 H7 r with fetch "If-Match" (Request.headers r)
@@ -22,7 +33,7 @@ H7 r with fetch "If-Match" (Request.headers r)
 
 G7 : Request → Status
 G7 r with resourceExists r
-... | true  = G8 r
+... | true  = G8+G9+G11 r
 ... | false = H7 r
 
 F6+F7 : Request → Status
