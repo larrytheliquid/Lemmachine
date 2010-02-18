@@ -22,7 +22,8 @@ Encoder = String
 --   defaultEncoder : Encoder
 data VaryHeader : Set where
 MovedURI = String
-data DateTime : Set where
+DateTime = String
+-- data DateTime : Set where
 ETag = String
 -- data ETag : Set where
 

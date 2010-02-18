@@ -1,5 +1,6 @@
 module Lemmachine.Utils where
 open import Data.Maybe
+open import Data.Bool hiding (_≟_)
 open import Data.String
 open import Data.Function
 open import Data.Product
@@ -13,3 +14,6 @@ fetch x xs with any (_≟_ x ∘ proj₁) xs
 ... | yes p = just (proj₂ (proj₁ (find p)))
 ... | no _ = nothing
 
+postulate isDate : String → Bool
+
+postulate isModified : String → String → Bool

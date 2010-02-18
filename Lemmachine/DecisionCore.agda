@@ -12,18 +12,29 @@ open import Data.Maybe
 open import Data.List
 open import Data.Product
 
-postulate H10 : Request → Status
+postulate I12 : Request → Status
 postulate I7 : Request → Status
+
+H10+H11+H12 : Request → Status
+H10+H11+H12 r with fetch "If-Unmodified-Since" (Request.headers r)
+... | nothing = I12 r
+... | just clientDate with isDate clientDate
+... | false = I12 r
+... | true  with lastModified r
+... | nothing = I12 r
+... | just serverDate with isModified clientDate serverDate
+... | true = PreconditionFailed
+... | false = I12 r
 
 G8+G9+G11 : Request → Status
 G8+G9+G11 r with fetch "If-Match" (Request.headers r)
-... | nothing = H10 r
+... | nothing = H10+H11+H12 r
 ... | just clientETag with "*" == clientETag
-... | true  = H10 r
+... | true  = H10+H11+H12 r
 ... | false with generateETag r
 ... | nothing = PreconditionFailed
 ... | just serverETag with clientETag == serverETag
-... | true = H10 r
+... | true = H10+H11+H12 r
 ... | false = PreconditionFailed
 
 H7 : Request → Status
