@@ -12,8 +12,6 @@ open import Data.Maybe
 open import Data.List
 open import Data.Product
 
-postulate N11 : Request → Status
-postulate O14 : Request → Status
 postulate I7 : Request → Status
 
 O18 : Request → Status
@@ -26,15 +24,30 @@ O20 r with Request.body r
 ... | nothing = NoContent
 ... | just _ = O18 r
 
+P11 : Request → Status
+P11 r with fetch "Location" (Request.headers r)
+... | nothing = O20 r
+... | just _  = Created
+
+O14 : Request → Status
+O14 r with isConflict r
+... | true  = Conflict
+... | false = P11 r
+
 O16 : Request → Status
 O16 r with Request.method r
 ... | PUT = O14 r
 ... | _ = O18 r
 
+N11 : Request → Status
+N11 r with isRedirect r
+... | true  = SeeOther
+... | false = P11 r
+
 N16 : Request → Status
 N16 r with Request.method r
-... | POST = O16 r
-... | _ = N11 r
+... | POST = N11 r
+... | _ = O16 r
 
 M20 : Request → Status
 M20 r with deleteResource r

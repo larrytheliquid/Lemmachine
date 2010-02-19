@@ -67,3 +67,5 @@ record Request : Set where
     cookie : Cookie
     queryString : QueryString
     port : Port
+
+postulate isRedirect : Request → Bool
