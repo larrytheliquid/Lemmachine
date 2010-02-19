@@ -12,8 +12,21 @@ open import Data.Maybe
 open import Data.List
 open import Data.Product
 
-postulate L13 : Request → Status
+postulate M16 : Request → Status
 postulate I7 : Request → Status
+
+L13+L14+L15+L17 : Request → Status
+L13+L14+L15+L17 r with fetch "If-Modified-Since" (Request.headers r)
+... | nothing = M16 r
+... | just clientDate with isDate clientDate
+... | false = M16 r
+... | true with isModified now clientDate
+... | true = M16 r
+... | false with lastModified r
+... | nothing = M16 r
+... | just serverDate with isModified clientDate serverDate
+... | true = M16 r
+... | false = NotModified
 
 J18 : Request → Status
 J18 r with Request.method r
@@ -23,14 +36,14 @@ J18 r with Request.method r
 
 I12+I13+K13 : Request → Status
 I12+I13+K13 r with fetch "If-None-Match" (Request.headers r)
-... | nothing = L13 r
+... | nothing = L13+L14+L15+L17 r
 ... | just clientETag with "*" == clientETag
 ... | true = J18 r
 ... | false with generateETag r
-... | nothing = L13 r
+... | nothing = L13+L14+L15+L17 r
 ... | just serverETag with clientETag == serverETag
 ... | true = J18 r
-... | false = L13 r
+... | false = L13+L14+L15+L17 r
 
 H10+H11+H12 : Request → Status
 H10+H11+H12 r with fetch "If-Unmodified-Since" (Request.headers r)

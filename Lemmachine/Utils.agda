@@ -17,3 +17,5 @@ fetch x xs with any (_≟_ x ∘ proj₁) xs
 postulate isDate : String → Bool
 
 postulate isModified : String → String → Bool
+
+postulate now : String
