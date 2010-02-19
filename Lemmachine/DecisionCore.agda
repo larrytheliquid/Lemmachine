@@ -12,8 +12,39 @@ open import Data.Maybe
 open import Data.List
 open import Data.Product
 
-postulate M16 : Request → Status
+postulate N11 : Request → Status
+postulate O14 : Request → Status
 postulate I7 : Request → Status
+
+O18 : Request → Status
+O18 r with multipleChoices r
+... | false = OK
+... | true  = MultipleChoices
+
+O20 : Request → Status
+O20 r with Request.body r
+... | nothing = NoContent
+... | just _ = O18 r
+
+O16 : Request → Status
+O16 r with Request.method r
+... | PUT = O14 r
+... | _ = O18 r
+
+N16 : Request → Status
+N16 r with Request.method r
+... | POST = O16 r
+... | _ = N11 r
+
+M20 : Request → Status
+M20 r with deleteResource r
+... | false = Accepted
+... | true = O20 r
+
+M16 : Request → Status
+M16 r with Request.method r
+... | DELETE = M20 r
+... | _ = N16 r
 
 L13+L14+L15+L17 : Request → Status
 L13+L14+L15+L17 r with fetch "If-Modified-Since" (Request.headers r)
