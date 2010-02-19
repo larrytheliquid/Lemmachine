@@ -12,8 +12,6 @@ open import Data.Maybe
 open import Data.List
 open import Data.Product
 
-postulate I7 : Request → Status
-
 O18 : Request → Status
 O18 r with multipleChoices r
 ... | false = OK
@@ -111,10 +109,31 @@ G8+G9+G11 r with fetch "If-Match" (Request.headers r)
 ... | true = H10+H11+H12 r
 ... | false = PreconditionFailed
 
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 : Request → Status
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r   with Request.method r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | PUT    with movedPermanently r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | PUT  | just _  = MovedPermanently
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | PUT  | nothing   with isConflict r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | PUT  | nothing | false   = N11 r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | PUT  | nothing | true    = Conflict
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | _      with previouslyExisted r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | _    | true      with movedPermanently r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | _    | true    | just _  = MovedPermanently
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | _    | true    | nothing   with movedTemporarily r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | _    | true    | nothing | just _  = MovedTemporarily
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | true    | nothing | nothing   with allowMissingPost r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | POST | true    | nothing | nothing | false = Gone
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | true    | nothing | nothing | true  = N11 r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | _    | true    | nothing | nothing = Gone
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | false     with allowMissingPost r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | POST | false   | false = NotFound
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | false   | true  = N11 r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | _    | false   = NotFound
+
 H7 : Request → Status
 H7 r with fetch "If-Match" (Request.headers r)
 ... | just _  = PreconditionFailed
-... | nothing = I7 r
+... | nothing = I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r
 
 G7 : Request → Status
 G7 r with resourceExists r
