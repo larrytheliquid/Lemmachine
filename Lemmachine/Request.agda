@@ -11,21 +11,13 @@ Path = String
 RequestHeader = String × String
 MediaType = String
 Handler = String
--- data Handler : Set where
---   toHtml : Handler
 Charset = String
 CharsetConverter = String
--- data CharsetConverter : Set where
 Encoding = String
 Encoder = String
--- data Encoder : Set where
---   defaultEncoder : Encoder
-data VaryHeader : Set where
 MovedURI = String
 DateTime = String
--- data DateTime : Set where
 ETag = String
--- data ETag : Set where
 
 data Method : Set where
   HEAD GET PUT DELETE POST : Method
@@ -51,8 +43,6 @@ Cookie = String
 QueryString = String
 Port = String
 
--- TODO: pathInfo
--- TODO: make Headers a Map?
 record Request : Set where
   field
     method : Method
