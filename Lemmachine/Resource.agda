@@ -75,7 +75,7 @@ charsetsProvided _ = []
 encodingsProvided : Request → List (Encoding × Encoder)
 encodingsProvided _ = [ "identity" , "defaultEncoder" ]
 
-variances : Request → List VaryHeader
+variances : Request → List RequestHeader
 variances _ = []
 
 isConflict : Request → Bool

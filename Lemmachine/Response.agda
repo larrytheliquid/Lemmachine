@@ -1,5 +1,5 @@
 module Lemmachine.Response where
-open import Lemmachine.Status
+open import Lemmachine.Status public
 open import Data.Product
 open import Data.List
 open import Data.String
