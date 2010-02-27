@@ -6,6 +6,9 @@ open import Data.List
 open import Data.Product
 open import Data.Bool
 
+Hook : Set → Set
+Hook A = Request → A
+
 resourceExists : Request → Bool
 resourceExists _ = true
 

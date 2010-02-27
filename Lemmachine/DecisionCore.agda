@@ -173,57 +173,57 @@ B3 r with Request.method r
 ... | OPTIONS = OK
 ... | _       = C3+C4 r
 
-B4 : Request → Status
-B4 r with validEntityLength r
+B4 : Hook Bool → Request → Status
+B4 validEntityLength r with validEntityLength r
 ... | true  = B3 r
 ... | false = RequestEntityTooLarge
 
-B5 : Request → Status
-B5 r with knownContentType r
-... | true  = B4 r
+B5 : Hook Bool → Request → Status
+B5 knownContentType r with knownContentType r
+... | true  = B4 validEntityLength r
 ... | false = UnsupportedMediaType
 
-B6 : Request → Status
-B6 r with validContentHeaders r
-... | true  = B5 r
+B6 : Hook Bool → Request → Status
+B6 validContentHeaders r with validContentHeaders r
+... | true  = B5 knownContentType r
 ... | false = NotImplemented
 
-B7 : Request → Status
-B7 r with forbidden r
+B7 : Hook Bool → Request → Status
+B7 forbidden r with forbidden r
 ... | true  = Forbidden
-... | false = B6 r
+... | false = B6 validContentHeaders r
 
-B8 : Request → Status
-B8 r with isAuthorized r
-... | true  = B7 r
+B8 : Hook Bool → Request → Status
+B8 isAuthorized r with isAuthorized r
+... | true  = B7 forbidden r
 ... | false = Unauthorized
 
-B9 : Request → Status
-B9 r with malformedRequest r
+B9 : Hook Bool → Request → Status
+B9 malformedRequest r with malformedRequest r
 ... | true  = BadRequest
-... | false = B8 r
+... | false = B8 isAuthorized r
 
 B10 : Request → Status
 B10 r with any (eqMethod (Request.method r))
                (allowedMethods r)
-... | true  = B9 r
+... | true  = B9 malformedRequest r
 ... | false = MethodNotAllowed
 
-B11 : Request → Status
-B11 r with uriTooLong r
+B11 : Hook Bool → Request → Status
+B11 uriTooLong r with uriTooLong r
 ... | true  = RequestURItooLong
 ... | false = B10 r
 
 B12 : Request → Status
 B12 r with any (eqMethod (Request.method r))
                (knownMethods r)
-... | true  = B11 r 
+... | true  = B11 uriTooLong r 
 ... | false = NotImplemented
 
-B13 : Request → Status
-B13 r with serviceAvailable r 
+B13 : Hook Bool → Request → Status
+B13 serviceAvailable r with serviceAvailable r 
 ... | true  = B12 r 
 ... | false = ServiceUnavailable
 
-decide : Request → Status
-decide r = B13 r
+resolve : Request → Status
+resolve r = B13 serviceAvailable r
