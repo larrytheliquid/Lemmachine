@@ -203,26 +203,28 @@ B9 malformedRequest r with malformedRequest r
 ... | true  = BadRequest
 ... | false = B8 isAuthorized r
 
-B10 : Request → Status
-B10 r with any (eqMethod (Request.method r))
-               (allowedMethods r)
+B10 : Hook (List Method) → Request → Status
+B10 allowedMethods r with 
+  any (eqMethod (Request.method r))
+      (allowedMethods r)
 ... | true  = B9 malformedRequest r
 ... | false = MethodNotAllowed
 
 B11 : Hook Bool → Request → Status
 B11 uriTooLong r with uriTooLong r
 ... | true  = RequestURItooLong
-... | false = B10 r
+... | false = B10 allowedMethods r
 
-B12 : Request → Status
-B12 r with any (eqMethod (Request.method r))
-               (knownMethods r)
+B12 : Hook (List Method) → Request → Status
+B12 knownMethods r with 
+  any (eqMethod (Request.method r))
+      (knownMethods r)
 ... | true  = B11 uriTooLong r 
 ... | false = NotImplemented
 
 B13 : Hook Bool → Request → Status
 B13 serviceAvailable r with serviceAvailable r 
-... | true  = B12 r 
+... | true  = B12 knownMethods r 
 ... | false = ServiceUnavailable
 
 resolve : Request → Status
