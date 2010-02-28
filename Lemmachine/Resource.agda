@@ -6,44 +6,93 @@ open import Data.List
 open import Data.Product
 open import Data.Bool
 
-Hook : Set → Set
-Hook A = Request → A
+module Universe where
+  data Code : Set where
+    resourceExists serviceAvailable isAuthorized : Code
+    forbidden allowMissingPost malformedRequest : Code
+    uriTooLong knownContentType validContentHeaders : Code
+    validEntityLength options allowedMethods : Code
+    knownMethods deleteResource deleteCompleted : Code
+    postIsCreate createPath processPost : Code
+    contentTypesProvided languageAvailable contentTypesAccepted : Code
+    charsetsProvided encodingsProvided variances : Code
+    isConflict multipleChoices previouslyExisted : Code
+    movedPermanently movedTemporarily lastModified : Code
+    expires generateETag finishRequest : Code
+
+  convert : Code → Set
+  convert resourceExists = Request → Bool
+  convert serviceAvailable = Request → Bool
+  convert isAuthorized = Request → AuthHead
+  convert forbidden = Request → Bool
+  convert allowMissingPost = Request → Bool
+  convert malformedRequest = Request → Bool
+  convert uriTooLong = Request → Bool
+  convert knownContentType = Request → Bool
+  convert validContentHeaders = Request → Bool
+  convert validEntityLength = Request → Bool
+  convert options = Request → List ResponseHeader
+  convert allowedMethods = Request → List Method
+  convert knownMethods = Request → List Method
+  convert deleteResource = Request → Bool
+  convert deleteCompleted = Request → Bool
+  convert postIsCreate = Request → Bool
+  convert createPath = Request → Maybe Path
+  convert processPost = Request → Bool
+  convert contentTypesProvided = Request → List (MediaType × Handler)
+  convert languageAvailable = Request → Bool
+  convert contentTypesAccepted = Request → List (MediaType × Handler)
+  convert charsetsProvided = Request → List (Charset × CharsetConverter)
+  convert encodingsProvided = Request → List (Encoding × Encoder)
+  convert variances = Request → List RequestHeader
+  convert isConflict = Request → Bool
+  convert multipleChoices = Request → Bool
+  convert previouslyExisted = Request → Bool
+  convert movedPermanently = Request → Maybe MovedURI
+  convert movedTemporarily = Request → Maybe MovedURI
+  convert lastModified = Request → Maybe DateTime
+  convert expires = Request → Maybe DateTime
+  convert generateETag = Request → Maybe ETag
+  convert finishRequest = Request → Bool
+
+private
+  module U = Universe
 
 record Config : Set where
   field
-    resourceExists : Request → Bool
-    serviceAvailable : Request → Bool
-    isAuthorized : Request → AuthHead
-    forbidden : Request → Bool
-    allowMissingPost : Request → Bool
-    malformedRequest : Request → Bool
-    uriTooLong : Request → Bool
-    knownContentType : Request → Bool
-    validContentHeaders : Request → Bool
-    validEntityLength : Request → Bool
-    options : Request → List ResponseHeader
-    allowedMethods : Request → List Method
-    knownMethods : Request → List Method
-    deleteResource : Request → Bool
-    deleteCompleted : Request → Bool
-    postIsCreate : Request → Bool
-    createPath : Request → Maybe Path
-    processPost : Request → Bool
-    contentTypesProvided : Request → List (MediaType × Handler)
-    languageAvailable : Request → Bool
-    contentTypesAccepted : Request → List (MediaType × Handler)
-    charsetsProvided : Request → List (Charset × CharsetConverter)
-    encodingsProvided : Request → List (Encoding × Encoder)
-    variances : Request → List RequestHeader
-    isConflict : Request → Bool
-    multipleChoices : Request → Bool
-    previouslyExisted : Request → Bool
-    movedPermanently : Request → Maybe MovedURI
-    movedTemporarily : Request → Maybe MovedURI
-    lastModified : Request → Maybe DateTime
-    expires : Request → Maybe DateTime
-    generateETag : Request → Maybe ETag
-    finishRequest : Request → Bool
+    resourceExists :  U.convert U.resourceExists
+    serviceAvailable : U.convert U.serviceAvailable
+    isAuthorized : U.convert U.isAuthorized
+    forbidden : U.convert U.forbidden
+    allowMissingPost : U.convert U.allowMissingPost
+    malformedRequest : U.convert U.malformedRequest
+    uriTooLong : U.convert U.uriTooLong
+    knownContentType : U.convert U.knownContentType
+    validContentHeaders : U.convert U.validContentHeaders
+    validEntityLength : U.convert U.validEntityLength
+    options : U.convert U.options
+    allowedMethods : U.convert U.allowedMethods
+    knownMethods : U.convert U.knownMethods
+    deleteResource : U.convert U.deleteResource
+    deleteCompleted : U.convert U.deleteCompleted
+    postIsCreate : U.convert U.postIsCreate
+    createPath : U.convert U.createPath
+    processPost : U.convert U.processPost
+    contentTypesProvided : U.convert U.contentTypesProvided
+    languageAvailable : U.convert U.languageAvailable
+    contentTypesAccepted : U.convert U.contentTypesAccepted
+    charsetsProvided : U.convert U.charsetsProvided
+    encodingsProvided : U.convert U.encodingsProvided
+    variances : U.convert U.variances
+    isConflict : U.convert U.isConflict
+    multipleChoices : U.convert U.multipleChoices
+    previouslyExisted : U.convert U.previouslyExisted
+    movedPermanently : U.convert U.movedPermanently
+    movedTemporarily : U.convert U.movedTemporarily
+    lastModified : U.convert U.lastModified
+    expires : U.convert U.expires
+    generateETag : U.convert U.generateETag
+    finishRequest : U.convert U.finishRequest
 
 default : Config
 default = record {
@@ -82,37 +131,39 @@ default = record {
   ; finishRequest = λ _ → true
   }
 
-data Code : Set where
-  resourceExists : Code
-  serviceAvailable : Code
-  isAuthorized : Code
-  forbidden : Code
-  allowMissingPost : Code
-  malformedRequest : Code
-  uriTooLong : Code
-  knownContentType : Code
-  validContentHeaders : Code
-  validEntityLength : Code
-  options : Code
-  allowedMethods : Code
-  knownMethods : Code
-  deleteResource : Code
-  deleteCompleted : Code
-  postIsCreate : Code
-  createPath : Code
-  processPost : Code
-  contentTypesProvided : Code
-  languageAvailable : Code
-  contentTypesAccepted : Code
-  charsetsProvided : Code
-  encodingsProvided : Code
-  variances : Code
-  isConflict : Code
-  multipleChoices : Code
-  previouslyExisted : Code
-  movedPermanently : Code
-  movedTemporarily : Code
-  lastModified : Code
-  expires : Code
-  generateETag : Code
-  finishRequest : Code
+id : U.Code → Config → Config
+id fn c = record {
+    resourceExists = Config.resourceExists c
+  ; serviceAvailable = Config.serviceAvailable c
+  ; isAuthorized = Config.isAuthorized c
+  ; forbidden = Config.forbidden c
+  ; allowMissingPost = Config.allowMissingPost c
+  ; malformedRequest = Config.malformedRequest c
+  ; uriTooLong = Config.uriTooLong c
+  ; knownContentType = Config.knownContentType c
+  ; validContentHeaders = Config.validContentHeaders c
+  ; validEntityLength = Config.validEntityLength c
+  ; options = Config.options c
+  ; allowedMethods = Config.allowedMethods c
+  ; knownMethods = Config.knownMethods c
+  ; deleteResource = Config.deleteResource c
+  ; deleteCompleted = Config.deleteCompleted c
+  ; postIsCreate = Config.postIsCreate c
+  ; createPath = Config.createPath c
+  ; processPost = Config.processPost c
+  ; contentTypesProvided = Config.contentTypesProvided c
+  ; languageAvailable = Config.languageAvailable c
+  ; contentTypesAccepted = Config.contentTypesAccepted c
+  ; charsetsProvided = Config.charsetsProvided c
+  ; encodingsProvided = Config.encodingsProvided c
+  ; variances = Config.variances c
+  ; isConflict = Config.isConflict c
+  ; multipleChoices = Config.multipleChoices c
+  ; previouslyExisted = Config.previouslyExisted c
+  ; movedPermanently = Config.movedPermanently c
+  ; movedTemporarily = Config.movedTemporarily c
+  ; lastModified = Config.lastModified c
+  ; expires = Config.expires c
+  ; generateETag = Config.generateETag c
+  ; finishRequest = Config.finishRequest c
+  }
