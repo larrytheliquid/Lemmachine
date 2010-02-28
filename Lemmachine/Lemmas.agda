@@ -1,5 +1,4 @@
 module Lemmachine.Lemmas where
-open import Lemmachine.DecisionCore
 open import Lemmachine.Request
 open import Lemmachine.Status
 open import Lemmachine.Utils
@@ -7,12 +6,15 @@ open import Data.Bool
 open import Data.List
 open import Data.Maybe
 open import Relation.Binary.PropositionalEquality
+open import Lemmachine.Resource
+import Lemmachine.DecisionCore
+open Lemmachine.DecisionCore default
 
 serviceUnavailable : ∀ {r} → B13 (λ _ → false) r ≡ ServiceUnavailable
 serviceUnavailable = refl
 
-unkownMethod : ∀ {r} → B12 (λ _ → []) r ≡ NotImplemented
-unkownMethod = refl
+unknownMethod : ∀ {r} → B12 (λ _ → []) r ≡ NotImplemented
+unknownMethod = refl
 
 requestURItooLong : ∀ {r} → B11 (λ _ → true) r ≡ RequestURItooLong
 requestURItooLong = refl

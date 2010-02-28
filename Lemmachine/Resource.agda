@@ -9,101 +9,76 @@ open import Data.Bool
 Hook : Set → Set
 Hook A = Request → A
 
-resourceExists : Request → Bool
-resourceExists _ = true
+record Config : Set where
+  field
+    resourceExists : Request → Bool
+    serviceAvailable : Request → Bool
+    isAuthorized : Request → AuthHead
+    forbidden : Request → Bool
+    allowMissingPost : Request → Bool
+    malformedRequest : Request → Bool
+    uriTooLong : Request → Bool
+    knownContentType : Request → Bool
+    validContentHeaders : Request → Bool
+    validEntityLength : Request → Bool
+    options : Request → List ResponseHeader
+    allowedMethods : Request → List Method
+    knownMethods : Request → List Method
+    deleteResource : Request → Bool
+    deleteCompleted : Request → Bool
+    postIsCreate : Request → Bool
+    createPath : Request → Maybe Path
+    processPost : Request → Bool
+    contentTypesProvided : Request → List (MediaType × Handler)
+    languageAvailable : Request → Bool
+    contentTypesAccepted : Request → List (MediaType × Handler)
+    charsetsProvided : Request → List (Charset × CharsetConverter)
+    encodingsProvided : Request → List (Encoding × Encoder)
+    variances : Request → List RequestHeader
+    isConflict : Request → Bool
+    multipleChoices : Request → Bool
+    previouslyExisted : Request → Bool
+    movedPermanently : Request → Maybe MovedURI
+    movedTemporarily : Request → Maybe MovedURI
+    lastModified : Request → Maybe DateTime
+    expires : Request → Maybe DateTime
+    generateETag : Request → Maybe ETag
+    finishRequest : Request → Bool
 
-serviceAvailable : Request → Bool
-serviceAvailable _ = true
+default : Config
+default = record {
+    resourceExists = λ _ → true
+  ; serviceAvailable = λ _ → true
+  ; isAuthorized = λ _ → true
+  ; forbidden = λ _ → false
+  ; allowMissingPost = λ _ → false
+  ; malformedRequest = λ _ → false
+  ; uriTooLong = λ _ → false
+  ; knownContentType = λ _ → true
+  ; validContentHeaders = λ _ → true
+  ; validEntityLength = λ _ → true
+  ; options = λ _ → []
+  ; allowedMethods = λ _ → HEAD ∷ GET ∷ []
+  ; knownMethods = λ _ → HEAD ∷ GET ∷ PUT ∷ DELETE ∷ POST ∷ TRACE ∷ CONNECT ∷ OPTIONS ∷ []
+  ; deleteResource = λ _ → false
+  ; deleteCompleted = λ _ → true
+  ; postIsCreate = λ _ → false
+  ; createPath = λ _ → nothing
+  ; processPost = λ _ → false
+  ; contentTypesProvided = λ _ → [ "text/html" , "toHtml" ]
+  ; languageAvailable = λ _ → true
+  ; contentTypesAccepted = λ _ → []
+  ; charsetsProvided = λ _ → []
+  ; encodingsProvided = λ _ → [ "identity" , "defaultEncoder" ]
+  ; variances = λ _ → []
+  ; isConflict = λ _ → false
+  ; multipleChoices = λ _ → false
+  ; previouslyExisted = λ _ → false
+  ; movedPermanently = λ _ → nothing
+  ; movedTemporarily = λ _ → nothing
+  ; lastModified = λ _ → nothing
+  ; expires = λ _ → nothing
+  ; generateETag = λ _ → nothing
+  ; finishRequest = λ _ → true
+  }
 
-isAuthorized : Request → AuthHead
-isAuthorized _ = true
-
-forbidden : Request → Bool
-forbidden _ = false
-
-allowMissingPost : Request → Bool
-allowMissingPost _ = false
-
-malformedRequest : Request → Bool
-malformedRequest _ = false
-
-uriTooLong : Request → Bool
-uriTooLong _ = false
-
-knownContentType : Request → Bool
-knownContentType _ = true
-
-validContentHeaders : Request → Bool
-validContentHeaders _ = true
-
-validEntityLength : Request → Bool
-validEntityLength _ = true
-
-options : Request → List ResponseHeader
-options _ = []
-
-allowedMethods : Request → List Method
-allowedMethods _ = HEAD ∷ GET ∷ []
-
-knownMethods : Request → List Method
-knownMethods _ = HEAD ∷ GET ∷ PUT ∷ DELETE ∷ POST ∷ TRACE ∷ CONNECT ∷ OPTIONS ∷ []
-
-deleteResource : Request → Bool
-deleteResource _ = false
-
-deleteCompleted : Request → Bool
-deleteCompleted _ = true
-
-postIsCreate : Request → Bool
-postIsCreate _ = false
-
-createPath : Request → Maybe Path
-createPath _ = nothing
-
-processPost : Request → Bool
-processPost _ = false
-
-contentTypesProvided : Request → List (MediaType × Handler)
-contentTypesProvided _ = [ "text/html" , "toHtml" ]
-
-languageAvailable : Request → Bool
-languageAvailable _ = true
-
-contentTypesAccepted : Request → List (MediaType × Handler)
-contentTypesAccepted _ = []
-
-charsetsProvided : Request → List (Charset × CharsetConverter)
-charsetsProvided _ = []
-
-encodingsProvided : Request → List (Encoding × Encoder)
-encodingsProvided _ = [ "identity" , "defaultEncoder" ]
-
-variances : Request → List RequestHeader
-variances _ = []
-
-isConflict : Request → Bool
-isConflict _ = false
-
-multipleChoices : Request → Bool
-multipleChoices _ = false
-
-previouslyExisted : Request → Bool
-previouslyExisted _ = false
-
-movedPermanently : Request → Maybe MovedURI
-movedPermanently _ = nothing
-
-movedTemporarily : Request → Maybe MovedURI
-movedTemporarily _ = nothing
-
-lastModified : Request → Maybe DateTime
-lastModified _ = nothing
-
-expires : Request → Maybe DateTime
-expires _ = nothing
-
-generateETag : Request → Maybe ETag
-generateETag _ = nothing
-
-finishRequest : Request → Bool
-finishRequest _ = true
