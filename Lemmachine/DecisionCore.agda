@@ -132,8 +132,8 @@ I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | _    | false   = NotFound
 
 H7 : Request → Status
 H7 r with fetch "If-Match" (Request.headers r)
-... | just _  = PreconditionFailed
-... | nothing = I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r
+... | just "*"  = PreconditionFailed
+... | _ = I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r
 
 G7 : Request → Status
 G7 r with resourceExists r

@@ -2,8 +2,10 @@ module Lemmachine.Lemmas where
 open import Lemmachine.DecisionCore
 open import Lemmachine.Request
 open import Lemmachine.Status
+open import Lemmachine.Utils
 open import Data.Bool
 open import Data.List
+open import Data.Maybe
 open import Relation.Binary.PropositionalEquality
 
 serviceUnavailable : ∀ {r} → B13 (λ _ → false) r ≡ ServiceUnavailable
@@ -38,3 +40,7 @@ invalidEntityLength = refl
 
 optionsSuccess : ∀ {r}(p : Request.method r ≡ OPTIONS) → B3 r ≡ OK
 optionsSuccess p rewrite p = refl
+
+preconditionFailed : ∀ {r}(p : fetch "If-Match" (Request.headers r) ≡ just "*") → H7 r ≡ PreconditionFailed
+preconditionFailed {r} p with fetch "If-Match" (Request.headers r) | p
+... | ._ | refl = refl
