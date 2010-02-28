@@ -10,7 +10,6 @@ open import Relation.Binary.PropositionalEquality
 open import Lemmachine.Resource
 import Lemmachine.DecisionCore
 
-fail : Config
 fail = record {
     resourceExists = λ _ → true
   ; serviceAvailable = λ _ → false
