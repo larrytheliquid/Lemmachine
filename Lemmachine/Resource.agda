@@ -82,3 +82,37 @@ default = record {
   ; finishRequest = λ _ → true
   }
 
+data Code : Set where
+  resourceExists : Code
+  serviceAvailable : Code
+  isAuthorized : Code
+  forbidden : Code
+  allowMissingPost : Code
+  malformedRequest : Code
+  uriTooLong : Code
+  knownContentType : Code
+  validContentHeaders : Code
+  validEntityLength : Code
+  options : Code
+  allowedMethods : Code
+  knownMethods : Code
+  deleteResource : Code
+  deleteCompleted : Code
+  postIsCreate : Code
+  createPath : Code
+  processPost : Code
+  contentTypesProvided : Code
+  languageAvailable : Code
+  contentTypesAccepted : Code
+  charsetsProvided : Code
+  encodingsProvided : Code
+  variances : Code
+  isConflict : Code
+  multipleChoices : Code
+  previouslyExisted : Code
+  movedPermanently : Code
+  movedTemporarily : Code
+  lastModified : Code
+  expires : Code
+  generateETag : Code
+  finishRequest : Code
