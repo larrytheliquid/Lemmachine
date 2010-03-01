@@ -1,7 +1,7 @@
 module Lemmachine.Resource where
 open import Lemmachine.Resource.Config public
 open import Lemmachine.Resource.Update
-open import Lemmachine.Resource.Universe
+open import Lemmachine.Resource.Universe public
 open import Data.List
 open import Data.Product
 

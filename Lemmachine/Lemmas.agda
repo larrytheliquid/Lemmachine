@@ -7,80 +7,44 @@ open import Data.List
 open import Data.Maybe
 open import Data.Product
 open import Relation.Binary.PropositionalEquality
+open import Data.Function using (const)
 open import Lemmachine.Resource
-import Lemmachine.DecisionCore
+open import Lemmachine.DecisionCore
 
-fail = record {
-    resourceExists = λ _ → true
-  ; serviceAvailable = λ _ → false
-  ; isAuthorized = λ _ → false
-  ; forbidden = λ _ → true
-  ; allowMissingPost = λ _ → false
-  ; malformedRequest = λ _ → true
-  ; uriTooLong = λ _ → true
-  ; knownContentType = λ _ → false
-  ; validContentHeaders = λ _ → false
-  ; validEntityLength = λ _ → false
-  ; options = λ _ → []
-  ; allowedMethods = λ _ → []
-  ; knownMethods = λ _ → []
-  ; deleteResource = λ _ → false
-  ; deleteCompleted = λ _ → true
-  ; postIsCreate = λ _ → false
-  ; createPath = λ _ → nothing
-  ; processPost = λ _ → false
-  ; contentTypesProvided = λ _ → [ "text/html" , "toHtml" ]
-  ; languageAvailable = λ _ → true
-  ; contentTypesAccepted = λ _ → []
-  ; charsetsProvided = λ _ → []
-  ; encodingsProvided = λ _ → [ "identity" , "defaultEncoder" ]
-  ; variances = λ _ → []
-  ; isConflict = λ _ → false
-  ; multipleChoices = λ _ → false
-  ; previouslyExisted = λ _ → false
-  ; movedPermanently = λ _ → nothing
-  ; movedTemporarily = λ _ → nothing
-  ; lastModified = λ _ → nothing
-  ; expires = λ _ → nothing
-  ; generateETag = λ _ → nothing
-  ; finishRequest = λ _ → true
-  }
-
-open Lemmachine.DecisionCore fail
-
-serviceUnavailable : ∀ {r} → B13 r ≡ ServiceUnavailable
+serviceUnavailable : ∀ {r} → resolve (configure [ serviceAvailable , const false ]) r ≡ ServiceUnavailable
 serviceUnavailable = refl
 
-unknownMethod : ∀ {r} → B12 r ≡ NotImplemented
+unknownMethod : ∀ {r} → resolve (configure [ knownMethods , const [] ]) r ≡ NotImplemented
 unknownMethod = refl
 
-requestURItooLong : ∀ {r} → B11 r ≡ RequestURItooLong
+requestURItooLong : ∀ {r} → B11 (configure [ uriTooLong , const true ]) r ≡ RequestURItooLong
 requestURItooLong = refl
 
-disallowedMethod : ∀ {r} → B10 r ≡ MethodNotAllowed
+disallowedMethod : ∀ {r} → B10 (configure [ allowedMethods , const [] ]) r ≡ MethodNotAllowed
 disallowedMethod = refl
 
-badRequest : ∀ {r} → B9 r ≡ BadRequest
+badRequest : ∀ {r} → B9 (configure [ malformedRequest , const true ]) r ≡ BadRequest
 badRequest = refl
 
-unauthorized : ∀ {r} → B8 r ≡ Unauthorized
+unauthorized : ∀ {r} → B8 (configure [ isAuthorized , const false ]) r ≡ Unauthorized
 unauthorized = refl
 
-forbidden : ∀ {r} → B7 r ≡ Forbidden
-forbidden = refl
+lem-forbidden : ∀ {r} → B7 (configure [ forbidden , const true ]) r ≡ Forbidden
+lem-forbidden = refl
 
-invalidContentHeaders : ∀ {r} → B6 r ≡ NotImplemented
+invalidContentHeaders : ∀ {r} → B6 (configure [ validContentHeaders , const false ]) r ≡ NotImplemented
 invalidContentHeaders = refl
 
-unsupportedMediaType : ∀ {r} → B5 r ≡ UnsupportedMediaType
+unsupportedMediaType : ∀ {r} → B5 (configure [ knownContentType , const false ]) r ≡ UnsupportedMediaType
 unsupportedMediaType = refl
 
-invalidEntityLength : ∀ {r} → B4 r ≡ RequestEntityTooLarge
+invalidEntityLength : ∀ {r} → B4 (configure [ validEntityLength , const false ]) r ≡ RequestEntityTooLarge
 invalidEntityLength = refl
 
-optionsSuccess : ∀ {r}(_ : Request.method r ≡ OPTIONS) → B3 r ≡ OK
+optionsSuccess : ∀ {r}(_ : Request.method r ≡ OPTIONS) → B3 (configure []) r ≡ OK
 optionsSuccess p rewrite p = refl
 
-preconditionFailed : ∀ {r}(_ : fetch "If-Match" (Request.headers r) ≡ just "*") → H7 r ≡ PreconditionFailed
+preconditionFailed : ∀ {r}(_ : fetch "If-Match" (Request.headers r) ≡ just "*") 
+                     → H7 (configure []) r ≡ PreconditionFailed
 preconditionFailed {r} p with fetch "If-Match" (Request.headers r) | p
 ... | ._ | refl = refl
