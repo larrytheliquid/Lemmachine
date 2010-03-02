@@ -17,27 +17,27 @@ serviceUnavailable = refl
 unknownMethod : ∀ {r} → resolve (configure [ knownMethods , const [] ]) r ≡ NotImplemented
 unknownMethod = refl
 
+private
+  anyMethod : ∀ r → any (eqMethod (Request.method r))
+                        (Config.knownMethods (configure []) r) 
+                    ≡ true
+  anyMethod r with Request.method r
+  ... | HEAD = refl
+  ... | GET = refl
+  ... | PUT = refl
+  ... | DELETE = refl
+  ... | POST = refl
+  ... | TRACE = refl
+  ... | CONNECT = refl
+  ... | OPTIONS = refl
+
 requestURItooLong : ∀ {r} → resolve (configure [ uriTooLong , const true ]) r ≡ RequestURItooLong
-requestURItooLong {r} with Request.method r
-... | HEAD = refl
-... | GET = refl
-... | PUT = refl
-... | DELETE = refl
-... | POST = refl
-... | TRACE = refl
-... | CONNECT = refl
-... | OPTIONS = refl
+requestURItooLong {r} with anyMethod r
+... | p rewrite p = refl
 
 disallowedMethod : ∀ {r} → resolve (configure [ allowedMethods , const [] ]) r ≡ MethodNotAllowed
-disallowedMethod {r} with Request.method r
-... | HEAD = refl
-... | GET = refl
-... | PUT = refl
-... | DELETE = refl
-... | POST = refl
-... | TRACE = refl
-... | CONNECT = refl
-... | OPTIONS = refl
+disallowedMethod {r} with anyMethod r
+... | p rewrite p = refl
 
 badRequest : ∀ {r} → B9 (configure [ malformedRequest , const true ]) r ≡ BadRequest
 badRequest = refl
