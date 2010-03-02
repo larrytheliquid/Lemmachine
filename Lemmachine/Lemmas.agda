@@ -17,11 +17,27 @@ serviceUnavailable = refl
 unknownMethod : ∀ {r} → resolve (configure [ knownMethods , const [] ]) r ≡ NotImplemented
 unknownMethod = refl
 
-requestURItooLong : ∀ {r} → B11 (configure [ uriTooLong , const true ]) r ≡ RequestURItooLong
-requestURItooLong = refl
+requestURItooLong : ∀ {r} → resolve (configure [ uriTooLong , const true ]) r ≡ RequestURItooLong
+requestURItooLong {r} with Request.method r
+... | HEAD = refl
+... | GET = refl
+... | PUT = refl
+... | DELETE = refl
+... | POST = refl
+... | TRACE = refl
+... | CONNECT = refl
+... | OPTIONS = refl
 
-disallowedMethod : ∀ {r} → B10 (configure [ allowedMethods , const [] ]) r ≡ MethodNotAllowed
-disallowedMethod = refl
+disallowedMethod : ∀ {r} → resolve (configure [ allowedMethods , const [] ]) r ≡ MethodNotAllowed
+disallowedMethod {r} with Request.method r
+... | HEAD = refl
+... | GET = refl
+... | PUT = refl
+... | DELETE = refl
+... | POST = refl
+... | TRACE = refl
+... | CONNECT = refl
+... | OPTIONS = refl
 
 badRequest : ∀ {r} → B9 (configure [ malformedRequest , const true ]) r ≡ BadRequest
 badRequest = refl
