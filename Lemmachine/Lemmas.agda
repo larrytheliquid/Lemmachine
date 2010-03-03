@@ -30,6 +30,15 @@ private
   ... | TRACE = refl
   ... | CONNECT = refl
   ... | OPTIONS = refl
+  
+  getRequest : Request → Set
+  getRequest r = Request.method r ≡ GET
+
+  getIsKnown : ∀ r → getRequest r
+                    → any (eqMethod (Request.method r))
+                          (Config.allowedMethods (configure []) r) 
+                    ≡ true
+  getIsKnown r p rewrite p = refl
 
 requestURItooLong : ∀ {r} → resolve (configure [ uriTooLong , const true ]) r ≡ RequestURItooLong
 requestURItooLong {r} with anyMethod r
@@ -39,28 +48,34 @@ disallowedMethod : ∀ {r} → resolve (configure [ allowedMethods , const [] ])
 disallowedMethod {r} with anyMethod r
 ... | p rewrite p = refl
 
-badRequest : ∀ {r} → B9 (configure [ malformedRequest , const true ]) r ≡ BadRequest
-badRequest = refl
+badRequest : ∀ {r} → getRequest r → resolve (configure [ malformedRequest , const true ]) r ≡ BadRequest
+badRequest {r} get with anyMethod r | getIsKnown r get
+... | p | p₂ rewrite p | p₂ = refl
 
-unauthorized : ∀ {r} → B8 (configure [ isAuthorized , const false ]) r ≡ Unauthorized
-unauthorized = refl
+unauthorized : ∀ {r} → getRequest r → resolve (configure [ isAuthorized , const false ]) r ≡ Unauthorized
+unauthorized {r} get with anyMethod r | getIsKnown r get
+... | p | p₂ rewrite p | p₂ = refl
 
-lem-forbidden : ∀ {r} → B7 (configure [ forbidden , const true ]) r ≡ Forbidden
-lem-forbidden = refl
+lem-forbidden : ∀ {r} → getRequest r → resolve (configure [ forbidden , const true ]) r ≡ Forbidden
+lem-forbidden {r} get with anyMethod r | getIsKnown r get
+... | p | p₂ rewrite p | p₂ = refl
 
-invalidContentHeaders : ∀ {r} → B6 (configure [ validContentHeaders , const false ]) r ≡ NotImplemented
-invalidContentHeaders = refl
+invalidContentHeaders : ∀ {r} → getRequest r → resolve (configure [ validContentHeaders , const false ]) r ≡ NotImplemented
+invalidContentHeaders {r} get with anyMethod r | getIsKnown r get
+... | p | p₂ rewrite p | p₂ = refl
 
-unsupportedMediaType : ∀ {r} → B5 (configure [ knownContentType , const false ]) r ≡ UnsupportedMediaType
-unsupportedMediaType = refl
+unsupportedMediaType : ∀ {r} → getRequest r → resolve (configure [ knownContentType , const false ]) r ≡ UnsupportedMediaType
+unsupportedMediaType {r} get with anyMethod r | getIsKnown r get
+... | p | p₂ rewrite p | p₂ = refl
 
-invalidEntityLength : ∀ {r} → B4 (configure [ validEntityLength , const false ]) r ≡ RequestEntityTooLarge
-invalidEntityLength = refl
+invalidEntityLength : ∀ {r} → getRequest r → resolve (configure [ validEntityLength , const false ]) r ≡ RequestEntityTooLarge
+invalidEntityLength {r} get with anyMethod r | getIsKnown r get
+... | p | p₂ rewrite p | p₂ = refl
 
-optionsSuccess : ∀ {r}(_ : Request.method r ≡ OPTIONS) → B3 (configure []) r ≡ OK
+optionsSuccess : ∀ {r} → Request.method r ≡ OPTIONS → B3 (configure []) r ≡ OK
 optionsSuccess p rewrite p = refl
 
-preconditionFailed : ∀ {r}(_ : fetch "If-Match" (Request.headers r) ≡ just "*") 
+preconditionFailed : ∀ {r} → fetch "If-Match" (Request.headers r) ≡ just "*"
                      → H7 (configure []) r ≡ PreconditionFailed
 preconditionFailed {r} p with fetch "If-Match" (Request.headers r) | p
 ... | ._ | refl = refl
