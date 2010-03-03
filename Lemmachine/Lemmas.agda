@@ -4,6 +4,8 @@ open import Lemmachine.Status
 open import Lemmachine.Utils
 open import Data.Bool
 open import Data.List
+open import Data.List.Any hiding (any)
+open Membership-≡
 open import Data.Maybe
 open import Data.Product
 open import Relation.Binary.PropositionalEquality
@@ -18,10 +20,10 @@ unknownMethod : ∀ {r} → resolve (configure [ knownMethods , const [] ]) r �
 unknownMethod = refl
 
 private
-  anyMethod : ∀ r → any (eqMethod (Request.method r))
+  methodIsKnown : ∀ r → any (eqMethod (Request.method r))
                         (Config.knownMethods (configure []) r) 
                     ≡ true
-  anyMethod r with Request.method r
+  methodIsKnown r with Request.method r
   ... | HEAD = refl
   ... | GET = refl
   ... | PUT = refl
@@ -31,45 +33,47 @@ private
   ... | CONNECT = refl
   ... | OPTIONS = refl
   
-  getRequest : Request → Set
-  getRequest r = Request.method r ≡ GET
+  allowedRequest : Request → Set
+  allowedRequest r = Request.method r ∈ Config.allowedMethods (configure []) r
 
-  getIsKnown : ∀ r → getRequest r
-                    → any (eqMethod (Request.method r))
+  methodIsAllowed : ∀ r → allowedRequest r
+                      → any (eqMethod (Request.method r))
                           (Config.allowedMethods (configure []) r) 
-                    ≡ true
-  getIsKnown r p rewrite p = refl
+                      ≡ true
+  methodIsAllowed r (here p) rewrite p = refl
+  methodIsAllowed r (there (here p)) rewrite p = refl
+  methodIsAllowed r (there (there ()))
 
 requestURItooLong : ∀ {r} → resolve (configure [ uriTooLong , const true ]) r ≡ RequestURItooLong
-requestURItooLong {r} with anyMethod r
+requestURItooLong {r} with methodIsKnown r
 ... | p rewrite p = refl
 
 disallowedMethod : ∀ {r} → resolve (configure [ allowedMethods , const [] ]) r ≡ MethodNotAllowed
-disallowedMethod {r} with anyMethod r
+disallowedMethod {r} with methodIsKnown r
 ... | p rewrite p = refl
 
-badRequest : ∀ {r} → getRequest r → resolve (configure [ malformedRequest , const true ]) r ≡ BadRequest
-badRequest {r} get with anyMethod r | getIsKnown r get
+badRequest : ∀ {r} → allowedRequest r → resolve (configure [ malformedRequest , const true ]) r ≡ BadRequest
+badRequest {r} m with methodIsKnown r | methodIsAllowed r m
 ... | p | p₂ rewrite p | p₂ = refl
 
-unauthorized : ∀ {r} → getRequest r → resolve (configure [ isAuthorized , const false ]) r ≡ Unauthorized
-unauthorized {r} get with anyMethod r | getIsKnown r get
+unauthorized : ∀ {r} → allowedRequest r → resolve (configure [ isAuthorized , const false ]) r ≡ Unauthorized
+unauthorized {r} m with methodIsKnown r | methodIsAllowed r m
 ... | p | p₂ rewrite p | p₂ = refl
 
-lem-forbidden : ∀ {r} → getRequest r → resolve (configure [ forbidden , const true ]) r ≡ Forbidden
-lem-forbidden {r} get with anyMethod r | getIsKnown r get
+lem-forbidden : ∀ {r} → allowedRequest r → resolve (configure [ forbidden , const true ]) r ≡ Forbidden
+lem-forbidden {r} m with methodIsKnown r | methodIsAllowed r m
 ... | p | p₂ rewrite p | p₂ = refl
 
-invalidContentHeaders : ∀ {r} → getRequest r → resolve (configure [ validContentHeaders , const false ]) r ≡ NotImplemented
-invalidContentHeaders {r} get with anyMethod r | getIsKnown r get
+invalidContentHeaders : ∀ {r} → allowedRequest r → resolve (configure [ validContentHeaders , const false ]) r ≡ NotImplemented
+invalidContentHeaders {r} m with methodIsKnown r | methodIsAllowed r m
 ... | p | p₂ rewrite p | p₂ = refl
 
-unsupportedMediaType : ∀ {r} → getRequest r → resolve (configure [ knownContentType , const false ]) r ≡ UnsupportedMediaType
-unsupportedMediaType {r} get with anyMethod r | getIsKnown r get
+unsupportedMediaType : ∀ {r} → allowedRequest r → resolve (configure [ knownContentType , const false ]) r ≡ UnsupportedMediaType
+unsupportedMediaType {r} m with methodIsKnown r | methodIsAllowed r m
 ... | p | p₂ rewrite p | p₂ = refl
 
-invalidEntityLength : ∀ {r} → getRequest r → resolve (configure [ validEntityLength , const false ]) r ≡ RequestEntityTooLarge
-invalidEntityLength {r} get with anyMethod r | getIsKnown r get
+invalidEntityLength : ∀ {r} → allowedRequest r → resolve (configure [ validEntityLength , const false ]) r ≡ RequestEntityTooLarge
+invalidEntityLength {r} m with methodIsKnown r | methodIsAllowed r m
 ... | p | p₂ rewrite p | p₂ = refl
 
 optionsSuccess : ∀ {r} → Request.method r ≡ OPTIONS → B3 (configure []) r ≡ OK
