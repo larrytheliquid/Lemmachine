@@ -5,6 +5,7 @@ open import Data.Maybe
 open import Data.List
 open import Data.Product
 open import Data.Bool
+open import Data.Function using (const)
 
 private
   module U = Lemmachine.Resource.Universe
@@ -47,37 +48,37 @@ record Config : Set where
 
 default : Config
 default = record {
-    resourceExists = λ _ → true
-  ; serviceAvailable = λ _ → true
-  ; isAuthorized = λ _ → true
-  ; forbidden = λ _ → false
-  ; allowMissingPost = λ _ → false
-  ; malformedRequest = λ _ → false
-  ; uriTooLong = λ _ → false
-  ; knownContentType = λ _ → true
-  ; validContentHeaders = λ _ → true
-  ; validEntityLength = λ _ → true
-  ; options = λ _ → []
-  ; allowedMethods = λ _ → HEAD ∷ GET ∷ []
-  ; knownMethods = λ _ → HEAD ∷ GET ∷ PUT ∷ DELETE ∷ POST ∷ TRACE ∷ CONNECT ∷ OPTIONS ∷ []
-  ; deleteResource = λ _ → false
-  ; deleteCompleted = λ _ → true
-  ; postIsCreate = λ _ → false
-  ; createPath = λ _ → nothing
-  ; processPost = λ _ → false
-  ; contentTypesProvided = λ _ → [ "text/html" , "toHtml" ]
-  ; languageAvailable = λ _ → true
-  ; contentTypesAccepted = λ _ → []
-  ; charsetsProvided = λ _ → []
-  ; encodingsProvided = λ _ → [ "identity" , "defaultEncoder" ]
-  ; variances = λ _ → []
-  ; isConflict = λ _ → false
-  ; multipleChoices = λ _ → false
-  ; previouslyExisted = λ _ → false
-  ; movedPermanently = λ _ → nothing
-  ; movedTemporarily = λ _ → nothing
-  ; lastModified = λ _ → nothing
-  ; expires = λ _ → nothing
-  ; generateETag = λ _ → nothing
-  ; finishRequest = λ _ → true
+    resourceExists = const true
+  ; serviceAvailable = const true
+  ; isAuthorized = const true
+  ; forbidden = const false
+  ; allowMissingPost = const false
+  ; malformedRequest = const false
+  ; uriTooLong = const false
+  ; knownContentType = const true
+  ; validContentHeaders = const true
+  ; validEntityLength = const true
+  ; options = const []
+  ; allowedMethods = const (HEAD ∷ GET ∷ [])
+  ; knownMethods = const (HEAD ∷ GET ∷ PUT ∷ DELETE ∷ POST ∷ TRACE ∷ CONNECT ∷ OPTIONS ∷ [])
+  ; deleteResource = const false
+  ; deleteCompleted = const true
+  ; postIsCreate = const false
+  ; createPath = const nothing
+  ; processPost = const false
+  ; contentTypesProvided = const [ "text/html" , "toHtml" ]
+  ; languageAvailable = const true
+  ; contentTypesAccepted = const []
+  ; charsetsProvided = const []
+  ; encodingsProvided = const [ "identity" , "defaultEncoder" ]
+  ; variances = const []
+  ; isConflict = const false
+  ; multipleChoices = const false
+  ; previouslyExisted = const false
+  ; movedPermanently = const nothing
+  ; movedTemporarily = const nothing
+  ; lastModified = const nothing
+  ; expires = const nothing
+  ; generateETag = const nothing
+  ; finishRequest = const true
   }

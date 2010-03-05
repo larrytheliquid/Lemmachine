@@ -77,14 +77,12 @@ unauthorized : ∀ r → Request.method r ∈ Config.knownMethods unauthorizedCo
 unauthorized r p p₂ with methodIsKnown unauthorizedConfig r p | methodIsAllowed unauthorizedConfig r p₂
 ... | p₃ | p₄ rewrite p₃ | p₄ = refl
 
-
 forbiddenConfig = configure [ forbidden ⇒ const true ]
 lem-forbidden : ∀ r → Request.method r ∈ Config.knownMethods forbiddenConfig r
-                     → Request.method r ∈ Config.allowedMethods forbiddenConfig r
+                    → Request.method r ∈ Config.allowedMethods forbiddenConfig r
                     → resolve forbiddenConfig r ≡ Forbidden
 lem-forbidden r p p₂ with methodIsKnown forbiddenConfig r p | methodIsAllowed forbiddenConfig r p₂
 ... | p₃ | p₄ rewrite p₃ | p₄ = refl
-
 
 invalidContentHeadersConfig = configure [ validContentHeaders ⇒ const false ]
 invalidContentHeaders : ∀ r → Request.method r ∈ Config.knownMethods invalidContentHeadersConfig r
@@ -92,7 +90,6 @@ invalidContentHeaders : ∀ r → Request.method r ∈ Config.knownMethods inval
                             → resolve invalidContentHeadersConfig r ≡ NotImplemented
 invalidContentHeaders r p p₂ with methodIsKnown invalidContentHeadersConfig r p | methodIsAllowed invalidContentHeadersConfig r p₂
 ... | p₃ | p₄ rewrite p₃ | p₄ = refl
-
 
 unknownContentTypeConfig = configure [ knownContentType ⇒ const false ]
 unsupportedMediaType : ∀ r → Request.method r ∈ Config.knownMethods unknownContentTypeConfig r
