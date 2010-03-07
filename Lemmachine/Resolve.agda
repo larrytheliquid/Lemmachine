@@ -1,7 +1,7 @@
 open import Lemmachine.Resource
-module Lemmachine.DecisionCore (c : Config) where
+module Lemmachine.Resolve (c : Resource) where
 open import Lemmachine.Request
-open import Lemmachine.Status
+open import Lemmachine.Response.Status
 open import Lemmachine.Utils
 open import Data.Bool
 open import Data.Nat
@@ -13,7 +13,7 @@ open import Data.List
 open import Data.Product
 
 O18 : Request → Status
-O18 r with Config.multipleChoices c r
+O18 r with Resource.multipleChoices c r
 ... | false = OK
 ... | true  = MultipleChoices
 
@@ -28,7 +28,7 @@ P11 r with fetch "Location" (Request.headers r)
 ... | just _  = Created
 
 O14 : Request → Status
-O14 r with Config.isConflict c r
+O14 r with Resource.isConflict c r
 ... | true  = Conflict
 ... | false = P11 r
 
@@ -48,7 +48,7 @@ N16 r with Request.method r
 ... | _ = O16 r
 
 M20 : Request → Status
-M20 r with Config.deleteResource c r
+M20 r with Resource.deleteResource c r
 ... | false = Accepted
 ... | true = O20 r
 
@@ -64,7 +64,7 @@ L13+L14+L15+L17 r with fetch "If-Modified-Since" (Request.headers r)
 ... | false = M16 r
 ... | true with isModified now clientDate
 ... | true = M16 r
-... | false with Config.lastModified c r
+... | false with Resource.lastModified c r
 ... | nothing = M16 r
 ... | just serverDate with isModified clientDate serverDate
 ... | true = M16 r
@@ -81,7 +81,7 @@ I12+I13+K13 r with fetch "If-None-Match" (Request.headers r)
 ... | nothing = L13+L14+L15+L17 r
 ... | just clientETag with "*" == clientETag
 ... | true = J18 r
-... | false with Config.generateETag c r
+... | false with Resource.generateETag c r
 ... | nothing = L13+L14+L15+L17 r
 ... | just serverETag with clientETag == serverETag
 ... | true = J18 r
@@ -92,7 +92,7 @@ H10+H11+H12 r with fetch "If-Unmodified-Since" (Request.headers r)
 ... | nothing = I12+I13+K13 r
 ... | just clientDate with isDate clientDate
 ... | false = I12+I13+K13 r
-... | true  with Config.lastModified c r
+... | true  with Resource.lastModified c r
 ... | nothing = I12+I13+K13 r
 ... | just serverDate with isModified clientDate serverDate
 ... | true = PreconditionFailed
@@ -103,7 +103,7 @@ G8+G9+G11 r with fetch "If-Match" (Request.headers r)
 ... | nothing = H10+H11+H12 r
 ... | just clientETag with "*" == clientETag
 ... | true  = H10+H11+H12 r
-... | false with Config.generateETag c r
+... | false with Resource.generateETag c r
 ... | nothing = PreconditionFailed
 ... | just serverETag with clientETag == serverETag
 ... | true = H10+H11+H12 r
@@ -111,21 +111,21 @@ G8+G9+G11 r with fetch "If-Match" (Request.headers r)
 
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 : Request → Status
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r   with Request.method r
-I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | PUT    with Config.movedPermanently c r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | PUT    with Resource.movedPermanently c r
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | PUT  | just _  = MovedPermanently
-I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | PUT  | nothing   with Config.isConflict c r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | PUT  | nothing   with Resource.isConflict c r
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | PUT  | nothing | false   = N11 r
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | PUT  | nothing | true    = Conflict
-I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | _      with Config.previouslyExisted c r
-I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | _    | true      with Config.movedPermanently c r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | _      with Resource.previouslyExisted c r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | _    | true      with Resource.movedPermanently c r
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | _    | true    | just _  = MovedPermanently
-I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | _    | true    | nothing   with Config.movedTemporarily c r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | _    | true    | nothing   with Resource.movedTemporarily c r
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | _    | true    | nothing | just _  = MovedTemporarily
-I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | true    | nothing | nothing   with Config.allowMissingPost c r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | true    | nothing | nothing   with Resource.allowMissingPost c r
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | POST | true    | nothing | nothing | false = Gone
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | true    | nothing | nothing | true  = N11 r
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | _    | true    | nothing | nothing = Gone
-I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | false     with Config.allowMissingPost c r
+I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | false     with Resource.allowMissingPost c r
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | POST | false   | false = NotFound
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | false   | true  = N11 r
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | _    | false   = NotFound
@@ -136,35 +136,35 @@ H7 r with fetch "If-Match" (Request.headers r)
 ... | _ = I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r
 
 G7 : Request → Status
-G7 r with Config.resourceExists c r
+G7 r with Resource.resourceExists c r
 ... | true  = G8+G9+G11 r
 ... | false = H7 r
 
 F6+F7 : Request → Status
 F6+F7 r with fetch "Accept-Encoding" (Request.headers r)
 ... | nothing = G7 r
-... | just encoding with fetch encoding (Config.encodingsProvided c r)
+... | just encoding with fetch encoding (Resource.encodingsProvided c r)
 ... | just _  = G7 r
 ... | nothing = NotAcceptable
 
 E5+E6 : Request → Status
 E5+E6 r with fetch "Accept-Charset" (Request.headers r)
 ... | nothing = F6+F7 r
-... | just charset with fetch charset (Config.charsetsProvided c r)
+... | just charset with fetch charset (Resource.charsetsProvided c r)
 ... | just _  = F6+F7 r
 ... | nothing = NotAcceptable
 
 D4+D5 : Request → Status
 D4+D5 r with fetch "Accept-Language" (Request.headers r)
 ... | nothing = E5+E6 r
-... | just language with Config.languageAvailable c r
+... | just language with Resource.languageAvailable c r
 ... | true    = E5+E6 r
 ... | false   = NotAcceptable
 
 C3+C4 : Request → Status
 C3+C4 r with fetch "Accept" (Request.headers r)
 ... | nothing = D4+D5 r
-... | just contentType with fetch contentType (Config.contentTypesProvided c r)
+... | just contentType with fetch contentType (Resource.contentTypesProvided c r)
 ... | just _  = D4+D5 r
 ... | nothing = NotAcceptable
 
@@ -174,54 +174,54 @@ B3 r with Request.method r
 ... | _       = C3+C4 r
 
 B4 : Request → Status
-B4 r with Config.validEntityLength c r
+B4 r with Resource.validEntityLength c r
 ... | true  = B3 r
 ... | false = RequestEntityTooLarge
 
 B5 : Request → Status
-B5 r with Config.knownContentType c r
+B5 r with Resource.knownContentType c r
 ... | true  = B4 r
 ... | false = UnsupportedMediaType
 
 B6 : Request → Status
-B6 r with Config.validContentHeaders c r
+B6 r with Resource.validContentHeaders c r
 ... | true  = B5 r
 ... | false = NotImplemented
 
 B7 : Request → Status
-B7 r with Config.forbidden c r
+B7 r with Resource.forbidden c r
 ... | true  = Forbidden
 ... | false = B6 r
 
 B8 : Request → Status
-B8 r with Config.isAuthorized c r
+B8 r with Resource.isAuthorized c r
 ... | true  = B7 r
 ... | false = Unauthorized
 
 B9 : Request → Status
-B9 r with Config.malformedRequest c r
+B9 r with Resource.malformedRequest c r
 ... | true  = BadRequest
 ... | false = B8 r
 
 B10 : Request → Status
 B10 r with any (eqMethod (Request.method r))
-               (Config.allowedMethods c r)
+               (Resource.allowedMethods c r)
 ... | true  = B9 r
 ... | false = MethodNotAllowed
 
 B11 : Request → Status
-B11 r with Config.uriTooLong c r
+B11 r with Resource.uriTooLong c r
 ... | true  = RequestURItooLong
 ... | false = B10 r
 
 B12 : Request → Status
 B12 r with any (eqMethod (Request.method r))
-               (Config.knownMethods c r)
+               (Resource.knownMethods c r)
 ... | true  = B11 r 
 ... | false = NotImplemented
 
 B13 : Request → Status
-B13 r with Config.serviceAvailable c r 
+B13 r with Resource.serviceAvailable c r 
 ... | true  = B12 r 
 ... | false = ServiceUnavailable
 

@@ -1,5 +1,4 @@
-module Lemmachine.Status where
-open import Data.Nat
+module Lemmachine.Response.Status where
 
 data Status : Set where
   OK : Status -- 200

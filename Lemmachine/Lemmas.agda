@@ -1,11 +1,15 @@
-module Lemmachine.Lemmas where
-open import Lemmachine.Request
-open import Lemmachine.Resource
-open import Data.Bool
-open import Data.List
+open import Lemmachine
+module Lemmachine.Lemmas (properties : Properties) where
+open import Lemmachine.Resource.Configure
 open import Data.List.Any hiding (any)
-open Membership-≡
-open import Relation.Binary.PropositionalEquality
+open Membership-≡ public
+open import Relation.Binary.PropositionalEquality public
+
+resource : Resource
+resource = toResource properties
+
+stub : Properties → Resource
+stub overrides = configure resource overrides
 
 private
   eqMethod-refl : ∀ m → eqMethod m m ≡ true
@@ -29,12 +33,12 @@ private
   ... | true | _ = refl
   ... | false | p rewrite p = refl
 
-methodIsKnown : ∀ c r → Request.method r ∈ Config.knownMethods c r
-                      → any (eqMethod (Request.method r))
-                            (Config.knownMethods c r) ≡ true
-methodIsKnown c r p = methodIsMember r (Config.knownMethods c r) p
+methodIsKnown : ∀ res req → Request.method req ∈ Resource.knownMethods res req
+                          → any (eqMethod (Request.method req))
+                                (Resource.knownMethods res req) ≡ true
+methodIsKnown res req p = methodIsMember req (Resource.knownMethods res req) p
 
-methodIsAllowed : ∀ c r → Request.method r ∈ Config.allowedMethods c r
-                        → any (eqMethod (Request.method r))
-                              (Config.allowedMethods c r) ≡ true
-methodIsAllowed c r p = methodIsMember r (Config.allowedMethods c r) p
+methodIsAllowed : ∀ res req → Request.method req ∈ Resource.allowedMethods res req
+                            → any (eqMethod (Request.method req))
+                                  (Resource.allowedMethods res req) ≡ true
+methodIsAllowed res req p = methodIsMember req (Resource.allowedMethods res req) p
