@@ -1,9 +1,15 @@
 open import Lemmachine
 module Lemmachine.Lemmas (properties : Properties) where
 open import Lemmachine.Resource.Configure
-open import Data.List.Any hiding (any)
+open import Data.String
+open import Data.Maybe
+open import Data.Function
+open import Data.Product hiding (map)
+open import Data.List.Any hiding (map) renaming (any to any₂)
+open import Relation.Nullary
 open Membership-≡ public
 open import Relation.Binary.PropositionalEquality public
+open import Relation.Binary.PropositionalEquality.TrustMe
 
 resource : Resource
 resource = toResource properties
@@ -42,3 +48,26 @@ methodIsAllowed : ∀ res req → Request.method req ∈ Resource.allowedMethods
                             → any (eqMethod (Request.method req))
                                   (Resource.allowedMethods res req) ≡ true
 methodIsAllowed res req p = methodIsMember req (Resource.allowedMethods res req) p
+
+private
+  ==-refl : ∀ s → (s == s) ≡ true
+  ==-refl s = trustMe
+
+  headerIsMember : (header : String)
+                   → (headers : List RequestHeader)
+                   → header ∈ map proj₁ headers
+                   → ∃ λ v → fetch header headers ≡ just v
+  headerIsMember _ [] ()
+  headerIsMember _ ((k , v) ∷ _) (here p) rewrite p with ==-refl k
+  ... | p₂ rewrite p₂ = v , refl
+  headerIsMember header ((k , v) ∷ xs) (there ps) with header ≟ k | headerIsMember header xs ps
+  ... | yes _ | _ = v , refl
+  ... | no _ | (v₂ , p) with any₂ (_≟_ header ∘ proj₁) xs
+  ... | yes _ rewrite p = v₂ , refl
+  ... | no _ = v₂ , p
+
+acceptIsHeader : ∀ req → "Accept" ∈ map proj₁ (Request.headers req)
+                       → ∃ λ v → fetch "Accept" (Request.headers req) ≡ just v
+acceptIsHeader req p with headerIsMember "Accept" (Request.headers req) p
+... | v , p₂ with fetch "Accept" (Request.headers req) | p₂
+... | ._ | refl = v , refl

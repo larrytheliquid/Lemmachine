@@ -4,8 +4,9 @@ import Lemmachine.Resource.Default
 import Lemmachine.Lemmas
 open Lemmachine.Lemmas Lemmachine.Resource.Default.resource
 open import Relation.Binary.PropositionalEquality
+open import Data.Empty
 open import Data.Maybe
-open import Data.Product
+open import Data.Product hiding (map)
 open import Data.Function using (const)
 
 serviceUnavailable : ∀ r → resolve (stub [ serviceAvailable ⇒ const false ]) r ≡ ServiceUnavailable
@@ -68,8 +69,34 @@ invalidEntityLength : ∀ r → Request.method r ∈ Resource.knownMethods inval
 invalidEntityLength r p p₂ with methodIsKnown invalidEntityLengthResource r p | methodIsAllowed invalidEntityLengthResource r p₂
 ... | p₃ | p₄ rewrite p₃ | p₄ = refl
 
+-- TODO: resolve
 optionsSuccess : ∀ r → Request.method r ≡ OPTIONS → B3 (stub []) r ≡ OK
 optionsSuccess _ p rewrite p = refl
+
+-- TODO: methodNotOptions like p₅
+notAcceptableResource = stub [ contentTypesProvided ⇒ const [] ]
+notAcceptable : ∀ r → Request.method r ∈ Resource.knownMethods notAcceptableResource r
+                    → Request.method r ∈ Resource.allowedMethods notAcceptableResource r
+                    → Request.method r ≢ OPTIONS
+                    → "Accept" ∈ map proj₁ (Request.headers r)
+                    → resolve notAcceptableResource r ≡ NotAcceptable
+notAcceptable r p p₂ p₃ p₄ with methodIsKnown notAcceptableResource r p | methodIsAllowed notAcceptableResource r p₂ | acceptIsHeader r p₄
+notAcceptable r _ _ _ _ | p₅ | p₆ | v , p₇ rewrite p₅ | p₆ with Request.method r -- | 
+notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | HEAD with fetch "Accept" (Request.headers r) | p₇
+... | ._ | refl = refl
+notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | GET with fetch "Accept" (Request.headers r) | p₇
+... | ._ | refl = refl
+notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | PUT with fetch "Accept" (Request.headers r) | p₇
+... | ._ | refl = refl
+notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | DELETE with fetch "Accept" (Request.headers r) | p₇
+... | ._ | refl = refl
+notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | POST with fetch "Accept" (Request.headers r) | p₇
+... | ._ | refl = refl
+notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | TRACE with fetch "Accept" (Request.headers r) | p₇
+... | ._ | refl = refl
+notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | CONNECT with fetch "Accept" (Request.headers r) | p₇
+... | ._ | refl = refl
+notAcceptable r _ _ p₃ _ | _ | _ | _ , _ | OPTIONS = ⊥-elim (p₃ refl)
 
 preconditionFailed : ∀ r → fetch "If-Match" (Request.headers r) ≡ just "*"
                          → H7 (stub []) r ≡ PreconditionFailed
