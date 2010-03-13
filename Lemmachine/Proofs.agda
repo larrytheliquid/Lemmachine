@@ -76,30 +76,16 @@ optionsOK : ∀ r → Request.method r ∈ Resource.knownMethods resource r
 optionsOK r p p₂ p₃ with methodIsKnown resource r p | methodIsAllowed resource r p₂
 ... | p₄ | p₅ rewrite p₄ | p₅ | p₃ = refl
 
--- TODO: methodNotOptions like p₅
 notAcceptableResource = stub [ contentTypesProvided ⇒ const [] ]
 notAcceptable : ∀ r → Request.method r ∈ Resource.knownMethods notAcceptableResource r
                     → Request.method r ∈ Resource.allowedMethods notAcceptableResource r
                     → Request.method r ≢ OPTIONS
                     → "Accept" ∈ map proj₁ (Request.headers r)
                     → resolve notAcceptableResource r ≡ NotAcceptable
-notAcceptable r p p₂ p₃ p₄ with methodIsKnown notAcceptableResource r p | methodIsAllowed notAcceptableResource r p₂ | acceptIsHeader r p₄
-notAcceptable r _ _ _ _ | p₅ | p₆ | v , p₇ rewrite p₅ | p₆ with Request.method r
-notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | HEAD with fetch "Accept" (Request.headers r) | p₇
+notAcceptable r p p₂ p₃ p₄ with methodIsKnown notAcceptableResource r p | methodIsAllowed notAcceptableResource r p₂
+                              | acceptIsHeader r p₄ | notOptions r p₃
+notAcceptable r _ _ p₃ _ | p₅ | p₆ | v , p₇ | p₈ rewrite p₅ | p₆ | p₈ with fetch "Accept" (Request.headers r) | p₇
 ... | ._ | refl = refl
-notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | GET with fetch "Accept" (Request.headers r) | p₇
-... | ._ | refl = refl
-notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | PUT with fetch "Accept" (Request.headers r) | p₇
-... | ._ | refl = refl
-notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | DELETE with fetch "Accept" (Request.headers r) | p₇
-... | ._ | refl = refl
-notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | POST with fetch "Accept" (Request.headers r) | p₇
-... | ._ | refl = refl
-notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | TRACE with fetch "Accept" (Request.headers r) | p₇
-... | ._ | refl = refl
-notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | CONNECT with fetch "Accept" (Request.headers r) | p₇
-... | ._ | refl = refl
-notAcceptable r _ _ p₃ _ | _ | _ | _ , _ | OPTIONS = ⊥-elim (p₃ refl)
 
 preconditionFailed : ∀ r → fetch "If-Match" (Request.headers r) ≡ just "*"
                          → H7 (stub []) r ≡ PreconditionFailed

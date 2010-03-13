@@ -169,9 +169,9 @@ C3+C4 r with fetch "Accept" (Request.headers r)
 ... | nothing = NotAcceptable
 
 B3 : Request → Status
-B3 r with Request.method r
-... | OPTIONS = OK
-... | _       = C3+C4 r
+B3 r with eqMethod (Request.method r) OPTIONS
+... | true  = OK
+... | false = C3+C4 r
 
 B4 : Request → Status
 B4 r with Resource.validEntityLength c r

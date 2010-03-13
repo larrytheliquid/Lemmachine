@@ -1,6 +1,7 @@
 open import Lemmachine
 module Lemmachine.Lemmas (properties : Properties) where
 open import Lemmachine.Resource.Configure
+open import Data.Empty
 open import Data.String
 open import Data.Maybe
 open import Data.Function
@@ -48,6 +49,18 @@ methodIsAllowed : ∀ res req → Request.method req ∈ Resource.allowedMethods
                             → any (eqMethod (Request.method req))
                                   (Resource.allowedMethods res req) ≡ true
 methodIsAllowed res req p = methodIsMember req (Resource.allowedMethods res req) p
+
+notOptions : ∀ r → Request.method r ≢ OPTIONS
+                 → eqMethod (Request.method r) OPTIONS ≡ false
+notOptions r p with Request.method r
+... | HEAD = refl
+... | GET = refl
+... | PUT = refl
+... | DELETE = refl
+... | POST = refl
+... | TRACE = refl
+... | CONNECT = refl
+... | OPTIONS = ⊥-elim (p refl)
 
 private
   ==-refl : ∀ s → (s == s) ≡ true
