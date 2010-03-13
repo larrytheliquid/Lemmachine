@@ -69,9 +69,12 @@ invalidEntityLength : ∀ r → Request.method r ∈ Resource.knownMethods inval
 invalidEntityLength r p p₂ with methodIsKnown invalidEntityLengthResource r p | methodIsAllowed invalidEntityLengthResource r p₂
 ... | p₃ | p₄ rewrite p₃ | p₄ = refl
 
--- TODO: resolve
-optionsSuccess : ∀ r → Request.method r ≡ OPTIONS → B3 (stub []) r ≡ OK
-optionsSuccess _ p rewrite p = refl
+optionsOK : ∀ r → Request.method r ∈ Resource.knownMethods resource r
+                → Request.method r ∈ Resource.allowedMethods resource r
+                → Request.method r ≡ OPTIONS 
+                → resolve resource r ≡ OK
+optionsOK r p p₂ p₃ with methodIsKnown resource r p | methodIsAllowed resource r p₂
+... | p₄ | p₅ rewrite p₄ | p₅ | p₃ = refl
 
 -- TODO: methodNotOptions like p₅
 notAcceptableResource = stub [ contentTypesProvided ⇒ const [] ]
@@ -81,7 +84,7 @@ notAcceptable : ∀ r → Request.method r ∈ Resource.knownMethods notAcceptab
                     → "Accept" ∈ map proj₁ (Request.headers r)
                     → resolve notAcceptableResource r ≡ NotAcceptable
 notAcceptable r p p₂ p₃ p₄ with methodIsKnown notAcceptableResource r p | methodIsAllowed notAcceptableResource r p₂ | acceptIsHeader r p₄
-notAcceptable r _ _ _ _ | p₅ | p₆ | v , p₇ rewrite p₅ | p₆ with Request.method r -- | 
+notAcceptable r _ _ _ _ | p₅ | p₆ | v , p₇ rewrite p₅ | p₆ with Request.method r
 notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | HEAD with fetch "Accept" (Request.headers r) | p₇
 ... | ._ | refl = refl
 notAcceptable r _ _ _ _ | _ | _ | _ , p₇ | GET with fetch "Accept" (Request.headers r) | p₇
