@@ -2,6 +2,8 @@
 *~
 .#*
 \#*
+*.hi
+*.o
 *.jar
 *.flymake
 *.el
