@@ -1,6 +1,5 @@
 open import Lemmachine
 module Lemmachine.Lemmas (properties : Properties) where
-open import Lemmachine.Resource.Configure
 open import Data.Empty
 open import Data.String
 open import Data.Maybe

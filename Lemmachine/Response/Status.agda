@@ -14,27 +14,12 @@ data Status : Set where
   -- 5xx: Server Error - The server failed to fulfill an apparently valid request
   NotImplemented ServiceUnavailable : Status
 
-toℕ : Status → ℕ
-toℕ OK = 200
-toℕ Created = 201
-toℕ Accepted = 202
-toℕ NoContent = 204
-toℕ MultipleChoices = 300
-toℕ MovedPermanently = 301
-toℕ SeeOther = 303
-toℕ NotModified = 304
-toℕ MovedTemporarily = 307
-toℕ BadRequest = 400
-toℕ Unauthorized = 401
-toℕ Forbidden = 403
-toℕ NotFound = 404
-toℕ MethodNotAllowed = 405
-toℕ NotAcceptable = 406
-toℕ Conflict = 409
-toℕ Gone = 410
-toℕ PreconditionFailed = 412
-toℕ RequestEntityTooLarge = 413
-toℕ RequestURItooLong = 414
-toℕ UnsupportedMediaType = 415
-toℕ NotImplemented = 501
-toℕ ServiceUnavailable = 503
+{-# IMPORT FFI #-}
+{-# COMPILED_DATA Status FFI.Status
+    FFI.OK FFI.Created FFI.Accepted FFI.NoContent
+    FFI.MultipleChoices FFI.MovedPermanently FFI.SeeOther FFI.NotModified FFI.MovedTemporarily
+    FFI.BadRequest FFI.Unauthorized FFI.Forbidden FFI.NotFound FFI.MethodNotAllowed 
+    FFI.NotAcceptable FFI.Conflict FFI.Gone FFI.PreconditionFailed
+    FFI.RequestEntityTooLarge FFI.RequestURItooLong FFI.UnsupportedMediaType
+    FFI.NotImplemented FFI.ServiceUnavailable
+#-}
