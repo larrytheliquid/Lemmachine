@@ -80,7 +80,7 @@ notAcceptableResource = stub [ contentTypesProvided ⇒ const [] ]
 notAcceptable : ∀ r → Request.method r ∈ Resource.knownMethods notAcceptableResource r
                     → Request.method r ∈ Resource.allowedMethods notAcceptableResource r
                     → Request.method r ≢ OPTIONS
-                    → "Accept" ∈ map proj₁ (Request.headers r)
+                    → "Accept" ∈ map headerKey (Request.headers r)
                     → resolve notAcceptableResource r ≡ NotAcceptable
 notAcceptable r p p₂ p₃ p₄ with methodIsKnown notAcceptableResource r p | methodIsAllowed notAcceptableResource r p₂
                               | acceptIsHeader r p₄ | notOptions r p₃

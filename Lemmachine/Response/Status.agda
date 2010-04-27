@@ -1,4 +1,5 @@
 module Lemmachine.Response.Status where
+{-# IMPORT FFI #-}
 open import Data.Nat
 
 data Status : Set where
@@ -14,7 +15,6 @@ data Status : Set where
   -- 5xx: Server Error - The server failed to fulfill an apparently valid request
   NotImplemented ServiceUnavailable : Status
 
-{-# IMPORT FFI #-}
 {-# COMPILED_DATA Status FFI.Status
     FFI.OK FFI.Created FFI.Accepted FFI.NoContent
     FFI.MultipleChoices FFI.MovedPermanently FFI.SeeOther FFI.NotModified FFI.MovedTemporarily

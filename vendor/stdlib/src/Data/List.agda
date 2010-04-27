@@ -26,6 +26,7 @@ data List (A : Set) : Set where
 {-# BUILTIN LIST List #-}
 {-# BUILTIN NIL  []   #-}
 {-# BUILTIN CONS _∷_  #-}
+{-# COMPILED_DATA List [] [] (:) #-}
 
 ------------------------------------------------------------------------
 -- Some operations

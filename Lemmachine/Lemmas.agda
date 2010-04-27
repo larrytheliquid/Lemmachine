@@ -66,20 +66,20 @@ private
   ==-refl s = trustMe
 
   headerIsMember : (header : String)
-                   → (headers : List RequestHeader)
-                   → header ∈ map proj₁ headers
-                   → ∃ λ v → fetch header headers ≡ just v
+                   → (headers : RequestHeaders)
+                   → header ∈ map headerKey headers
+                   → ∃ λ v → fetchHeader header headers ≡ just v
   headerIsMember _ [] ()
   headerIsMember _ ((k , v) ∷ _) (here p) rewrite p with ==-refl k
   ... | p₂ rewrite p₂ = v , refl
   headerIsMember header ((k , v) ∷ xs) (there ps) with header ≟ k | headerIsMember header xs ps
   ... | yes _ | _ = v , refl
-  ... | no _ | (v₂ , p) with any₂ (_≟_ header ∘ proj₁) xs
-  ... | yes _ rewrite p = v₂ , refl
-  ... | no _ = v₂ , p
+  ... | no _ | (v₂ , p) with any₂ (_≟_ header ∘ headerKey) xs
+  ... | yes _ = {!!} -- rewrite p = v₂ , refl
+  ... | no _ = {!!} -- v₂ , p
 
-acceptIsHeader : ∀ req → "Accept" ∈ map proj₁ (Request.headers req)
-                       → ∃ λ v → fetch "Accept" (Request.headers req) ≡ just v
-acceptIsHeader req p with headerIsMember "Accept" (Request.headers req) p
-... | v , p₂ with fetch "Accept" (Request.headers req) | p₂
-... | ._ | refl = v , refl
+-- acceptIsHeader : ∀ req → "Accept" ∈ map headerKey (Request.headers req)
+--                        → ∃ λ v → fetch "Accept" (Request.headers req) ≡ just v
+-- acceptIsHeader req p with headerIsMember "Accept" (Request.headers req) p
+-- ... | v , p₂ with fetch "Accept" (Request.headers req) | p₂
+-- ... | ._ | refl = v , refl

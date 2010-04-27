@@ -23,7 +23,7 @@ O20 r with Request.body r
 ... | just _ = O18 r
 
 P11 : Request → Status
-P11 r with fetch "Location" (Request.headers r)
+P11 r with fetchHeader "Location" (Request.headers r)
 ... | nothing = O20 r
 ... | just _  = Created
 
@@ -58,7 +58,7 @@ M16 r with Request.method r
 ... | _ = N16 r
 
 L13+L14+L15+L17 : Request → Status
-L13+L14+L15+L17 r with fetch "If-Modified-Since" (Request.headers r)
+L13+L14+L15+L17 r with fetchHeader "If-Modified-Since" (Request.headers r)
 ... | nothing = M16 r
 ... | just clientDate with isDate clientDate
 ... | false = M16 r
@@ -77,7 +77,7 @@ J18 r with Request.method r
 ... | _    = PreconditionFailed
 
 I12+I13+K13 : Request → Status
-I12+I13+K13 r with fetch "If-None-Match" (Request.headers r)
+I12+I13+K13 r with fetchHeader "If-None-Match" (Request.headers r)
 ... | nothing = L13+L14+L15+L17 r
 ... | just clientETag with "*" == clientETag
 ... | true = J18 r
@@ -88,7 +88,7 @@ I12+I13+K13 r with fetch "If-None-Match" (Request.headers r)
 ... | false = L13+L14+L15+L17 r
 
 H10+H11+H12 : Request → Status
-H10+H11+H12 r with fetch "If-Unmodified-Since" (Request.headers r)
+H10+H11+H12 r with fetchHeader "If-Unmodified-Since" (Request.headers r)
 ... | nothing = I12+I13+K13 r
 ... | just clientDate with isDate clientDate
 ... | false = I12+I13+K13 r
@@ -99,7 +99,7 @@ H10+H11+H12 r with fetch "If-Unmodified-Since" (Request.headers r)
 ... | false = I12+I13+K13 r
 
 G8+G9+G11 : Request → Status
-G8+G9+G11 r with fetch "If-Match" (Request.headers r)
+G8+G9+G11 r with fetchHeader "If-Match" (Request.headers r)
 ... | nothing = H10+H11+H12 r
 ... | just clientETag with "*" == clientETag
 ... | true  = H10+H11+H12 r
@@ -131,7 +131,7 @@ I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r | POST | false   | true  = N11 r
 I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 _ | _    | false   = NotFound
 
 H7 : Request → Status
-H7 r with fetch "If-Match" (Request.headers r)
+H7 r with fetchHeader "If-Match" (Request.headers r)
 ... | just "*"  = PreconditionFailed
 ... | _ = I7+I4+P3+K7+K5+L5+M5+N5+L7+M7 r
 
@@ -141,28 +141,28 @@ G7 r with Resource.resourceExists c r
 ... | false = H7 r
 
 F6+F7 : Request → Status
-F6+F7 r with fetch "Accept-Encoding" (Request.headers r)
+F6+F7 r with fetchHeader "Accept-Encoding" (Request.headers r)
 ... | nothing = G7 r
 ... | just encoding with fetch encoding (Resource.encodingsProvided c r)
 ... | just _  = G7 r
 ... | nothing = NotAcceptable
 
 E5+E6 : Request → Status
-E5+E6 r with fetch "Accept-Charset" (Request.headers r)
+E5+E6 r with fetchHeader "Accept-Charset" (Request.headers r)
 ... | nothing = F6+F7 r
 ... | just charset with fetch charset (Resource.charsetsProvided c r)
 ... | just _  = F6+F7 r
 ... | nothing = NotAcceptable
 
 D4+D5 : Request → Status
-D4+D5 r with fetch "Accept-Language" (Request.headers r)
+D4+D5 r with fetchHeader "Accept-Language" (Request.headers r)
 ... | nothing = E5+E6 r
 ... | just language with Resource.languageAvailable c r
 ... | true    = E5+E6 r
 ... | false   = NotAcceptable
 
 C3+C4 : Request → Status
-C3+C4 r with fetch "Accept" (Request.headers r)
+C3+C4 r with fetchHeader "Accept" (Request.headers r)
 ... | nothing = D4+D5 r
 ... | just contentType with fetch contentType (Resource.contentTypesProvided c r)
 ... | just _  = D4+D5 r
@@ -227,3 +227,6 @@ B13 r with Resource.serviceAvailable c r
 
 resolve : Request → Status
 resolve r = B13 r
+
+Data-resolve : Data-Request → Status
+Data-resolve r = resolve (toRequest r)

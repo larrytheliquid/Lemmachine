@@ -26,6 +26,7 @@ data Bool : Set where
 {-# BUILTIN BOOL  Bool  #-}
 {-# BUILTIN TRUE  true  #-}
 {-# BUILTIN FALSE false #-}
+{-# COMPILED_DATA Bool Bool True False #-}
 
 ------------------------------------------------------------------------
 -- Some operations
