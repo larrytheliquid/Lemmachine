@@ -1,0 +1,5 @@
+\.l?agda\.el$
+\.agdai$
+(^|/)MAlonzo($|/)
+^html($|/)
+^Everything\.agda$
