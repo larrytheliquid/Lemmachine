@@ -16,9 +16,10 @@ Then add this to `Agda2 Include Dirs`:
 
 ## Running ##
 
-Lemmachine statuses can presently be passed through to Hack.
+Lemmachine currently supports resolving HTTP status codes (resolving
+headers & body will come later).
 
-To see this in action, run the following from the project root directory:
+Run the following to see this in action for `Lemmachine.Resource.Default`:
     agda -c -i . -i ./vendor/stdlib/src Lemmachine/Runner.agda
     ./Runner
     curl -i http://localhost:3000 && echo
