@@ -5,6 +5,18 @@ open import Data.Maybe
 open import Data.List
 open import Data.Product
 open import Data.Bool
+open import Data.String
+
+AuthHead = Bool
+MediaType = String
+Handler = String
+Charset = String
+CharsetConverter = String
+Encoding = String
+Encoder = String
+MovedURI = String
+DateTime = String
+ETag = String
 
 data Code : Set where
   resourceExists serviceAvailable isAuthorized : Code

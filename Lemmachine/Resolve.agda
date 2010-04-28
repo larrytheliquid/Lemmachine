@@ -227,6 +227,3 @@ B13 r with Resource.serviceAvailable c r
 
 resolve : Request → Status
 resolve r = B13 r
-
-Data-resolve : Data-Request → Status
-Data-resolve r = resolve (toRequest r)

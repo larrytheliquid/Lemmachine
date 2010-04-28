@@ -8,18 +8,6 @@ open import Data.Bool
 open import Data.Nat
 open import Data.String
 
-AuthHead = Bool
-Path = String
-MediaType = String
-Handler = String
-Charset = String
-CharsetConverter = String
-Encoding = String
-Encoder = String
-MovedURI = String
-DateTime = String
-ETag = String
-
 data Method : Set where
   HEAD GET PUT DELETE POST : Method
   TRACE CONNECT OPTIONS : Method
@@ -43,6 +31,7 @@ eqMethod _ _ = false
 Version = String
 IP = String
 LocalPath = String
+Path = String
 
 RawPath = String
 PathToken = String
@@ -50,6 +39,7 @@ PathTokens = List PathToken
 
 data RequestHeader : Set where
   _,_ : String → String → RequestHeader
+
 {-# COMPILED_DATA RequestHeader FFI.RequestHeader FFI.RequestHeader #-}
 
 headerKey : RequestHeader → String
@@ -75,51 +65,5 @@ record Request : Set where
     cookie : Cookie
     queryString : QueryString
     port : Port
-
-data Data-Request : Set where
-  request :
-    Method →
-    Version →
-    IP →
-    LocalPath →
-    Path →
-    RawPath →
-    PathTokens →
-    RequestHeaders →
-    Body →
-    Cookie →
-    QueryString →
-    Port →
-    Data-Request
-{-# COMPILED_DATA Data-Request FFI.Request FFI.Request #-}
-
-toRequest : Data-Request → Request
-toRequest (request 
-  method
-  version
-  peer
-  dispPath
-  path
-  rawPath
-  pathTokens
-  headers
-  body
-  cookie
-  queryString
-  port
-  ) = record {
-    method = method
-  ; version = version
-  ; peer = peer
-  ; dispPath = dispPath
-  ; path = path
-  ; rawPath = rawPath
-  ; pathTokens = pathTokens
-  ; headers = headers
-  ; body = body
-  ; cookie = cookie
-  ; queryString = queryString
-  ; port = port
-  }
 
 postulate isRedirect : Request → Bool
