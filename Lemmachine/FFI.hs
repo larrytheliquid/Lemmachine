@@ -1,4 +1,4 @@
-module FFI where
+module Lemmachine.FFI where
 import qualified Hack
 import qualified Hack.Handler.Happstack as Handler
 import Data.ByteString.Lazy.Char8 (pack)
@@ -10,14 +10,12 @@ type Path = String
 type RawPath = String
 type PathToken = String
 type PathTokens = [PathToken]
+data RequestHeader = RequestHeader String String
+type RequestHeaders = [RequestHeader]
 type Body = Maybe String
 type Cookie = String
 type QueryString = String
 type Port = String
-
-data RequestHeader = RequestHeader String String
-
-type RequestHeaders = [RequestHeader]
 
 data Request = Request {
   method :: Hack.RequestMethod,

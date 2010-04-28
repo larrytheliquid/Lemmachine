@@ -1,6 +1,6 @@
 module Lemmachine.Request where
-{-# IMPORT FFI #-}
 {-# IMPORT Hack #-}
+{-# IMPORT Lemmachine.FFI #-}
 open import Data.Product
 open import Data.List
 open import Data.Maybe
@@ -40,7 +40,10 @@ PathTokens = List PathToken
 data RequestHeader : Set where
   _,_ : String → String → RequestHeader
 
-{-# COMPILED_DATA RequestHeader FFI.RequestHeader FFI.RequestHeader #-}
+{-# COMPILED_DATA RequestHeader
+    Lemmachine.FFI.RequestHeader
+    Lemmachine.FFI.RequestHeader
+#-}
 
 headerKey : RequestHeader → String
 headerKey (k , _) = k

@@ -1,5 +1,5 @@
 module Lemmachine.Response.Status where
-{-# IMPORT FFI #-}
+{-# IMPORT Lemmachine.FFI #-}
 open import Data.Nat
 
 data Status : Set where
@@ -15,11 +15,13 @@ data Status : Set where
   -- 5xx: Server Error - The server failed to fulfill an apparently valid request
   NotImplemented ServiceUnavailable : Status
 
-{-# COMPILED_DATA Status FFI.Status
-    FFI.OK FFI.Created FFI.Accepted FFI.NoContent
-    FFI.MultipleChoices FFI.MovedPermanently FFI.SeeOther FFI.NotModified FFI.MovedTemporarily
-    FFI.BadRequest FFI.Unauthorized FFI.Forbidden FFI.NotFound FFI.MethodNotAllowed 
-    FFI.NotAcceptable FFI.Conflict FFI.Gone FFI.PreconditionFailed
-    FFI.RequestEntityTooLarge FFI.RequestURItooLong FFI.UnsupportedMediaType
-    FFI.NotImplemented FFI.ServiceUnavailable
+{-# COMPILED_DATA Status Lemmachine.FFI.Status
+    Lemmachine.FFI.OK Lemmachine.FFI.Created Lemmachine.FFI.Accepted Lemmachine.FFI.NoContent
+    Lemmachine.FFI.MultipleChoices Lemmachine.FFI.MovedPermanently 
+    Lemmachine.FFI.SeeOther Lemmachine.FFI.NotModified Lemmachine.FFI.MovedTemporarily
+    Lemmachine.FFI.BadRequest Lemmachine.FFI.Unauthorized Lemmachine.FFI.Forbidden 
+    Lemmachine.FFI.NotFound Lemmachine.FFI.MethodNotAllowed 
+    Lemmachine.FFI.NotAcceptable Lemmachine.FFI.Conflict Lemmachine.FFI.Gone Lemmachine.FFI.PreconditionFailed
+    Lemmachine.FFI.RequestEntityTooLarge Lemmachine.FFI.RequestURItooLong Lemmachine.FFI.UnsupportedMediaType
+    Lemmachine.FFI.NotImplemented Lemmachine.FFI.ServiceUnavailable
 #-}

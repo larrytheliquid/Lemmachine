@@ -1,5 +1,5 @@
 module Lemmachine.Runner where
-{-# IMPORT FFI #-}
+{-# IMPORT Lemmachine.FFI #-}
 open import Lemmachine
 import Lemmachine.Resource.Default as Default
 open import Data.Unit
@@ -24,7 +24,10 @@ data Data-Request : Set where
     Port →
     Data-Request
 
-{-# COMPILED_DATA Data-Request FFI.Request FFI.Request #-}
+{-# COMPILED_DATA Data-Request 
+    Lemmachine.FFI.Request 
+    Lemmachine.FFI.Request
+#-}
 
 toRequest : Data-Request → Request
 toRequest (request 
@@ -60,7 +63,7 @@ Data-resolve res req = resolve res (toRequest req)
 
 postulate run : (Data-Request → Status) → IO Unit
 
-{-# COMPILED run FFI.run #-}
+{-# COMPILED run Lemmachine.FFI.run #-}
 
 main = run (Data-resolve (toResource Default.resource))
 
