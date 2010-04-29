@@ -74,12 +74,12 @@ private
   ... | p₂ rewrite p₂ = v , refl
   headerIsMember header ((k , v) ∷ xs) (there ps) with header ≟ k | headerIsMember header xs ps
   ... | yes _ | _ = v , refl
-  ... | no _ | (v₂ , p) with any₂ (_≟_ header ∘ headerKey) xs
-  ... | yes _ = {!!} -- rewrite p = v₂ , refl
-  ... | no _ = {!!} -- v₂ , p
+  ... | no _ | v₂ , p with any₂ (_≟_ header ∘ headerKey) xs
+  ... | yes _ rewrite p = v₂ , refl
+  ... | no _ =  v₂ , p
 
--- acceptIsHeader : ∀ req → "Accept" ∈ map headerKey (Request.headers req)
---                        → ∃ λ v → fetch "Accept" (Request.headers req) ≡ just v
--- acceptIsHeader req p with headerIsMember "Accept" (Request.headers req) p
--- ... | v , p₂ with fetch "Accept" (Request.headers req) | p₂
--- ... | ._ | refl = v , refl
+acceptIsHeader : ∀ req → "Accept" ∈ map headerKey (Request.headers req)
+                       → ∃ λ v → fetchHeader "Accept" (Request.headers req) ≡ just v
+acceptIsHeader req p with headerIsMember "Accept" (Request.headers req) p
+... | v , p₂ with fetchHeader "Accept" (Request.headers req) | p₂
+... | ._ | refl = v , refl

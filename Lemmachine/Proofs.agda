@@ -84,10 +84,10 @@ notAcceptable : ∀ r → Request.method r ∈ Resource.knownMethods notAcceptab
                     → resolve notAcceptableResource r ≡ NotAcceptable
 notAcceptable r p p₂ p₃ p₄ with methodIsKnown notAcceptableResource r p | methodIsAllowed notAcceptableResource r p₂
                               | acceptIsHeader r p₄ | notOptions r p₃
-notAcceptable r _ _ p₃ _ | p₅ | p₆ | v , p₇ | p₈ rewrite p₅ | p₆ | p₈ with fetch "Accept" (Request.headers r) | p₇
+notAcceptable r _ _ p₃ _ | p₅ | p₆ | v , p₇ | p₈ rewrite p₅ | p₆ | p₈ with fetchHeader "Accept" (Request.headers r) | p₇
 ... | ._ | refl = refl
 
-preconditionFailed : ∀ r → fetch "If-Match" (Request.headers r) ≡ just "*"
+preconditionFailed : ∀ r → fetchHeader "If-Match" (Request.headers r) ≡ just "*"
                          → H7 (stub []) r ≡ PreconditionFailed
-preconditionFailed r p with fetch "If-Match" (Request.headers r) | p
+preconditionFailed r p with fetchHeader "If-Match" (Request.headers r) | p
 ... | ._ | refl = refl

@@ -26,7 +26,9 @@ private
     f (k , v) = k , v
 
 fetchHeader : String → RequestHeaders → Maybe String
-fetchHeader x xs = fetch x $ fromHeaders xs
+fetchHeader x xs with any (_≟_ x ∘ headerKey) xs
+... | yes p = just (headerValue (proj₁ (find p)))
+... | no _ = nothing
 
 postulate isDate : String → Bool
 postulate isModified : String → String → Bool

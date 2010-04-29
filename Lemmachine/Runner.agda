@@ -5,6 +5,7 @@ import Lemmachine.Resource.Default as Default
 open import Data.Unit
 open import Data.Nat
 open import Data.String
+open import Data.Function
 open import Foreign.Haskell
 open import IO.Primitive
 
@@ -30,7 +31,7 @@ data Data-Request : Set where
 #-}
 
 toRequest : Data-Request → Request
-toRequest (request 
+toRequest (request
   method
   version
   peer
@@ -59,11 +60,11 @@ toRequest (request
   }
 
 Data-resolve : Resource → Data-Request → Status
-Data-resolve res req = resolve res (toRequest req)
+Data-resolve res req = resolve res $ toRequest req
 
 postulate run : (Data-Request → Status) → IO Unit
 
 {-# COMPILED run Lemmachine.FFI.run #-}
 
-main = run (Data-resolve (toResource Default.resource))
+main = run $ Data-resolve (toResource Default.resource)
 

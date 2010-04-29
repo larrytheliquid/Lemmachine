@@ -48,6 +48,9 @@ data RequestHeader : Set where
 headerKey : RequestHeader → String
 headerKey (k , _) = k
 
+headerValue : RequestHeader → String
+headerValue (_ , v) = v
+
 RequestHeaders = List RequestHeader
 Body = Maybe String
 Cookie = String
