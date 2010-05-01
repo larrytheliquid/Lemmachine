@@ -30,6 +30,8 @@ Make sure you have Agda version `2.2.6`:
 
 ## Development ##
 
+Get [Emacs to work with Agda](http://wiki.portal.chalmers.se/agda/pmwiki.php?n=Main.README-2-2-6).
+
 We use a vendored modified Agda stdlib, so in Emacs:
     M-x customize group
     agda2
