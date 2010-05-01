@@ -20,6 +20,8 @@ This project is still very much an early-stage work in progress, without guarant
 
 ## Setup ##
 
+[Grab Haskell](http://hackage.haskell.org/platform) if you don't already have it installed.
+
     cabal update
     cabal install hack hack-handler-happstack Agda-executable
 
