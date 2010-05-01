@@ -31,6 +31,7 @@ Make sure you have Agda version `2.2.6`:
 ## Development ##
 
 Get [Emacs to work with Agda](http://wiki.portal.chalmers.se/agda/pmwiki.php?n=Main.README-2-2-6).
+
 [Examples](http://wiki.portal.chalmers.se/agda/pmwiki.php?n=Main.QuickGuideToEditingTypeCheckingAndCompilingAgdaCode) of how to use `agda-mode`.
 
 We use a vendored modified Agda stdlib, so in Emacs:
