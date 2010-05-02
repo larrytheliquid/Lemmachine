@@ -38,7 +38,7 @@ Get [Emacs to work with Agda](http://wiki.portal.chalmers.se/agda/pmwiki.php?n=M
 [Examples](http://wiki.portal.chalmers.se/agda/pmwiki.php?n=Main.QuickGuideToEditingTypeCheckingAndCompilingAgdaCode) of how to use `agda-mode`.
 
 We use a vendored modified Agda stdlib, so in Emacs:
-    M-x customize group
+    M-x customize-group
     agda2
 
 Then add this to `Agda2 Include Dirs`:

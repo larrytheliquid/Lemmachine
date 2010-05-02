@@ -71,7 +71,7 @@ invalidEntityLength r p p₂ with methodIsKnown invalidEntityLengthResource r p 
 
 optionsOK : ∀ r → Request.method r ∈ Resource.knownMethods resource r
                 → Request.method r ∈ Resource.allowedMethods resource r
-                → Request.method r ≡ OPTIONS 
+                → Request.method r ≡ OPTIONS
                 → resolve resource r ≡ OK
 optionsOK r p p₂ p₃ with methodIsKnown resource r p | methodIsAllowed resource r p₂
 ... | p₄ | p₅ rewrite p₄ | p₅ | p₃ = refl

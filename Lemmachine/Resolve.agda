@@ -164,7 +164,7 @@ D4+D5 r with fetchHeader "Accept-Language" (Request.headers r)
 C3+C4 : Request → Status
 C3+C4 r with fetchHeader "Accept" (Request.headers r)
 ... | nothing = D4+D5 r
-... | just contentType with fetch contentType (Resource.contentTypesProvided c r)
+... | just contentType with fetchContentType contentType (Resource.contentTypesProvided c r)
 ... | just _  = D4+D5 r
 ... | nothing = NotAcceptable
 

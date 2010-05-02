@@ -83,3 +83,9 @@ acceptIsHeader : ∀ req → "Accept" ∈ map headerKey (Request.headers req)
 acceptIsHeader req p with headerIsMember "Accept" (Request.headers req) p
 ... | v , p₂ with fetchHeader "Accept" (Request.headers req) | p₂
 ... | ._ | refl = v , refl
+
+acceptLanguageIsHeader : ∀ req → "Accept-Language" ∈ map headerKey (Request.headers req)
+                       → ∃ λ v → fetchHeader "Accept-Language" (Request.headers req) ≡ just v
+acceptLanguageIsHeader req p with headerIsMember "Accept-Language" (Request.headers req) p
+... | v , p₂ with fetchHeader "Accept-Language" (Request.headers req) | p₂
+... | ._ | refl = v , refl
