@@ -87,7 +87,13 @@ run f = Handler.run $ return . \env ->
   let code = statusCode $ f (toRequest env) in
   Hack.Response 
     { Hack.status = code
-    , Hack.headers = [ ("Content-Type", "text/plain") ]
-    , Hack.body = pack ("This HTTP status (" ++ show code ++ ") is brought to you by Lemmachine!")
+    , Hack.headers = [ ("Content-Type", "text/html") ]
+    , Hack.body = pack $ toHtml code
     }
+      where
+        toHtml x = doctype ++ html x
+        doctype = "<!DOCTYPE html>"
+        html x = "<html lang='en'>" ++ head ++ body x ++ "</html>"
+        head = "<head><meta charset=utf-8 /><title>Lemmachine</title></head>"
+        body x = "<body>This HTTP status (" ++ show x ++ ") is brought to you by Lemmachine!</body>"
 
