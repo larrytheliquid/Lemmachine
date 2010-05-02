@@ -25,6 +25,9 @@ This project is still very much an early-stage work in progress, without guarant
     cabal update
     cabal install hack hack-handler-happstack Agda-executable
 
+Add Cabal binaries to your `PATH` in `~/.profile`:
+    export PATH=~/.cabal/bin:$PATH 
+
 Make sure you have Agda version `2.2.6`:
     agda --version
 
