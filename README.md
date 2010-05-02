@@ -52,4 +52,14 @@ headers & body will come later).
 Run the following to see this in action for [Lemmachine.Resource.Default](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Resource/Default.agda):
     agda -c -i . -i ./vendor/stdlib/src Lemmachine/Runner.agda
     ./Runner
-    curl -i http://localhost:3000 && echo
+
+In a separate terminal, see a `200` response:
+    curl -X GET -H "Accept: text/html" -i http://localhost:3000 && echo
+
+... compared to a `406` due to requesting an unsupported `text/xml` media type:
+    curl -X GET -H "Accept: text/xml" -i http://localhost:3000 && echo
+
+... compared to a `405` due to requesting an unsupported `POST` method:
+    curl -X POST -H "Accept: text/html" -i http://localhost:3000 && echo
+
+All of this is just default behavior and can be overridden by defining appropriate hook methods.
