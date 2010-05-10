@@ -59,12 +59,12 @@ toRequest (request
   ; port = port
   }
 
-Data-resolve : Resource → Data-Request → Status
-Data-resolve res req = resolve res $ toRequest req
+Data-resolveStatus : Resource → Data-Request → Status
+Data-resolveStatus res req = resolveStatus res $ toRequest req
 
 postulate run : (Data-Request → Status) → IO Unit
 
 {-# COMPILED run Lemmachine.FFI.run #-}
 
-main = run $ Data-resolve (toResource Default.resource)
+main = run $ Data-resolveStatus (toResource Default.resource)
 

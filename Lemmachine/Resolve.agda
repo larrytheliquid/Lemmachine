@@ -6,11 +6,12 @@ open import Lemmachine.Utils
 open import Data.Bool
 open import Data.Nat
 open import Data.String
-open import Relation.Binary
-open import Relation.Binary.PropositionalEquality
+open import Data.Function
 open import Data.Maybe
 open import Data.List
 open import Data.Product
+open import Relation.Binary
+open import Relation.Binary.PropositionalEquality
 
 O18 : Request → Status
 O18 r with Resource.multipleChoices c r
@@ -227,3 +228,6 @@ B13 r with Resource.serviceAvailable c r
 
 resolve : Request → Status
 resolve r = B13 r
+
+resolveStatus : Request → Status
+resolveStatus r = resolve r
