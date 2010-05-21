@@ -10,7 +10,7 @@ open import Data.Function using (const)
 
 private
 
- update : (code : Code) → convert code → Resource → Resource
+ update : (code : Code) → El code → Resource → Resource
 
  update resourceExists f c = record {
      resourceExists = f
