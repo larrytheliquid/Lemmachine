@@ -7,8 +7,8 @@ private
   module U = Lemmachine.Resource.Universe
   open U using (convert; Code)
 
-Property = Σ Code convert
-Properties = List Property
+Hook = Σ Code convert
+Hooks = List Hook
 
 _⇒_ : {A : Set}{B : A → Set} → (a : A) → B a → (Σ A B)
 _⇒_ = _,_

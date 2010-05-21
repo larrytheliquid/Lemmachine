@@ -1236,9 +1236,9 @@ private
    ; finishRequest = const true
    }
 
-configure : Resource → Properties → Resource
+configure : Resource → Hooks → Resource
 configure base [] = base
 configure base ((code , f) ∷ cfs) = update code f (configure base cfs)
 
-toResource : Properties → Resource
+toResource : Hooks → Resource
 toResource props = configure default props

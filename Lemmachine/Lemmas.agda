@@ -1,5 +1,5 @@
 open import Lemmachine
-module Lemmachine.Lemmas (properties : Properties) where
+module Lemmachine.Lemmas (hooks : Hooks) where
 open import Data.Empty
 open import Data.String
 open import Data.Maybe
@@ -12,9 +12,9 @@ open import Relation.Binary.PropositionalEquality public
 open import Relation.Binary.PropositionalEquality.TrustMe
 
 resource : Resource
-resource = toResource properties
+resource = toResource hooks
 
-stub : Properties → Resource
+stub : Hooks → Resource
 stub overrides = configure resource overrides
 
 private
