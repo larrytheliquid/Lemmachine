@@ -5,7 +5,7 @@ open import Data.List
 
 private
   module U = Lemmachine.Resource.Universe
-  open U using (El; Code)
+  open U using (Code; El)
 
 Hook = Σ Code El
 Hooks = List Hook

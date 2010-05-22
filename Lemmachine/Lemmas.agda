@@ -10,12 +10,14 @@ open import Relation.Nullary
 open Membership-≡ public
 open import Relation.Binary.PropositionalEquality public
 open import Relation.Binary.PropositionalEquality.TrustMe
+private
+  resource : Resource
+  resource = toResource hooks
+open Request public
+open Resource resource public
 
-resource : Resource
-resource = toResource hooks
-
-stub : Hooks → Resource
-stub overrides = configure resource overrides
+resolveStatus : Request → Status
+resolveStatus r = resolve resource r
 
 private
   eqMethod-refl : ∀ m → eqMethod m m ≡ true
@@ -29,29 +31,34 @@ private
   eqMethod-refl OPTIONS = refl
 
   methodIsMember : ∀ r → (methods : List Method)
-                   → Request.method r ∈ methods
-                   → any (eqMethod (Request.method r))
+                   → method r ∈ methods
+                   → any (eqMethod (method r))
                          methods ≡ true
   methodIsMember _ [] ()
   methodIsMember _ (x ∷ _) (here p) rewrite p with eqMethod-refl x
   ... | p₂ rewrite p₂ = refl
-  methodIsMember r (x ∷ xs) (there ps) with eqMethod (Request.method r) x | methodIsMember r xs ps
+  methodIsMember r (x ∷ xs) (there ps) with eqMethod (method r) x | methodIsMember r xs ps
   ... | true | _ = refl
   ... | false | p rewrite p = refl
 
-methodIsKnown : ∀ res req → Request.method req ∈ Resource.knownMethods res req
-                          → any (eqMethod (Request.method req))
-                                (Resource.knownMethods res req) ≡ true
-methodIsKnown res req p = methodIsMember req (Resource.knownMethods res req) p
+methodIsKnown : ∀ r → method r ∈ knownMethods r
+                    → any (eqMethod (method r))
+                          (knownMethods r) ≡ true
+methodIsKnown r p = methodIsMember r (knownMethods r) p
 
-methodIsAllowed : ∀ res req → Request.method req ∈ Resource.allowedMethods res req
-                            → any (eqMethod (Request.method req))
-                                  (Resource.allowedMethods res req) ≡ true
-methodIsAllowed res req p = methodIsMember req (Resource.allowedMethods res req) p
+methodIsAllowed : ∀ r → method r ∈ allowedMethods r
+                      → any (eqMethod (method r))
+                            (allowedMethods r) ≡ true
+methodIsAllowed r p = methodIsMember r (allowedMethods r) p
 
-notOptions : ∀ r → Request.method r ≢ OPTIONS
-                 → eqMethod (Request.method r) OPTIONS ≡ false
-notOptions r p with Request.method r
+postulate
+  methodIsntAllowed : ∀ r → method r ∉ allowedMethods r
+                          → any (eqMethod (method r))
+                                (allowedMethods r) ≡ false
+
+notOptions : ∀ r → method r ≢ OPTIONS
+                 → eqMethod (method r) OPTIONS ≡ false
+notOptions r p with method r
 ... | HEAD = refl
 ... | GET = refl
 ... | PUT = refl
@@ -78,14 +85,14 @@ private
   ... | yes _ rewrite p = v₂ , refl
   ... | no _ =  v₂ , p
 
-acceptIsHeader : ∀ req → "Accept" ∈ map headerKey (Request.headers req)
-                       → ∃ λ v → fetchHeader "Accept" (Request.headers req) ≡ just v
-acceptIsHeader req p with headerIsMember "Accept" (Request.headers req) p
-... | v , p₂ with fetchHeader "Accept" (Request.headers req) | p₂
+acceptIsHeader : ∀ r → "Accept" ∈ map headerKey (headers r)
+                     → ∃ λ v → fetchHeader "Accept" (headers r) ≡ just v
+acceptIsHeader r p with headerIsMember "Accept" (headers r) p
+... | v , p₂ with fetchHeader "Accept" (headers r) | p₂
 ... | ._ | refl = v , refl
 
-acceptLanguageIsHeader : ∀ req → "Accept-Language" ∈ map headerKey (Request.headers req)
-                       → ∃ λ v → fetchHeader "Accept-Language" (Request.headers req) ≡ just v
-acceptLanguageIsHeader req p with headerIsMember "Accept-Language" (Request.headers req) p
-... | v , p₂ with fetchHeader "Accept-Language" (Request.headers req) | p₂
+acceptLanguageIsHeader : ∀ r → "Accept-Language" ∈ map headerKey (headers r)
+                             → ∃ λ v → fetchHeader "Accept-Language" (headers r) ≡ just v
+acceptLanguageIsHeader r p with headerIsMember "Accept-Language" (headers r) p
+... | v , p₂ with fetchHeader "Accept-Language" (headers r) | p₂
 ... | ._ | refl = v , refl
