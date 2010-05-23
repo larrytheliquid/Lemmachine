@@ -4,9 +4,9 @@ Lemmachine
 Lemmachine is a REST'ful web framework that makes it easy to get HTTP right by exposing users to overridable hooks with sane defaults. The main architecture is a copy of Erlang-based [Webmachine](http://webmachine.basho.com), which is currently the best documentation reference (for hooks & general design).
 
 Lemmachine stands out from the dynamically typed Webmachine by being written in dependently typed
-[Agda](http://wiki.portal.chalmers.se/agda/pmwiki.php). The goal of the project is to show the advantages gained from compositional testing by taking advantage of proofs being inherently compositional. See [proofs](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Proofs.agda) for examples of universally quantified proofs (tests over all possible input values) written against the [default resource](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Resource/Default.agda), which does not override any hooks.
+[Agda](http://wiki.portal.chalmers.se/agda/pmwiki.php). The goal of the project is to show the advantages gained from compositional testing by taking advantage of proofs being inherently compositional. See [proofs](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Default/Proofs.agda) for examples of universally quantified proofs (tests over all possible input values) written against the [default resource](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Default.agda), which does not override any hooks.
 
-When a user implements their own resource, they can write simple lemmas ("unit tests") against the resource's hooks, but then literally reuse those lemmas to write more complex proofs ("integration tests"). For examples see some reuse of [lemmas](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Lemmas.agda) in [proofs](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Proofs.agda).
+When a user implements their own resource, they can write simple lemmas ("unit tests") against the resource's hooks, but then literally reuse those lemmas to write more complex proofs ("integration tests"). For examples see some reuse of [lemmas](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Default/Lemmas.agda) in [proofs](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Default/Proofs.agda).
 
 The big goal is to show that in service oriented architectures, proofs of individual [middlewares](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Utils.agda) can themselves be reused to write cross-service proofs (even higher level "integration tests") for a consumer application that mounts those middlewares. See [this post](http://vision-media.ca/resources/ruby/ruby-rack-middleware-tutorial) for what is meant by middleware.
 
@@ -46,12 +46,11 @@ Then add this to `Agda2 Include Dirs`:
 
 ## Running ##
 
-Lemmachine currently supports resolving HTTP status codes (resolving
-headers & body will come later).
+Lemmachine currently supports resolving HTTP status codes (resolving headers & body will come later).
 
-Run the following to see this in action for [Lemmachine.Resource.Default](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Resource/Default.agda):
-    agda -c -i . -i ./vendor/stdlib/src Lemmachine/Runner.agda
-    ./Runner
+Run the following to see this in action for [Lemmachine.Default](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Default.agda):
+    agda -c -i . -i ./vendor/stdlib/src Lemmachine/Default.agda
+    ./Default
 
 In a separate terminal, see a `200` response:
     curl -X GET -H "Accept: text/html" -i http://localhost:3000 && echo
@@ -63,3 +62,8 @@ In a separate terminal, see a `200` response:
     curl -X POST -H "Accept: text/html" -i http://localhost:3000 && echo
 
 All of this is just default behavior and can be overridden by defining appropriate hook methods.
+
+Even though we are working in a language with a lot of verification power, the amount of code required for a complete runnable application remains competitive with more mainstream languages:
+    module ItsSoEasy where
+    open import Lemmachine
+    main = runResolve (toApp [])

@@ -226,5 +226,5 @@ B13 r with Resource.serviceAvailable c r
 ... | true  = B12 r 
 ... | false = ServiceUnavailable
 
-resolve : Request → Status
+resolve : Application
 resolve r = B13 r
