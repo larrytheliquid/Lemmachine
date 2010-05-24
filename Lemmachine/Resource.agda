@@ -48,3 +48,4 @@ record Resource : Set where
     expires : El U.expires
     generateETag : El U.generateETag
     finishRequest : El U.finishRequest
+    body : El U.body

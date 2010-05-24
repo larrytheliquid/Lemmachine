@@ -67,7 +67,7 @@ record Request : Set where
     rawPath : RawPath
     pathTokens : PathTokens
     headers : RequestHeaders
-    body : Body
+    reqBody : Body
     cookie : Cookie
     queryString : QueryString
     port : Port

@@ -14,14 +14,3 @@ data Status : Set where
   RequestEntityTooLarge RequestURItooLong UnsupportedMediaType : Status
   -- 5xx: Server Error - The server failed to fulfill an apparently valid request
   NotImplemented ServiceUnavailable : Status
-
-{-# COMPILED_DATA Status Lemmachine.FFI.Status
-    Lemmachine.FFI.OK Lemmachine.FFI.Created Lemmachine.FFI.Accepted Lemmachine.FFI.NoContent
-    Lemmachine.FFI.MultipleChoices Lemmachine.FFI.MovedPermanently 
-    Lemmachine.FFI.SeeOther Lemmachine.FFI.NotModified Lemmachine.FFI.MovedTemporarily
-    Lemmachine.FFI.BadRequest Lemmachine.FFI.Unauthorized Lemmachine.FFI.Forbidden 
-    Lemmachine.FFI.NotFound Lemmachine.FFI.MethodNotAllowed 
-    Lemmachine.FFI.NotAcceptable Lemmachine.FFI.Conflict Lemmachine.FFI.Gone Lemmachine.FFI.PreconditionFailed
-    Lemmachine.FFI.RequestEntityTooLarge Lemmachine.FFI.RequestURItooLong Lemmachine.FFI.UnsupportedMediaType
-    Lemmachine.FFI.NotImplemented Lemmachine.FFI.ServiceUnavailable
-#-}

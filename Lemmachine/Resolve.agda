@@ -19,7 +19,7 @@ O18 r with Resource.multipleChoices c r
 ... | true  = MultipleChoices
 
 O20 : Request → Status
-O20 r with Request.body r
+O20 r with Request.reqBody r
 ... | nothing = NoContent
 ... | just _ = O18 r
 
@@ -165,9 +165,10 @@ D4+D5 r with fetchHeader "Accept-Language" (Request.headers r)
 C3+C4 : Request → Status
 C3+C4 r with fetchHeader "Accept" (Request.headers r)
 ... | nothing = D4+D5 r
-... | just contentType with fetchContentType contentType (Resource.contentTypesProvided c r)
-... | just _  = D4+D5 r
-... | nothing = NotAcceptable
+... | just contentType with any (_==_ contentType) 
+                                (Resource.contentTypesProvided c r)
+... | true  = D4+D5 r
+... | false = NotAcceptable
 
 B3 : Request → Status
 B3 r with eqMethod (Request.method r) OPTIONS
@@ -226,5 +227,13 @@ B13 r with Resource.serviceAvailable c r
 ... | true  = B12 r 
 ... | false = ServiceUnavailable
 
+resolveStatus : Request → Status
+resolveStatus r = B13 r
+
 resolve : Application
-resolve r = B13 r
+resolve r = record {
+    status = s
+  ; headers = []
+  ; body = Resource.body c s 
+  } where
+  s = resolveStatus r

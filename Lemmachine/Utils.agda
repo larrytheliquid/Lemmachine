@@ -1,6 +1,6 @@
 module Lemmachine.Utils where
 open import Lemmachine.Request
-open import Lemmachine.Response.Status
+open import Lemmachine.Response
 open import Data.Maybe
 open import Data.Bool hiding (_≟_)
 open import Data.String
@@ -11,7 +11,7 @@ open import Data.List hiding (any)
 open import Data.List.Any
 open Membership-≡
 
-Application = Request → Status
+Application = Request → Response
 Middleware = Application → Application
 
 fetch : String → List (String × String) → Maybe String

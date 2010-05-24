@@ -58,16 +58,29 @@ private
     ; rawPath = rawPath
     ; pathTokens = pathTokens
     ; headers = headers
-    ; body = body
+    ; reqBody = body
     ; cookie = cookie
     ; queryString = queryString
     ; port = port
     }
 
-  Data-resolve : Application → Data-Request → Status
-  Data-resolve app req = app $ toRequest req
+  data Data-Response : Set where
+    response : String → String → Data-Response
 
-  postulate run : (Data-Request → Status) → IO Unit
+  {-# COMPILED_DATA Data-Response
+      Lemmachine.FFI.Response 
+      Lemmachine.FFI.Response
+  #-}
+
+  fromResponse : Response → Data-Response
+  fromResponse resp = response
+    (showStatus $ Response.status resp)
+    (Response.body resp)
+
+  Data-resolve : Application → Data-Request → Data-Response
+  Data-resolve app req = fromResponse $ app (toRequest req)
+
+  postulate run : (Data-Request → Data-Response) → IO Unit
   {-# COMPILED run Lemmachine.FFI.run #-}
 
 runResolve : Application → IO Unit

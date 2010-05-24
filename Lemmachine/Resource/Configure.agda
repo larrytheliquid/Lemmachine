@@ -1,5 +1,6 @@
 module Lemmachine.Resource.Configure where
 open import Lemmachine.Request
+open import Lemmachine.Response
 open import Lemmachine.Resource
 open import Lemmachine.Resource.Universe
 open import Data.Bool
@@ -46,6 +47,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update serviceAvailable f c = record {
@@ -82,6 +84,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update isAuthorized f c = record {
@@ -118,6 +121,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update forbidden f c = record {
@@ -154,6 +158,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update allowMissingPost f c = record {
@@ -190,6 +195,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update malformedRequest f c = record {
@@ -226,6 +232,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update uriTooLong f c = record {
@@ -262,6 +269,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update knownContentType f c = record {
@@ -298,6 +306,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update validContentHeaders f c = record {
@@ -334,6 +343,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update validEntityLength f c = record {
@@ -370,6 +380,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update options f c = record {
@@ -406,6 +417,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update allowedMethods f c = record {
@@ -442,7 +454,9 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
+
  update knownMethods f c = record {
      resourceExists = Resource.resourceExists c
    ; serviceAvailable = Resource.serviceAvailable c
@@ -477,6 +491,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update deleteResource f c = record {
@@ -513,6 +528,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update deleteCompleted f c = record {
@@ -549,6 +565,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update postIsCreate f c = record {
@@ -585,6 +602,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update createPath f c = record {
@@ -621,6 +639,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update processPost f c = record {
@@ -657,6 +676,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update contentTypesProvided f c = record {
@@ -693,6 +713,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update languageAvailable f c = record {
@@ -729,6 +750,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update contentTypesAccepted f c = record {
@@ -765,6 +787,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update charsetsProvided f c = record {
@@ -801,6 +824,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update encodingsProvided f c = record {
@@ -837,6 +861,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update variances f c = record {
@@ -873,6 +898,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update isConflict f c = record {
@@ -909,6 +935,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update multipleChoices f c = record {
@@ -945,6 +972,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update previouslyExisted f c = record {
@@ -981,6 +1009,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update movedPermanently f c = record {
@@ -1017,6 +1046,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update movedTemporarily f c = record {
@@ -1053,6 +1083,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update lastModified f c = record {
@@ -1089,6 +1120,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update expires f c = record {
@@ -1125,6 +1157,7 @@ private
    ; expires = f
    ; generateETag = Resource.generateETag c
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update generateETag f c = record {
@@ -1161,6 +1194,7 @@ private
    ; expires = Resource.expires c
    ; generateETag = f
    ; finishRequest = Resource.finishRequest c
+   ; body = Resource.body c
    }
 
  update finishRequest f c = record {
@@ -1197,6 +1231,44 @@ private
    ; expires = Resource.expires c
    ; generateETag = Resource.generateETag c
    ; finishRequest = f
+   ; body = Resource.body c
+   }
+
+ update body f c = record {
+     resourceExists = Resource.resourceExists c
+   ; serviceAvailable = Resource.serviceAvailable c
+   ; isAuthorized = Resource.isAuthorized c
+   ; forbidden = Resource.forbidden c
+   ; allowMissingPost = Resource.allowMissingPost c
+   ; malformedRequest = Resource.malformedRequest c
+   ; uriTooLong = Resource.uriTooLong c
+   ; knownContentType = Resource.knownContentType c
+   ; validContentHeaders = Resource.validContentHeaders c
+   ; validEntityLength = Resource.validEntityLength c
+   ; options = Resource.options c
+   ; allowedMethods = Resource.allowedMethods c
+   ; knownMethods = Resource.knownMethods c
+   ; deleteResource = Resource.deleteResource c
+   ; deleteCompleted = Resource.deleteCompleted c
+   ; postIsCreate = Resource.postIsCreate c
+   ; createPath = Resource.createPath c
+   ; processPost = Resource.processPost c
+   ; contentTypesProvided = Resource.contentTypesProvided c
+   ; languageAvailable = Resource.languageAvailable c
+   ; contentTypesAccepted = Resource.contentTypesAccepted c
+   ; charsetsProvided = Resource.charsetsProvided c
+   ; encodingsProvided = Resource.encodingsProvided c
+   ; variances = Resource.variances c
+   ; isConflict = Resource.isConflict c
+   ; multipleChoices = Resource.multipleChoices c
+   ; previouslyExisted = Resource.previouslyExisted c
+   ; movedPermanently = Resource.movedPermanently c
+   ; movedTemporarily = Resource.movedTemporarily c
+   ; lastModified = Resource.lastModified c
+   ; expires = Resource.expires c
+   ; generateETag = Resource.generateETag c
+   ; finishRequest = Resource.finishRequest c
+   ; body = f
    }
 
  default : Resource
@@ -1219,7 +1291,7 @@ private
    ; postIsCreate = const false
    ; createPath = const nothing
    ; processPost = const false
-   ; contentTypesProvided = const [ "text/html" , "toHtml" ]
+   ; contentTypesProvided = const [ "text/html" ]
    ; languageAvailable = const true
    ; contentTypesAccepted = const []
    ; charsetsProvided = const []
@@ -1234,6 +1306,7 @@ private
    ; expires = const nothing
    ; generateETag = const nothing
    ; finishRequest = const true
+   ; body = defaultHtml
    }
 
 configure : Resource → Hooks → Resource

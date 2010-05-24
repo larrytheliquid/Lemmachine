@@ -31,39 +31,11 @@ data Request = Request {
   queryString :: QueryString,
   port :: Port
   }
-
-data Status =
-  OK | Created | Accepted | NoContent |
-  MultipleChoices | MovedPermanently | SeeOther | NotModified | MovedTemporarily |
-  BadRequest | Unauthorized | Forbidden | NotFound | MethodNotAllowed |
-  NotAcceptable | Conflict | Gone | PreconditionFailed |
-  RequestEntityTooLarge | RequestURItooLong | UnsupportedMediaType |
-  NotImplemented | ServiceUnavailable
-
-statusCode :: Status -> Int
-statusCode OK = 200
-statusCode Created = 201
-statusCode Accepted = 202
-statusCode NoContent = 204
-statusCode MultipleChoices = 300
-statusCode MovedPermanently = 301
-statusCode SeeOther = 303
-statusCode NotModified = 304
-statusCode MovedTemporarily = 307
-statusCode BadRequest = 400
-statusCode Unauthorized = 401
-statusCode Forbidden = 403
-statusCode NotFound = 404
-statusCode MethodNotAllowed = 405
-statusCode NotAcceptable = 406
-statusCode Conflict = 409
-statusCode Gone = 410
-statusCode PreconditionFailed = 412
-statusCode RequestEntityTooLarge = 413
-statusCode RequestURItooLong = 414
-statusCode UnsupportedMediaType = 415
-statusCode NotImplemented = 501
-statusCode ServiceUnavailable = 503
+                   
+data Response = Response {
+  status :: String,
+  respBody :: String
+  }
 
 toRequest :: Hack.Env -> Request
 toRequest e = Request {
@@ -82,18 +54,14 @@ toRequest e = Request {
   }
   where toHeader h = RequestHeader (fst h) (snd h)
 
-run :: (Request -> Status) -> IO ()
+run :: (Request -> Response) -> IO ()
 run f = Handler.run $ return . \env -> 
-  let code = statusCode $ f (toRequest env) in
+  let response = f $ toRequest env in
   Hack.Response 
-    { Hack.status = code
+    { Hack.status = read $ status response
     , Hack.headers = [ ("Content-Type", "text/html") ]
-    , Hack.body = pack $ toHtml code
+    , Hack.body = pack $ respBody response
     }
-      where
-        toHtml x = doctype ++ html x
-        doctype = "<!DOCTYPE html>"
-        html x = "<html lang='en'>" ++ head ++ body x ++ "</html>"
-        head = "<head><meta charset=utf-8 /><title>Lemmachine</title></head>"
-        body x = "<body>This HTTP status (" ++ show x ++ ") is brought to you by Lemmachine!</body>"
+
+
 

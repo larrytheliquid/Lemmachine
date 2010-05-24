@@ -1,5 +1,6 @@
 open import Lemmachine
 module Lemmachine.Lemmas (hooks : Hooks) where
+import Lemmachine.Resolve
 open import Data.Empty
 open import Data.String
 open import Data.Maybe
@@ -15,9 +16,7 @@ private
   resource = toResource hooks
 open Request public
 open Resource resource public
-
-resolveStatus : Request → Status
-resolveStatus r = resolve resource r
+open Lemmachine.Resolve resource public
 
 private
   eqMethod-refl : ∀ m → eqMethod m m ≡ true

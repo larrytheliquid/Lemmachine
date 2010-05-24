@@ -29,7 +29,7 @@ data Code : Set where
   charsetsProvided encodingsProvided variances : Code
   isConflict multipleChoices previouslyExisted : Code
   movedPermanently movedTemporarily lastModified : Code
-  expires generateETag finishRequest : Code
+  expires generateETag finishRequest body : Code
 
 El : Code → Set
 El resourceExists = Request → Bool
@@ -50,7 +50,7 @@ El deleteCompleted = Request → Bool
 El postIsCreate = Request → Bool
 El createPath = Request → Maybe Path
 El processPost = Request → Bool
-El contentTypesProvided = Request → List (MediaType × Handler)
+El contentTypesProvided = Request → List MediaType
 El languageAvailable = Request → Bool
 El contentTypesAccepted = Request → List (MediaType × Handler)
 El charsetsProvided = Request → List (Charset × CharsetConverter)
@@ -65,3 +65,4 @@ El lastModified = Request → Maybe DateTime
 El expires = Request → Maybe DateTime
 El generateETag = Request → Maybe ETag
 El finishRequest = Request → Bool
+El body = Status → String
