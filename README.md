@@ -16,7 +16,7 @@ Lemmachine currently uses the Haskell [Hack](http://github.com/nfjinjing/hack) a
 
 ## Status ##
 
-This project is still very much an early-stage work in progress, without guarantees for API stability. It currently only renders response statuses (not headers or body). Lemmas and proofs exist for the status resolution, and now there is a real runner hardcoded against the default resource!
+The project is still in development and rapidly changing. Lemmas and proofs exist for status resolution, and you can now run resources! The focus will now comprise of a gradual direct translation of RFC 2616 sections into dependent type theory.
 
 ## Setup ##
 
@@ -45,8 +45,6 @@ Then add this to `Agda2 Include Dirs`:
     ./vendor/stdlib/src
 
 ## Running ##
-
-Lemmachine currently supports resolving HTTP status codes (resolving headers & body will come later).
 
 Run the following to see this in action for [Lemmachine.Default](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Default.agda):
     agda -c -i . -i ./vendor/stdlib/src Lemmachine/Default.agda

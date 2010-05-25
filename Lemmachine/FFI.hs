@@ -31,11 +31,6 @@ data Request = Request {
   queryString :: QueryString,
   port :: Port
   }
-                   
-data Response = Response {
-  status :: String,
-  respBody :: String
-  }
 
 toRequest :: Hack.Env -> Request
 toRequest e = Request {
@@ -54,14 +49,24 @@ toRequest e = Request {
   }
   where toHeader h = RequestHeader (fst h) (snd h)
 
+data ResponseHeader = ResponseHeader String String
+type ResponseHeaders = [ResponseHeader]
+
+data Response = Response {
+  status :: String,
+  respHeaders :: ResponseHeaders,
+  respBody :: String
+  }
+
 run :: (Request -> Response) -> IO ()
 run f = Handler.run $ return . \env -> 
   let response = f $ toRequest env in
-  Hack.Response 
-    { Hack.status = read $ status response
-    , Hack.headers = [ ("Content-Type", "text/html") ]
-    , Hack.body = pack $ respBody response
+  Hack.Response { 
+    Hack.status = read $ status response,
+    Hack.headers = map fromHeader $ respHeaders response, 
+    Hack.body = pack $ respBody response
     }
+    where fromHeader (ResponseHeader k v) = (k , v)
 
 
 

@@ -1,7 +1,7 @@
 open import Lemmachine.Resource
 module Lemmachine.Resolve (c : Resource) where
 open import Lemmachine.Request
-open import Lemmachine.Response.Status
+open import Lemmachine.Response
 open import Lemmachine.Utils
 open import Data.Bool
 open import Data.Nat
@@ -165,10 +165,10 @@ D4+D5 r with fetchHeader "Accept-Language" (Request.headers r)
 C3+C4 : Request → Status
 C3+C4 r with fetchHeader "Accept" (Request.headers r)
 ... | nothing = D4+D5 r
-... | just contentType with any (_==_ contentType) 
-                                (Resource.contentTypesProvided c r)
-... | true  = D4+D5 r
-... | false = NotAcceptable
+... | just contentType with fetchContentType contentType
+                              (Resource.contentTypesProvided c r)
+... | just _  = D4+D5 r
+... | nothing = NotAcceptable
 
 B3 : Request → Status
 B3 r with eqMethod (Request.method r) OPTIONS
@@ -233,7 +233,10 @@ resolveStatus r = B13 r
 resolve : Application
 resolve r = record {
     status = s
-  ; headers = []
-  ; body = Resource.body c s 
+  ; headers = hs $ fetchAccept (Request.headers r) (Resource.contentTypesProvided c r)
+  ; body = Resource.body c s
   } where
   s = resolveStatus r
+  hs : Maybe String → List ResponseHeader
+  hs (just s) = [ "Content-Type" , s ]
+  hs nothing = []

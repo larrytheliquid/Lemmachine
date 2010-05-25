@@ -5,12 +5,20 @@ open import Data.List hiding (_++_)
 open import Data.Nat
 open import Data.String
 
-ResponseHeader = String × String
+data ResponseHeader : Set where
+  _,_ : String → String → ResponseHeader
+
+{-# COMPILED_DATA ResponseHeader
+    Lemmachine.FFI.ResponseHeader
+    Lemmachine.FFI.ResponseHeader
+#-}
+
+ResponseHeaders = List ResponseHeader
 
 record Response : Set where 
   field 
     status : Status
-    headers : List ResponseHeader
+    headers : ResponseHeaders
     body : String
 
 showStatus : Status → String

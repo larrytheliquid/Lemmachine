@@ -65,7 +65,7 @@ private
     }
 
   data Data-Response : Set where
-    response : String → String → Data-Response
+    response : String → ResponseHeaders → String → Data-Response
 
   {-# COMPILED_DATA Data-Response
       Lemmachine.FFI.Response 
@@ -75,6 +75,7 @@ private
   fromResponse : Response → Data-Response
   fromResponse resp = response
     (showStatus $ Response.status resp)
+    (Response.headers resp)
     (Response.body resp)
 
   Data-resolve : Application → Data-Request → Data-Response
