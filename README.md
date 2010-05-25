@@ -47,7 +47,7 @@ Then add this to `Agda2 Include Dirs`:
 ## Running ##
 
 Run the following to see this in action for [Lemmachine.Default](http://github.com/larrytheliquid/Lemmachine/blob/master/Lemmachine/Default.agda):
-    agda -c -i . -i ./vendor/stdlib/src Lemmachine/Default.agda
+    agda -c --compile-dir=. --ghc-flag=-isrc -i src -i vendor/stdlib/src src/Lemmachine/Default.agda
     ./Default
 
 In a separate terminal, see a `200` response:
