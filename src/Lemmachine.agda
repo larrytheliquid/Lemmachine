@@ -4,9 +4,9 @@ open import Data.Maybe
 open import Data.Product
 open import Data.List
 
-data Raw : Set where
-  method version : String → Raw
-Raws = List Raw
+data Message : Set where
+  end : Message
+  line : String → String → Message → Message
 
 data Method : Set where
   GET HEAD : Method
@@ -20,19 +20,19 @@ data Header : Set where
   version : Version → Header
 Headers = List Header
 
-erase : Headers → Raws
-erase [] = []
-erase ((method  GET) ∷ xs)      = method  "GET" ∷ (erase xs)
-erase ((method  HEAD) ∷ xs)     = method  "HEAD" ∷ (erase xs)
-erase ((version HTTP-1-1) ∷ xs) = version "HTTP/1.1" ∷ (erase xs)
+erase : Headers → Message
+erase [] = end
+erase ((method  GET) ∷ xs)      = line "method"  "GET" (erase xs)
+erase ((method  HEAD) ∷ xs)     = line "method"  "HEAD" (erase xs)
+erase ((version HTTP-1-1) ∷ xs) = line "version" "HTTP/1.1" (erase xs)
 
-data Valid : Raws → Set where
+data Valid : Message → Set where
   valid : (xs : Headers) → Valid (erase xs)
 
-check : (xs : Raws) → Maybe (Valid xs)
-check [] = just (valid [])
-check (x ∷ xs) with check xs
-check (method  "GET" ∷ ._)      | just (valid ys) = just (valid (method GET ∷ ys))
-check (method  "HEAD" ∷ ._)     | just (valid ys) = just (valid (method HEAD ∷ ys))
-check (version "HTTP/1.1" ∷ ._) | just (valid ys) = just (valid (version HTTP-1-1 ∷ ys))
+check : (xs : Message) → Maybe (Valid xs)
+check end = just (valid [])
+check (line _ _ xs) with check xs
+check (line "method"  "GET"  ._)     | just (valid ys) = just (valid (method GET ∷ ys))
+check (line "method"  "HEAD" ._)     | just (valid ys) = just (valid (method HEAD ∷ ys))
+check (line "version" "HTTP/1.1" ._) | just (valid ys) = just (valid (version HTTP-1-1 ∷ ys))
 ... | _ = nothing
