@@ -27,13 +27,14 @@ erase (x ∷ xs) = erase″ x ∷ (erase xs)
   erase″ (version x) = version x
 
 data Infer : Raws → Set where
-  ok : (xs : Headers) → Infer (erase xs)
+  just : (xs : Headers) → Infer (erase xs)
+  nothing : {ys : Raws} → Infer ys
 
-infer : (xs : Raws) → Maybe (Infer xs)
-infer [] = just (ok [])
+infer : (xs : Raws) → Infer xs
+infer [] = just []
 infer (x ∷ xs) with infer xs
-infer (method "GET" ∷ ._) | just (ok ys) = just (ok (method GET ∷ ys))
-infer (method "HEAD" ∷ ._) | just (ok ys) = just (ok (method HEAD ∷ ys))
-infer (version y″ ∷ ._) | just (ok ys) = just (ok (version y″ ∷ ys))
+infer (method "GET" ∷ ._) | just ys = just (method GET ∷ ys)
+infer (method "HEAD" ∷ ._) | just ys = just (method HEAD ∷ ys)
+infer (version y″ ∷ ._) | just ys = just (version y″ ∷ ys)
 ... | _ = nothing
 
