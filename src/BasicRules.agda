@@ -5,6 +5,11 @@ open import Data.String
 open import Data.Nat
 open import Data.Sum
 
+infixr 1 _∣_
+
+_∣_ : (A B : Set) → Set
+A ∣ B = A ⊎ B
+
 data U : Set where
   DAR NAT : U
 
@@ -40,9 +45,9 @@ OCTET   = any-US-ASCII "8-bit sequence of data" 0 255
 CHAR    = any-US-ASCII "character" 0 127
 UPALPHA = any-US-ASCII "uppercase" 'A' 'Z'
 LOALPHA = any-US-ASCII "lowercase" 'a' 'z'
-ALPHA   = UPALPHA ⊎ LOALPHA
+ALPHA   = UPALPHA ∣ LOALPHA
 DIGIT   = any-US-ASCII "digit" '0' '9'
-CTL     = any-US-ASCII "control character" 0 31 ⊎ US-ASCII "DEL" 127
+CTL     = any-US-ASCII "control character" 0 31 ∣ US-ASCII "DEL" 127
 CR      = US-ASCII "carriage return" 13
 LF      = US-ASCII "linefeed" 10
 SP      = US-ASCII "space" 32
