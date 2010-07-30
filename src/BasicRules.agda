@@ -41,6 +41,7 @@ any-US-ASCII : {u : U} → String → El u → El u → Set
 any-US-ASCII {DAR} _ x y = AnyDar (toNat x) (toNat y) true
 any-US-ASCII {NAT} _ x y = AnyDar x y true
 
+-- http://tools.ietf.org/html/rfc2616#section-2.2
 OCTET   = any-US-ASCII "8-bit sequence of data" 0 255
 CHAR    = any-US-ASCII "character" 0 127
 UPALPHA = any-US-ASCII "uppercase" 'A' 'Z'
