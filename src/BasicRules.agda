@@ -58,14 +58,14 @@ El : U → Set
 El DAR = Char
 El NAT = ℕ
 
-data RelDar (f : Char → Bool) : Bool → Set where
-  char : (c : Char) → RelDar f (f c)
+data CharPred (f : Char → Bool) : Bool → Set where
+  char : (c : Char) → CharPred f (f c)
 
 is? : ℕ → Char → Bool
 is? n c = n == toNat c
 
 Dar : ℕ → Set
-Dar n = RelDar (is? n) true
+Dar n = CharPred (is? n) true
 
 between? : ℕ → ℕ → Char → Bool
 between? start end c = toBool lower ∧ toBool higher
@@ -78,13 +78,13 @@ between? start end c = toBool lower ∧ toBool higher
   toBool (suc _) = true
 
 BetweenDar : ℕ → ℕ → Set
-BetweenDar x y = RelDar (between? x y) true
+BetweenDar x y = CharPred (between? x y) true
 
 any? : List ℕ → Char → Bool
 any? xs c = any (_==_ (toNat c)) xs
 
 AnyDar : List ℕ → Set
-AnyDar xs = RelDar (any? xs) true
+AnyDar xs = CharPred (any? xs) true
 
 US-ASCII : {u : U} → String → El u → Set
 US-ASCII {DAR} _ x = Dar (toNat x)
