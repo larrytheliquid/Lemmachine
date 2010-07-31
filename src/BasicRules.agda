@@ -1,8 +1,8 @@
 module BasicRules where
 open import Data.Empty
 open import Data.Bool
-open import Data.Char
-open import Data.String hiding (_++_)
+open import Data.Char hiding (_==_)
+open import Data.String hiding (_++_;_==_)
 open import Data.Nat hiding (_*_)
 open import Data.Sum
 open import Data.Product
@@ -13,6 +13,12 @@ infix 3 _*_[_] _*[_] *_[_]
 
 ∞ : ℕ
 ∞ = 0
+
+_==_ : ℕ → ℕ → Bool
+zero == zero = true
+suc _ == zero = false
+zero == suc _ = false
+suc x == suc y = x == y
 
 data BList (A : Set) : ℕ → Set where
   [] : ∀ {n} → BList A n
@@ -52,11 +58,17 @@ El : U → Set
 El DAR = Char
 El NAT = ℕ
 
-data Dar : ℕ → Set where
-  char : (c : Char) → Dar (toNat c)
+data RelDar (f : Char → Bool) : Bool → Set where
+  char : (c : Char) → RelDar f (f c)
 
-between? : Char → ℕ → ℕ → Bool
-between? c start end = toBool lower ∧ toBool higher
+is? : ℕ → Char → Bool
+is? n c = n == toNat c
+
+Dar : ℕ → Set
+Dar n = RelDar (is? n) true
+
+between? : ℕ → ℕ → Char → Bool
+between? start end c = toBool lower ∧ toBool higher
   where
   target = toNat c
   lower  = suc target ∸ start
@@ -65,26 +77,32 @@ between? c start end = toBool lower ∧ toBool higher
   toBool zero    = false
   toBool (suc _) = true
 
-data AnyDar (start end : ℕ) : Bool → Set where
-  char : (c : Char) → AnyDar start end (between? c start end)
+BetweenDar : ℕ → ℕ → Set
+BetweenDar x y = RelDar (between? x y) true
+
+any? : List ℕ → Char → Bool
+any? xs c = any (_==_ (toNat c)) xs
+
+AnyDar : List ℕ → Set
+AnyDar xs = RelDar (any? xs) true
 
 US-ASCII : {u : U} → String → El u → Set
 US-ASCII {DAR} _ x = Dar (toNat x)
 US-ASCII {NAT} _ x = Dar x
 
-any-US-ASCII : {u : U} → String → El u → El u → Set
-any-US-ASCII {DAR} _ x y = AnyDar (toNat x) (toNat y) true
-any-US-ASCII {NAT} _ x y = AnyDar x y true
+between-US-ASCII : {u : U} → String → El u → El u → Set
+between-US-ASCII {DAR} _ x y = BetweenDar (toNat x) (toNat y)
+between-US-ASCII {NAT} _ x y = BetweenDar x y
 
 -- http://tools.ietf.org/html/rfc2616#section-2.2
 
-OCTET   = any-US-ASCII "8-bit sequence of data" 0 255
-CHAR    = any-US-ASCII "character" 0 127
-UPALPHA = any-US-ASCII "uppercase letter" 'A' 'Z'
-LOALPHA = any-US-ASCII "lowercase letter" 'a' 'z'
+OCTET   = between-US-ASCII "8-bit sequence of data" 0 255
+CHAR    = between-US-ASCII "character" 0 127
+UPALPHA = between-US-ASCII "uppercase letter" 'A' 'Z'
+LOALPHA = between-US-ASCII "lowercase letter" 'a' 'z'
 ALPHA   = UPALPHA ∣ LOALPHA
-DIGIT   = any-US-ASCII "digit" '0' '9'
-CTL     = any-US-ASCII "control character" 0 31 ∣ US-ASCII "DEL" 127
+DIGIT   = between-US-ASCII "digit" '0' '9'
+CTL     = between-US-ASCII "control character" 0 31 ∣ US-ASCII "DEL" 127
 CR      = US-ASCII "carriage return" 13
 LF      = US-ASCII "linefeed" 10
 SP      = US-ASCII "space" 32
@@ -95,12 +113,8 @@ CRLF = CR ++ LF
 
 LWS = [ CR ] ++ 1 *[ SP ∣ HT ]
 
-HEX = any-US-ASCII "hexadecimal uppercase letters" 'A' 'F'
-    ∣ any-US-ASCII "hexadecimal lowercase letters" 'a' 'f'
+HEX = between-US-ASCII "hexadecimal uppercase letter" 'A' 'F'
+    ∣ between-US-ASCII "hexadecimal lowercase letter" 'a' 'f'
     ∣ DIGIT
 
-separators
-  = US-ASCII "" '(' ∣ US-ASCII "" ')' ∣ US-ASCII "" '<' ∣ US-ASCII "" '>' ∣ US-ASCII "" '@'
-   ∣ US-ASCII "" ',' ∣ US-ASCII "" ';' ∣ US-ASCII "" ':' ∣ US-ASCII "" '\\' ∣ US-ASCII "" '"'
-   ∣ US-ASCII "" '/' ∣ US-ASCII "" '[' ∣ US-ASCII "" ']' ∣ US-ASCII "" '?' ∣ US-ASCII "" '='
-   ∣ US-ASCII "" '{' ∣ US-ASCII "" '}' ∣ SP ∣ HT
+separators = AnyDar (Data.List.map toNat (toList "()<>@,;:\\\"/[]?={} \t"))
