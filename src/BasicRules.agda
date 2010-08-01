@@ -27,20 +27,20 @@ data BList (A : Set) : ℕ → Set where
 data Cons (A B : Set) : Set where
   _∷_ : A → B → Cons A B
 
-FList : Set → ℕ → ℕ → Set
-FList A zero (suc m)    = BList A (suc m)
-FList A zero ∞          = List A
-FList A (suc n) zero    = Cons A (FList A n zero)
-FList A (suc n) (suc m) = Cons A (FList A n m)
+RList : Set → ℕ → ℕ → Set
+RList A zero (suc m)    = BList A (suc m)
+RList A zero ∞          = List A
+RList A (suc n) zero    = Cons A (RList A n zero)
+RList A (suc n) (suc m) = Cons A (RList A n m)
 
 _*_[_] : ℕ → ℕ → Set → Set
-n * m [ A ] = FList A n m
+n * m [ A ] = RList A n m
 
 _*[_] : ℕ → Set → Set
-n *[ A ] = FList A n ∞
+n *[ A ] = RList A n ∞
 
 *_[_] : ℕ → Set → Set
-* n [ A ] = FList A zero n
+* n [ A ] = RList A zero n
 
 [_] : Set → Set
 [ A ] =  * 1 [ A ]
@@ -80,11 +80,11 @@ between? start end c = toBool lower ∧ toBool higher
 BetweenDar : ℕ → ℕ → Set
 BetweenDar x y = CharPred (between? x y) true
 
-any? : List ℕ → Char → Bool
-any? xs c = any (_==_ (toNat c)) xs
+elem? : List ℕ → Char → Bool
+elem? xs c = any (_==_ (toNat c)) xs
 
-AnyDar : List ℕ → Set
-AnyDar xs = CharPred (any? xs) true
+ElemDar : List ℕ → Set
+ElemDar xs = CharPred (elem? xs) true
 
 US-ASCII : {u : U} → String → El u → Set
 US-ASCII {DAR} _ x = Dar (toNat x)
@@ -117,4 +117,4 @@ HEX = between-US-ASCII "hexadecimal uppercase letter" 'A' 'F'
     ∣ between-US-ASCII "hexadecimal lowercase letter" 'a' 'f'
     ∣ DIGIT
 
-separators = AnyDar (Data.List.map toNat (toList "()<>@,;:\\\"/[]?={} \t"))
+separators = ElemDar (Data.List.map toNat (toList "()<>@,;:\\\"/[]?={} \t"))
