@@ -22,7 +22,7 @@ data U : Set where
 El : U → Set
 El _ = String
 
-Header = (Σ U El)
+Header = Σ U El
 Request = List Header
 
 -- map-with-∈ : ∀ {B} (xs : List A) → (∀ {x} → x ∈ xs → B) → List B
