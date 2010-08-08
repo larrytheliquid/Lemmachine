@@ -21,24 +21,34 @@ data Between? (start end : ℕ) : Bool → Set where
 
 OCTET = Between? 0 255 true
 
-postulate
-  Method : Set
-  request-target : Set
-  
-  HTTP-Version : Set
+data Method : Set where
+  HEAD : Method
 
+request-target = String
+HTTP-Version = String
+
+data field-name : Set where
+  Host : field-name
+
+field-value : field-name → Set
+field-value Host = String
+
+postulate
   Status-Code : Set
   Reason-Phrase : Set
 
-  field-name : Set
-  field-value : field-name → Set
+data Request' : Bool → Set where
+  Request-Line : Method → request-target → HTTP-Version → Request' false
+  header-field : (name : field-name) → field-value name → Request' false → Request' false
+  message-body : List OCTET → Request' false → Request' true
 
-data Request : Set where
-  Request-Line : Method → request-target → HTTP-Version → Request
-  header-field : (n : field-name) → field-value n → Request → Request
-  message-body : List OCTET → Request → Request
+Request : {_ : Bool} → Set
+Request {b} = Request' b
 
-data Response : Set where
-  Status-Line  : HTTP-Version → Status-Code → Reason-Phrase → Response
-  header-field : (n : field-name) → field-value n → Response → Response
-  message-body : List OCTET → Response → Response
+data Response' : Bool → Set where
+  Status-Line  : HTTP-Version → Status-Code → Reason-Phrase → Response' false
+  header-field : (n : field-name) → field-value n → Response' false → Response' false
+  message-body : List OCTET → Response' false → Response' true
+
+Response : {_ : Bool} → Set
+Response {b} = Response' b
