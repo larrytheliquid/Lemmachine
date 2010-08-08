@@ -4,7 +4,7 @@ open import Data.Char
 open import Data.String
 open import Data.Nat
 open import Data.Maybe
-open import Data.List
+open import Data.Vec
 
 between? : Char → ℕ → ℕ → Bool
 between? c start end = toBool lower ∧ toBool higher
@@ -40,7 +40,7 @@ postulate
 data Request' : Bool → Set where
   Request-Line : Method → request-target → HTTP-Version → Request' false
   header-field : (name : field-name) → field-value name → Request' false → Request' false
-  message-body : List OCTET → Request' false → Request' true
+  message-body : ∀ {n} → Vec OCTET n → Request' false → Request' true
 
 Request : {_ : Bool} → Set
 Request {b} = Request' b
@@ -48,7 +48,7 @@ Request {b} = Request' b
 data Response' : Bool → Set where
   Status-Line  : HTTP-Version → Status-Code → Reason-Phrase → Response' false
   header-field : (n : field-name) → field-value n → Response' false → Response' false
-  message-body : List OCTET → Response' false → Response' true
+  message-body : ∀ {n} → Vec OCTET n → Response' false → Response' true
 
 Response : {_ : Bool} → Set
 Response {b} = Response' b
