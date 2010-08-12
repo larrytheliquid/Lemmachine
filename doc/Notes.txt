@@ -1,0 +1,70 @@
+* Extended & Unrecognized Headers
+
+New or experimental header fields MAY be given the semantics of request/response/general header fields
+if all parties in the communication recognize them to be request/response/general header fields.
+... but no payload or representation headers?
+
+HTTP allows the set of defined header fields to be extended.
+
+Unrecognized header fields SHOULD be ignored by a recipient.
+
+* General Headers
+
+Cache-Control, Connection, Date, Pragma, Trailer, Transfer-Encoding, Upgrade,
+Via, Warning, MIME-Version
+
+* Payload Headers
+
+Content-Length, Content-MD5, Content-Range
+
+* Representation Headers
+
+Content-Encoding, Content-Language, Content-Location, Content-Type, Expires, Last-Modified
+
+Representation header fields define metadata about the representation data enclosed in the message-body or,
+if no message-body is present, about the representation that would have been transferred in a 200
+response to a simultaneous GET request with the same effective request URI.
+
+* Request Headers
+
+Accept, Accept-Charset, Accept-Encoding, Accept-Language, Authorization, Expect, From, Host, If-Match,
+If-Modified-Since, If-None-Match, If-Range, If-Unmodified-Since, Max-Forwards, Proxy-Authorization,
+Range, Referer, TE, User-Agent
+
+* Response Headers
+
+Accept-Ranges, Age, Allow, ETag, Location, Proxy-Authenticate, Retry-After, Server, Vary, WWW-Authenticate
+
+* Request Invalidity
+
+|---------+-------+--------------+----------------+-------------------+-------|
+| Method  | Host  | Content-Type | Content-Length | Transfer-Encoding | Body  |
+|---------+-------+--------------+----------------+-------------------+-------|
+| *       | false | -            | -              | -                 | -     |
+| OPTIONS | -     | false        | -              | -                 | true  |
+| *       | -     | -            | false          | false             | true  |
+| *       | -     | true         | -              | -                 | false |
+| *       | -     | -            | true           | -                 | false |
+| *       | -     | -            | -              | true              | false |
+| *       | -     | -            | true           | true              | -     |
+| TRACE   | -     | -            | -              | -                 | true  |
+|---------+-------+--------------+----------------+-------------------+-------|
+
+The inclusion of "Response Headers" also invalidates requests.
+* TODO Check about inclusion of "Payload Headers" like Content-MD5
+
+A response given as a request is interpreted as an unknown or invalid request method.
+
+* Response Invalidity
+
+|---------+---+--------------+----------------+-------------------+-------|
+| Method  | + | Content-Type | Content-Length | Transfer-Encoding | Body  |
+|---------+---+--------------+----------------+-------------------+-------|
+| OPTIONS | + | -            | false          | -                 | false |
+| OPTIONS | + | -            | true (not 0)   | -                 | false |
+|---------+---+--------------+----------------+-------------------+-------|
+
+* Quality Values
+
+If a parameter has a quality value of 0, then content with this parameter
+is "not acceptable" for the client.
