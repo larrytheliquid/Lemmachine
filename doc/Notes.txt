@@ -2,7 +2,7 @@
 
 New or experimental header fields MAY be given the semantics of request/response/general header fields
 if all parties in the communication recognize them to be request/response/general header fields.
-... but no payload or representation headers?
+Me: ... but no payload or representation headers?
 
 HTTP allows the set of defined header fields to be extended.
 
@@ -17,6 +17,10 @@ Via, Warning, MIME-Version
 
 Content-Length, Content-MD5, Content-Range
 
+A "payload" in HTTP is always a partial or complete representation of some resource.
+
+A payload body is only present in a message when a message-body is present.
+
 * Representation Headers
 
 Content-Encoding, Content-Language, Content-Location, Content-Type, Expires, Last-Modified
@@ -24,6 +28,9 @@ Content-Encoding, Content-Language, Content-Location, Content-Type, Expires, Las
 Representation header fields define metadata about the representation data enclosed in the message-body or,
 if no message-body is present, about the representation that would have been transferred in a 200
 response to a simultaneous GET request with the same effective request URI.
+
+Me: e.g. a PUT response returning headers applying to the Location referenced
+Me: For requests this means no message-body implies invalid.
 
 * Request Headers
 
@@ -50,8 +57,9 @@ Accept-Ranges, Age, Allow, ETag, Location, Proxy-Authenticate, Retry-After, Serv
 | TRACE   | -     | -            | -              | -                 | true  |
 |---------+-------+--------------+----------------+-------------------+-------|
 
-The inclusion of "Response Headers" also invalidates requests.
-* TODO Check about inclusion of "Payload Headers" like Content-MD5
+Me: The inclusion of "Response Headers" also invalidates requests.
+
+Having a "Payload Header" but not Request body is also invalid.
 
 A response given as a request is interpreted as an unknown or invalid request method.
 
