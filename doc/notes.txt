@@ -1,0 +1,92 @@
+Upon receipt of a media type with an unrecognized parameter, a user
+agent should treat the media type as if the unrecognized parameter and
+its value were not present.
+
+content-encoding & media-type only with message-body
+
+If an HTTP/1.0 server receives a Simple-Request, it must respond with
+an HTTP/0.9 Simple-Response
+
+An HTTP/1.0 client capable of receiving a Full-Response should never
+generate a Simple-Request
+
+An entity consists of Entity-Header fields and (usually) an
+Entity-Body.
+
+TODO: request entity header fields apply to response if no body?
+
+Any HTTP/1.0 message containing an entity body should include a
+Content-Type header field defining the media type of that body.
+
+If the media type remains unknown, the recipient should treat it as
+type "application/octet-stream".
+
+Therefore, HTTP/1.0 requests containing an entity body must include a
+valid Content-Length header field.
+
+A valid Content-Length is required on all HTTP/1.0 POST requests. An
+HTTP/1.0 server should respond with a 400 (bad request) message if it
+cannot determine the length of the request message's content.
+
+If an If-Modified-Since header field is included with a HEAD request, it should be ignored.
+
+The Allow header field is not permitted in a request using the POST
+method, and thus should be ignored if it is received as part of a POST entity.
+
+TODO: so maybe in general things that should be ignored when received
+are not allowed when sent?
+
+TODO: does Allow description imply only post can have an entity in a
+request?
+
+Full-Request and Full-Response messages may transfer an entity within
+some requests and responses.
+
+The semantics of the GET method changes to a "conditional GET" if the
+request message includes an If-Modified-Since header field.
+
+The presence of an entity body in a request is signaled by the
+inclusion of a Content-Length header field in the request message
+headers.
+
+If a Content-Length header field is present, its value in bytes
+represents the length of the Entity-Body.
+
+Therefore, HTTP/1.0 requests containing an entity body must include a
+valid Content-Length header field.
+
+An entity body is included with a request message only when the
+request method calls for one.
+
+If-Modified-Since:
+A date which is later than the server's current time is invalid.
+
+If a prior request has been authorized, the same credentials may be
+reused for all other requests within that protection space for a
+period of time determined by the authentication scheme, parameters,
+and/or user preference.
+
+Me: so auth can be dependent on previously successful auth and given
+still obeying a responded time period
+
+Me: Look more closely at Authentication details wrt history
+
+TODO: re-check section 3
+
+Upon receipt of a media type with an unrecognized parameter, a user
+agent should treat the media type as if the unrecognized parameter and
+its value were not present.
+
+Use of non-registered media types is discouraged.
+
+Note: Applications are encouraged to be tolerant of bad or misinformed
+implementations of the Expires header. A value of zero (0) or an
+invalid date format should be considered equivalent to an "expires
+immediately." Although these values are not legitimate for HTTP/1.0, a
+robust implementation is always desirable.
+
+An origin server must not send a Last-Modified date which is later
+than the server's time of message origination. In such cases, where
+the resource's last modification would indicate some time in the
+future, the server must replace that date with the message origination date.
+

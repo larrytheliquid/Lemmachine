@@ -1,0 +1,82 @@
+
+* Extended Method Definitions
+
+The set of common methods for HTTP/1.0 is defined below. Although this
+set can be expanded, additional methods cannot be assumed to share the
+same semantics for separately extended clients and servers.
+
+* Extended Header Fields
+
+Response-Header field names can be extended reliably only in
+combination with a change in the protocol version. However, new or
+experimental header fields may be given the semantics of response
+header fields if all parties in the communication recognize them to be
+response header fields. Unrecognized header fields are treated as
+Entity-Header fields.
+
+The extension-header mechanism allows additional Entity-Header fields
+to be defined without changing the protocol, but these fields cannot
+be assumed to be recognizable by the recipient. Unrecognized header
+fields should be ignored by the recipient and forwarded by proxies.
+
+* General Header Fields
+
+|------+--------|
+| Date | Pragma |
+|------+--------|
+
+* Request Header Fields
+
+|---------------+------+-------------------+---------+------------|
+| Authorization | From | If-Modified-Since | Referer | User-Agent |
+|---------------+------+-------------------+---------+------------|
+
+* Response Header Fields
+
+|----------+--------+------------------|
+| Location | Server | WWW-Authenticate |
+|----------+--------+------------------|
+
+* Entity Header Fields
+
+|-------+------------------+----------------+--------------+---------+---------------|
+| Allow | Content-Encoding | Content-Length | Content-Type | Expires | Last-Modified |
+|-------+------------------+----------------+--------------+---------+---------------|
+
+Entity-Header fields define optional metainformation about the
+Entity-Body or, if no body is present, about the resource identified
+by the request.
+
+Me: Clearly for a request Content-Length of the resource you are
+GET'ing would be incorrect, so all are not valid without a body in a
+request.
+
+* Request Invalidation
+
+|--------+------+-------------------+-------+----------------+--------------+-------------|
+| Method | Date | If-Modified-Since | Allow | Content-Length | Content-Type | Entity-Body |
+|--------+------+-------------------+-------+----------------+--------------+-------------|
+| POST   | -    | -                 | -     | false          | -            | -           |
+| -      | -    | -                 | -     | true           | -            | false       |
+| -      | -    | -                 | -     | false          | -            | true        |
+| -      | -    | -                 | -     | -              | false        | true        |
+| -      | true | -                 | -     | -              | -            | false       |
+| GET    | -    | -                 | -     | -              | -            | true        |
+| HEAD   | -    | -                 | -     | -              | -            | true        |
+| HEAD   | -    | true              | -     | -              | -            | -           |
+| POST   | -    | true              | -     | -              | -            | -           |
+| POST   | -    | -                 | true  | -              | -            | -           |
+|--------+------+-------------------+-------+----------------+--------------+-------------|
+
+No Response Header Fields.
+No Entity Header Fields without the presence of Entity-Body.
+
+If-Modified-Since:
+A date which is later than the server's current time is invalid.
+
+Date:
+A date which is later than the server's current time is invalid.
+
+Last-Modified:
+If Date is given, Last-Modified must not be later.
+
