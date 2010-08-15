@@ -4,7 +4,7 @@ open import Data.Unit
 open import Data.Bool
 open import Data.String hiding (_==_)
 open import Data.Nat
-open import Data.List
+open import Data.List hiding ([_])
 open import Data.Sum
 open import Data.Product hiding (_×_)
 
@@ -44,6 +44,8 @@ data HTTP : Set where
 
   HTTP-Version : HTTP
 
+  field-name : HTTP
+
   Date Pragma : HTTP
 
   Authorization From : HTTP
@@ -55,6 +57,7 @@ data HTTP : Set where
   Expires Last-Modified : HTTP
 
 Type : HTTP → Set
+-- Type field-name = ⟦ End ⟧
 Type _ = String
 
 mutual
@@ -75,6 +78,13 @@ mutual
   ⟦ And f₁ f₂ ⟧ = ⟦ f₁ ⟧ × ⟦ f₂ ⟧
   ⟦ Use f₁ f₂ ⟧ = Σ ⟦ f₁ ⟧ λ x → ⟦ f₂ x ⟧
 
+data U : Set where
+  http format : U
+
+El : U → Set
+El http   = HTTP
+El format = Format
+
 _>>_ : Format → Format → Format
 f₁ >> f₂ = Skip f₁ f₂
 
@@ -84,12 +94,8 @@ x >>= y = Use x y
 _>>-_ : Format → Format → Format
 x >>- y = And x y
 
-data U : Set where
-  http format : U
-
-El : U → Set
-El http   = HTTP
-El format = Format
+[_] : Format → Format
+[ f ] = Between 0 ∞ f
 
 _∣_ : {x y : U} → El x → El y → Format
 _∣_ {http}   {http}   x y = Or (Base x) (Base y)
@@ -101,15 +107,6 @@ SP   = Base (DAR 32)
 CR   = Base (DAR 13)
 LF   = Base (DAR 10)
 CRLF = CR >>- LF
-
-Request-Line =
-  Base Method >>-
-  SP >>
-  Base Request-URI >>-
-  SP >>
-  Base HTTP-Version >>-
-  CRLF >>
-  End
 
 General-Header = Date
                ∣ Pragma
@@ -126,3 +123,14 @@ Entity-Header = Allow
               ∣ Content-Type
               ∣ Expires
               ∣ Last-Modified
+
+Request-Line =
+  Base Method >>-
+  SP >>
+  Base Request-URI >>-
+  SP >>
+  Base HTTP-Version >>-
+  CRLF >>
+  [
+    End -- General-Header >>= Type
+  ]
