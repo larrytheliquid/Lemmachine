@@ -19,6 +19,16 @@ to be defined without changing the protocol, but these fields cannot
 be assumed to be recognizable by the recipient. Unrecognized header
 fields should be ignored by the recipient and forwarded by proxies.
 
+* Entity
+
+Entity-Header fields define optional metainformation about the
+Entity-Body or, if no body is present, about the resource identified
+by the request.
+
+Me: Clearly for a request Content-Length of the resource you are
+GET'ing would be incorrect, so all are not valid without a body in a
+request.
+
 * General Header Fields
 
 |------+--------|
@@ -43,30 +53,24 @@ fields should be ignored by the recipient and forwarded by proxies.
 | Allow | Content-Encoding | Content-Length | Content-Type | Expires | Last-Modified |
 |-------+------------------+----------------+--------------+---------+---------------|
 
-Entity-Header fields define optional metainformation about the
-Entity-Body or, if no body is present, about the resource identified
-by the request.
-
-Me: Clearly for a request Content-Length of the resource you are
-GET'ing would be incorrect, so all are not valid without a body in a
-request.
-
 * Request Invalidation
 
-|--------+------+-------------------+-------+----------------+--------------+-------------|
-| Method | Date | If-Modified-Since | Allow | Content-Length | Content-Type | Entity-Body |
-|--------+------+-------------------+-------+----------------+--------------+-------------|
-| POST   | -    | -                 | -     | false          | -            | -           |
-| -      | -    | -                 | -     | true           | -            | false       |
-| -      | -    | -                 | -     | false          | -            | true        |
-| -      | -    | -                 | -     | -              | false        | true        |
-| -      | true | -                 | -     | -              | -            | false       |
-| GET    | -    | -                 | -     | -              | -            | true        |
-| HEAD   | -    | -                 | -     | -              | -            | true        |
-| HEAD   | -    | true              | -     | -              | -            | -           |
-| POST   | -    | true              | -     | -              | -            | -           |
-| POST   | -    | -                 | true  | -              | -            | -           |
-|--------+------+-------------------+-------+----------------+--------------+-------------|
+|--------+------+-------------------+---------------+---------+-------+----------------+--------------+-------------|
+| Method | Date | If-Modified-Since | Last-Modified | Expires | Allow | Content-Length | Content-Type | Entity-Body |
+|--------+------+-------------------+---------------+---------+-------+----------------+--------------+-------------|
+| POST   | -    | -                 | -             | -       | -     | false          | -            | -           |
+| -      | -    | -                 | -             | -       | -     | true           | -            | false       |
+| -      | -    | -                 | -             | -       | -     | false          | -            | true        |
+| -      | -    | -                 | -             | -       | -     | -              | false        | true        |
+| -      | true | -                 | -             | -       | -     | -              | -            | false       |
+| GET    | -    | -                 | -             | -       | -     | -              | -            | true        |
+| HEAD   | -    | -                 | -             | -       | -     | -              | -            | true        |
+| HEAD   | -    | true              | -             | -       | -     | -              | -            | -           |
+| POST   | -    | true              | -             | -       | -     | -              | -            | -           |
+| POST   | -    | -                 | true          | -       | -     | -              | -            | -           |
+| POST   | -    | -                 | -             | true    | -     | -              | -            | -           |
+| POST   | -    | -                 | -             | -       | true  | -              | -            | -           |
+|--------+------+-------------------+---------------+---------+-------+----------------+--------------+-------------|
 
 No Response Header Fields.
 No Entity Header Fields without the presence of Entity-Body.

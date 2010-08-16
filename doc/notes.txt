@@ -90,3 +90,10 @@ than the server's time of message origination. In such cases, where
 the resource's last modification would indicate some time in the
 future, the server must replace that date with the message origination date.
 
+Applications must not cache responses to a POST request because the
+application has no way of knowing that the server would return an
+equivalent response on some future request.
+
+
+A valid Content-Length field value is required on all HTTP/1.0 request
+messages containing an entity body.
