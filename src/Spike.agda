@@ -1,4 +1,9 @@
 module Spike where
+open import Data.Nat
+open import Data.String
+
+data Method : Set where
+  GET HEAD POST : Method
 
 data GET-Header : Set where
   Pragma : GET-Header
@@ -18,3 +23,14 @@ data POST-Header : Set where
   Content-Length : POST-Header
   Content-Type : POST-Header
   Entity-Body : POST-Header
+
+Header : Method → Set
+Header GET = GET-Header
+Header HEAD = HEAD-Header
+Header POST = POST-Header
+
+Value : {m : Method} → Header m → Set
+Value {GET}  _ = String
+Value {HEAD} _ = String
+Value {POST} Content-Length = ℕ
+Value {POST} _ = String
