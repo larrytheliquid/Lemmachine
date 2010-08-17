@@ -50,8 +50,8 @@ data Dar : ℕ → Set where
 
 data U : Set where
   CHAR NAT METHOD : U
-  HEADER : Method → U
-  VALUE : {m : Method} → Header m → U
+  HEADER : (m : Method) → Header m → U
+  VALUE : {m : Method}{h : Header m} → HeaderSingle h → U
   DAR : ℕ → U
   DAR-RANGE : ℕ → ℕ → U
   VEC : U → ℕ → U
@@ -60,11 +60,15 @@ El : U → Set
 El CHAR = Char
 El NAT = ℕ
 El METHOD = Method
-El (HEADER m) = Header m
-El (VALUE h) = Value h
+El (HEADER _ h) = HeaderSingle h
+El (VALUE (header h)) = Value h
 El (DAR n) = Dar n
 El (DAR-RANGE n m) = DarRange n m true
 El (VEC u n) = Vec (El u) n
+
+GET-HEADER  = HEADER GET
+HEAD-HEADER = HEADER HEAD
+POST-HEADER = HEADER POST
 
 mutual
   data Format : Set where
@@ -108,11 +112,30 @@ Value-Format : {m : Method} → Header m → Format
 Value-Format {POST} Content-Length = Between 1 ∞ DIGIT
 Value-Format _ = Fail
 
+GET-Format : Format
+GET-Format = Fail
+
+HEAD-Format : Format
+HEAD-Format = Fail
+
+POST-Format : Format
+POST-Format =
+  Base (POST-HEADER Content-Length) >>-
+  char ':' >>
+  Base (VALUE (header Content-Length)) >>= λ n →
+
+  Base (POST-HEADER Content-Type) >>-
+  char ':' >>
+  Base (VALUE (header Content-Type)) >>-
+
+  Base (VEC CHAR n)
+
+Method-Format : Method → Format
+Method-Format GET  = GET-Format
+Method-Format HEAD = HEAD-Format
+Method-Format POST = POST-Format
+
 Request-Format =
   Base METHOD >>= λ m →
   CRLF >>
-  Base (HEADER m) >>= λ h →
-  char ':' >>
-  Base (VALUE h) >>-
-  CRLF >>
-  End
+  Method-Format m
