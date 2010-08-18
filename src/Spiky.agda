@@ -16,6 +16,12 @@ infixr 2 _×_
 ∞ : ℕ
 ∞ = 0
 
+data Single {A : Set} : A → Set where
+  single : (x : A) → Single x
+
+proj : {A : Set}{x : A} → Single x → A
+proj (single x) = x
+
 data BList (A : Set) : ℕ → Set where
   [] : ∀ {n} → BList A n
   _∷_ : ∀ {n} → A → BList A n → BList A (suc n)
@@ -48,23 +54,26 @@ data _×_ (A B : Set): Set where
 data Dar : ℕ → Set where
   dar : (c : Char) → Dar (toNat c)
 
-data U : Set where
-  CHAR NAT METHOD : U
-  HEADER : (m : Method) → Header m → U
-  VALUE : {m : Method}{h : Header m} → HeaderSingle h → U
-  DAR : ℕ → U
-  DAR-RANGE : ℕ → ℕ → U
-  VEC : U → ℕ → U
+mutual 
+  data U : Set where
+    CHAR NAT METHOD : U
+    HEADER : Method → U
+    VALUE : {m : Method} → Header m → U
+    SINGLE : (u : U) → El u → U
+    DAR : ℕ → U
+    DAR-RANGE : ℕ → ℕ → U
+    VEC : U → ℕ → U
 
-El : U → Set
-El CHAR = Char
-El NAT = ℕ
-El METHOD = Method
-El (HEADER _ h) = HeaderSingle h
-El (VALUE h) = Value h
-El (DAR n) = Dar n
-El (DAR-RANGE n m) = DarRange n m true
-El (VEC u n) = Vec (El u) n
+  El : U → Set
+  El CHAR = Char
+  El NAT = ℕ
+  El METHOD = Method
+  El (HEADER m) = Header m
+  El (VALUE h) = Value h
+  El (SINGLE _ x) = Single x
+  El (DAR n) = Dar n
+  El (DAR-RANGE n m) = DarRange n m true
+  El (VEC u n) = Vec (El u) n
 
 GET-HEADER  = HEADER GET
 HEAD-HEADER = HEADER HEAD
@@ -120,20 +129,24 @@ HEAD-Format = Fail
 
 POST-Format : Format
 POST-Format =
-  Base (POST-HEADER Content-Length) >>= λ c-l →
+  Base (SINGLE POST-HEADER Content-Length) >>= λ c-l →
   char ':' >>
-  Base (VALUE c-l) >>= λ n →
+  Base (VALUE (proj c-l)) >>= λ n →
 
-  Base (POST-HEADER Content-Type) >>= λ c-t →
+  Base (SINGLE POST-HEADER Content-Type) >>= λ h →
   char ':' >>
-  Base (VALUE c-t) >>-
+  Base (VALUE (proj h)) >>-
+
+  Base POST-HEADER >>= λ h →
+  char ':' >>
+  Base (VALUE h) >>-
 
   body c-l n
 
   where
 
-  body : (h : HeaderSingle Content-Length) → Value h → Format
-  body (header ._) v = Base (VEC CHAR v)
+  body : (s : Single {Header POST} Content-Length) → Value (proj s) → Format
+  body (single ._) n = Base (VEC CHAR n)
 
 Method-Format : Method → Format
 Method-Format GET  = GET-Format
