@@ -122,10 +122,20 @@ Value-Format {POST} Content-Length = Between 1 ∞ DIGIT
 Value-Format _ = Fail
 
 GET-Format : Format
-GET-Format = Fail
+GET-Format =
+  Between 0 ∞ (
+    Base GET-HEADER >>= λ h →
+    char ':' >>
+    Base (VALUE h)
+  )
 
 HEAD-Format : Format
-HEAD-Format = Fail
+HEAD-Format =
+  Between 0 ∞ (
+    Base HEAD-HEADER >>= λ h →
+    char ':' >>
+    Base (VALUE h)
+  )
 
 POST-Format : Format
 POST-Format =
@@ -137,9 +147,11 @@ POST-Format =
   char ':' >>
   Base (VALUE (proj h)) >>-
 
-  Base POST-HEADER >>= λ h →
-  char ':' >>
-  Base (VALUE h) >>-
+  Between 0 ∞ (
+    Base POST-HEADER >>= λ h →
+    char ':' >>
+    Base (VALUE h)
+  ) >>-
 
   body c-l n
 
