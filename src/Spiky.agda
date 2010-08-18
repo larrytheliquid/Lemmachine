@@ -61,7 +61,7 @@ El CHAR = Char
 El NAT = ℕ
 El METHOD = Method
 El (HEADER _ h) = HeaderSingle h
-El (VALUE (header h)) = Value h
+El (VALUE h) = Value h
 El (DAR n) = Dar n
 El (DAR-RANGE n m) = DarRange n m true
 El (VEC u n) = Vec (El u) n
@@ -120,15 +120,20 @@ HEAD-Format = Fail
 
 POST-Format : Format
 POST-Format =
-  Base (POST-HEADER Content-Length) >>-
+  Base (POST-HEADER Content-Length) >>= λ c-l →
   char ':' >>
-  Base (VALUE (header Content-Length)) >>= λ n →
+  Base (VALUE c-l) >>= λ n →
 
-  Base (POST-HEADER Content-Type) >>-
+  Base (POST-HEADER Content-Type) >>= λ c-t →
   char ':' >>
-  Base (VALUE (header Content-Type)) >>-
+  Base (VALUE c-t) >>-
 
-  Base (VEC CHAR n)
+  body c-l n
+
+  where
+
+  body : (h : HeaderSingle Content-Length) → Value h → Format
+  body (header ._) v = Base (VEC CHAR v)
 
 Method-Format : Method → Format
 Method-Format GET  = GET-Format

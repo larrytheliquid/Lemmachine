@@ -32,8 +32,8 @@ Header POST = POST-Header
 data HeaderSingle {m : Method} : Header m → Set where
   header : (h : Header m) → HeaderSingle h
 
-Value : {m : Method} → Header m → Set
+Value : {m : Method}{h : Header m} → HeaderSingle h → Set
 Value {GET}  _ = String
 Value {HEAD} _ = String
-Value {POST} Content-Length = ℕ
+Value {POST} (header Content-Length) = ℕ
 Value {POST} _ = String
