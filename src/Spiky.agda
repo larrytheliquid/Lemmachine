@@ -8,51 +8,10 @@ open import Data.List
 open import Data.Vec hiding (_>>=_)
 open import Data.Sum
 open import Data.Product hiding (_×_)
+open import Data
 open import Spike
 
 infixr 1 _>>_ _>>-_ _>>=_
-infixr 2 _×_
-
-∞ : ℕ
-∞ = 0
-
-data Single {A : Set} : A → Set where
-  single : (x : A) → Single x
-
-proj : {A : Set}{x : A} → Single x → A
-proj (single x) = x
-
-data BList (A : Set) : ℕ → Set where
-  [] : ∀ {n} → BList A n
-  _∷_ : ∀ {n} → A → BList A n → BList A (suc n)
-
-data Cons (A B : Set) : Set where
-  _∷_ : A → B → Cons A B
-
-RList : Set → ℕ → ℕ → Set
-RList A zero (suc m)    = BList A (suc m)
-RList A zero ∞          = List A
-RList A (suc n) zero    = Cons A (RList A n zero)
-RList A (suc n) (suc m) = Cons A (RList A n m)
-
-within? : Char → ℕ → ℕ → Bool
-within? c start end = toBool lower ∧ toBool higher
-  where
-  target = toNat c
-  lower  = suc target ∸ start
-  higher = suc end ∸ target
-  toBool : ℕ → Bool
-  toBool zero    = false
-  toBool (suc _) = true
-
-data DarRange (start end : ℕ) : Bool → Set where
-  dar : (c : Char) → DarRange start end (within? c start end)
-
-data _×_ (A B : Set): Set where
-  _,_ : A → B → A × B
-
-data Dar : ℕ → Set where
-  dar : (c : Char) → Dar (toNat c)
 
 mutual 
   data U : Set where

@@ -6,6 +6,7 @@ open import Data.Maybe
 open import Data.Sum
 open import Data.Product hiding (_×_)
 open import Data.List
+open import Data
 
 postulate
   read : (u : U) → List Char → Maybe (El u × List Char)
