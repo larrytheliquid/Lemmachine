@@ -13,6 +13,11 @@ open import Spiky
 open import Spike
 open import Data
 
+read-ℕ : Char → Maybe ℕ
+read-ℕ x with within? x (toNat '0') (toNat '9')
+... | false = nothing
+... | true = just (toNat x ∸ toNat '0')
+
 read-Value-String : {m : Method} → (h : Header m) → Value h ≡₁ String → List Char → Maybe (Value h × List Char)
 read-Value-String h p [] = nothing
 read-Value-String h p ('\r' ∷ '\n' ∷ xs) with Value h | p
@@ -22,14 +27,27 @@ read-Value-String h p (x ∷ xs) with read-Value-String h p xs
 ... | just (a , ys) with Value h | p
 ... | ._ | refl = just ( fromList [ x ] ++ a  , ys )
 
+read-Value-ℕ : {m : Method} → (h : Header m) → Value h ≡₁ ℕ → List Char → Maybe (Value h × List Char)
+read-Value-ℕ h p [] = nothing
+read-Value-ℕ h p (x ∷ '\r' ∷ '\n' ∷ xs) with Value h | p
+... | ._ | refl with read-ℕ x
+... | nothing = nothing
+... | just n = just (n , '\r' ∷ '\n' ∷ xs)
+read-Value-ℕ h p (x ∷ xs) with read-Value-ℕ h p xs
+... | nothing = nothing
+... | just (n , ys) with read-ℕ x | Value h | p
+... | nothing | _ | _ = nothing
+-- TODO: use correct num
+... | just m | ._ | refl = just ( m + n  , ys )
+
 read : (u : U) → List Char → Maybe (El u × List Char)
 read _ [] = nothing
 
 read CHAR (x ∷ xs) = just (x , xs)
 
-read NAT (x ∷ xs) with within? x (toNat '0') (toNat '9')
-... | false = nothing
-... | true = just ( (toNat x) ∸ (toNat '0') , xs)
+read NAT (x ∷ xs) with read-ℕ x
+... | nothing = nothing
+... | just n = just (n , xs)
 
 read METHOD ('G' ∷ 'E' ∷ 'T' ∷ xs) = just (GET , xs)
 read METHOD ('H' ∷ 'E' ∷ 'A' ∷ 'D' ∷ xs) = just (HEAD , xs)
@@ -74,6 +92,7 @@ read (VALUE {HEAD} User-Agent) xs    = read-Value-String {HEAD} User-Agent refl 
 read (VALUE {POST} Date) xs             = read-Value-String {POST} Date refl xs
 read (VALUE {POST} Pragma) xs           = read-Value-String {POST} Pragma refl xs
 read (VALUE {POST} Content-Encoding) xs = read-Value-String {POST} Content-Encoding refl xs
+read (VALUE {POST} Content-Length) xs   = read-Value-ℕ {POST} Content-Length refl xs
 read (VALUE {POST} Content-Type) xs     = read-Value-String {POST} Content-Type refl xs
 
 read _ _ = {!!}
