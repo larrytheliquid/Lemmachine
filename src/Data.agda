@@ -2,12 +2,22 @@ module Data where
 open import Data.Bool
 open import Data.Char
 open import Data.Nat
-open import Data.List
+open import Data.List hiding ([_])
 
 infixr 2 _×_
+infixr 5 _∷_
+infixl 8 _^_
 
 ∞ : ℕ
 ∞ = 0
+
+_^_ : ℕ → ℕ → ℕ
+n ^ zero = 1
+n ^ (suc m) = n * (n ^ (m))
+
+data Decimal : ℕ → ℕ → Set where
+  [_] : (n : ℕ) → Decimal 1 n
+  _∷_ : ∀ {place val} → (n : ℕ) → Decimal place val → Decimal (suc place) (n * 10 ^ place + val)
 
 data Single {A : Set} : A → Set where
   single : (x : A) → Single x
