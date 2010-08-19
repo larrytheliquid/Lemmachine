@@ -16,7 +16,8 @@ parse End xs = just (tt , xs)
 parse (Base u) xs = read u xs
 -- TODO: actually parse towards any later match
 parse (Somewhere f) xs = parse f xs
-parse (Between n m f) xs = {!!}
+-- TODO: actually parse Many for a first stab
+parse (Between n m f) xs = parse f xs
 parse (Skip f₁ f₂) xs with parse f₁ xs
 ... | nothing = nothing
 ... | just (_ , ys) = parse f₂ ys
