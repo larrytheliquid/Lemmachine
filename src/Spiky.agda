@@ -46,7 +46,7 @@ between? c start end = toBool lower ∧ toBool higher
   toBool (suc _) = true
 
 data DarRange (start end : ℕ) : Bool → Set where
-  dar : (c : Char) → DarRange start end (between? c 0 end)
+  dar : (c : Char) → DarRange start end (between? c start end)
 
 data _×_ (A B : Set): Set where
   _,_ : A → B → A × B
@@ -56,24 +56,27 @@ data Dar : ℕ → Set where
 
 mutual 
   data U : Set where
-    CHAR NAT METHOD : U
-    HEADER : Method → U
-    VALUE : {m : Method} → Header m → U
-    SINGLE : (u : U) → El u → U
+    CHAR NAT : U
     DAR : ℕ → U
     DAR-RANGE : ℕ → ℕ → U
+    SINGLE : (u : U) → El u → U
     VEC : U → ℕ → U
+    METHOD REQUEST-URI HTTP-VERSION : U
+    HEADER : Method → U
+    VALUE : {m : Method} → Header m → U
 
   El : U → Set
   El CHAR = Char
   El NAT = ℕ
-  El METHOD = Method
-  El (HEADER m) = Header m
-  El (VALUE h) = Value h
-  El (SINGLE _ x) = Single x
   El (DAR n) = Dar n
   El (DAR-RANGE n m) = DarRange n m true
+  El (SINGLE _ x) = Single x
   El (VEC u n) = Vec (El u) n
+  El METHOD = Method
+  El REQUEST-URI = Request-URI
+  El HTTP-VERSION = HTTP-Version
+  El (HEADER m) = Header m
+  El (VALUE h) = Value h
 
 GET-HEADER  = HEADER GET
 HEAD-HEADER = HEADER HEAD
@@ -126,39 +129,57 @@ GET-Format =
   Between 0 ∞ (
     Base GET-HEADER >>= λ h →
     char ':' >>
-    Base (VALUE h)
-  )
+    Base (VALUE h) >>-
+    CRLF >>
+    End
+  ) >>-
+
+  CRLF >>
+  End
 
 HEAD-Format : Format
 HEAD-Format =
   Between 0 ∞ (
     Base HEAD-HEADER >>= λ h →
     char ':' >>
-    Base (VALUE h)
-  )
+    Base (VALUE h) >>-
+    CRLF >>
+    End
+  ) >>-
+
+  CRLF >>
+  End
 
 POST-Format : Format
 POST-Format =
-  Base (SINGLE POST-HEADER Content-Length) >>= λ c-l →
-  char ':' >>
-  Base (VALUE (proj c-l)) >>= λ n →
-
-  Base (SINGLE POST-HEADER Content-Type) >>= λ h →
-  char ':' >>
-  Base (VALUE (proj h)) >>-
-
-  Between 0 ∞ (
-    Base POST-HEADER >>= λ h →
+  Somewhere (
+    Base (SINGLE POST-HEADER Content-Length) >>= λ c-l →
     char ':' >>
-    Base (VALUE h)
-  ) >>-
+    Base (VALUE (proj c-l)) >>= λ n →
+    CRLF >>
+    
+    f c-l n
+  ) where
+  f : (s : Single {Header POST} Content-Length) → Value (proj s) → Format
+  f (single ._) n =
+    Somewhere (
+      Base (SINGLE POST-HEADER Content-Type) >>= λ h →
+      char ':' >>
+      Base (VALUE (proj h)) >>-
+      CRLF >>
+      End
+    ) >>-
 
-  body c-l n
+    Between 0 ∞ (
+      Base POST-HEADER >>= λ h →
+      char ':' >>
+      Base (VALUE h) >>-
+      CRLF >>
+      End
+    ) >>-
 
-  where
-
-  body : (s : Single {Header POST} Content-Length) → Value (proj s) → Format
-  body (single ._) n = Base (VEC CHAR n)
+    CRLF >>
+    Base (VEC CHAR n)
 
 Method-Format : Method → Format
 Method-Format GET  = GET-Format
@@ -167,5 +188,9 @@ Method-Format POST = POST-Format
 
 Request-Format =
   Base METHOD >>= λ m →
-  CRLF >>
+  SP >>
+  Base REQUEST-URI >>-
+  SP >>
+  Base HTTP-VERSION >>-
+  CRLF >>  
   Method-Format m
