@@ -129,6 +129,7 @@ GET-Format =
   Between 0 ∞ (
     Base GET-HEADER >>= λ h →
     char ':' >>
+    SP >>
     Base (VALUE h) >>-
     CRLF >>
     End
@@ -142,6 +143,7 @@ HEAD-Format =
   Between 0 ∞ (
     Base HEAD-HEADER >>= λ h →
     char ':' >>
+    SP >>
     Base (VALUE h) >>-
     CRLF >>
     End
@@ -155,6 +157,7 @@ POST-Format =
   Somewhere (
     Base (SINGLE POST-HEADER Content-Length) >>= λ c-l →
     char ':' >>
+    SP >>
     Base (VALUE (proj c-l)) >>= λ n →
     CRLF >>
     
@@ -165,6 +168,7 @@ POST-Format =
     Somewhere (
       Base (SINGLE POST-HEADER Content-Type) >>= λ h →
       char ':' >>
+      SP >>
       Base (VALUE (proj h)) >>-
       CRLF >>
       End
@@ -173,6 +177,7 @@ POST-Format =
     Between 0 ∞ (
       Base POST-HEADER >>= λ h →
       char ':' >>
+      SP >>
       Base (VALUE h) >>-
       CRLF >>
       End
