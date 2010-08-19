@@ -29,11 +29,13 @@ data BList (A : Set) : ℕ → Set where
 data Cons (A B : Set) : Set where
   _∷_ : A → B → Cons A B
 
+-- TODO: Use real Between, not Many
 RList : Set → ℕ → ℕ → Set
-RList A zero (suc m)    = BList A (suc m)
-RList A zero ∞          = List A
-RList A (suc n) zero    = Cons A (RList A n zero)
-RList A (suc n) (suc m) = Cons A (RList A n m)
+RList A _ _ = List A
+-- RList A zero (suc m)    = BList A (suc m)
+-- RList A zero ∞          = List A
+-- RList A (suc n) zero    = Cons A (RList A n zero)
+-- RList A (suc n) (suc m) = Cons A (RList A n m)
 
 within? : Char → ℕ → ℕ → Bool
 within? c start end = toBool lower ∧ toBool higher
@@ -88,7 +90,7 @@ mutual
     Base : U → Format
     Somewhere : Format → Format
     Between : ℕ → ℕ → Format → Format
-    Or And Skip : Format → Format → Format
+    Skip Or And : Format → Format → Format
     Use : (f : Format) → (⟦ f ⟧ → Format) → Format
 
   ⟦_⟧ : Format → Set
@@ -97,8 +99,8 @@ mutual
   ⟦ Base u ⟧ = El u
   ⟦ Somewhere f ⟧ = ⟦ f ⟧
   ⟦ Between x y f ⟧ = RList ⟦ f ⟧ x y
-  ⟦ Or f₁ f₂ ⟧ = ⟦ f₁ ⟧ ⊎ ⟦ f₂ ⟧
   ⟦ Skip _ f ⟧ = ⟦ f ⟧
+  ⟦ Or f₁ f₂ ⟧ = ⟦ f₁ ⟧ ⊎ ⟦ f₂ ⟧
   ⟦ And f₁ f₂ ⟧ = ⟦ f₁ ⟧ × ⟦ f₂ ⟧
   ⟦ Use f₁ f₂ ⟧ = Σ ⟦ f₁ ⟧ λ x → ⟦ f₂ x ⟧
 
