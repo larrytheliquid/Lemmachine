@@ -1,5 +1,4 @@
 module Parser where
-open import Spiky
 open import Data.Unit
 open import Data.Bool
 open import Data.Nat
@@ -8,6 +7,8 @@ open import Data.Maybe
 open import Data.Sum
 open import Data.Product hiding (_×_)
 open import Data.List
+open import Spiky
+open import Spike
 open import Data
 
 read : (u : U) → List Char → Maybe (El u × List Char)
@@ -16,6 +17,10 @@ read CHAR (x ∷ xs) = just (x , xs)
 read NAT (x ∷ xs) with within? x (toNat '0') (toNat '9')
 ... | false = nothing
 ... | true = just ( (toNat x) ∸ (toNat '0') , xs)
+read METHOD ('G' ∷ 'E' ∷ 'T' ∷ xs) = just (GET , xs)
+read METHOD ('H' ∷ 'E' ∷ 'A' ∷ 'D' ∷ xs) = just (HEAD , xs)
+read METHOD ('P' ∷ 'O' ∷ 'S' ∷ 'T' ∷ xs) = just (POST , xs)
+read METHOD _ = nothing
 read _ _ = {!!}
 
 parse : (f : Format) → List Char → Maybe (⟦ f ⟧ × List Char)
