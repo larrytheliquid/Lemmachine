@@ -35,8 +35,8 @@ RList A zero ∞          = List A
 RList A (suc n) zero    = Cons A (RList A n zero)
 RList A (suc n) (suc m) = Cons A (RList A n m)
 
-between? : Char → ℕ → ℕ → Bool
-between? c start end = toBool lower ∧ toBool higher
+within? : Char → ℕ → ℕ → Bool
+within? c start end = toBool lower ∧ toBool higher
   where
   target = toNat c
   lower  = suc target ∸ start
@@ -46,7 +46,7 @@ between? c start end = toBool lower ∧ toBool higher
   toBool (suc _) = true
 
 data DarRange (start end : ℕ) : Bool → Set where
-  dar : (c : Char) → DarRange start end (between? c start end)
+  dar : (c : Char) → DarRange start end (within? c start end)
 
 data _×_ (A B : Set): Set where
   _,_ : A → B → A × B
