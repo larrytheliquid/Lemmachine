@@ -1,6 +1,8 @@
 module Parser where
 open import Spiky
 open import Data.Unit
+open import Data.Bool
+open import Data.Nat
 open import Data.Char
 open import Data.Maybe
 open import Data.Sum
@@ -8,8 +10,13 @@ open import Data.Product hiding (_×_)
 open import Data.List
 open import Data
 
-postulate
-  read : (u : U) → List Char → Maybe (El u × List Char)
+read : (u : U) → List Char → Maybe (El u × List Char)
+read _ [] = nothing
+read CHAR (x ∷ xs) = just (x , xs)
+read NAT (x ∷ xs) with within? x (toNat '0') (toNat '9')
+... | false = nothing
+... | true = just ( (toNat x) ∸ (toNat '0') , xs)
+read _ _ = {!!}
 
 parse : (f : Format) → List Char → Maybe (⟦ f ⟧ × List Char)
 parse Fail _ = nothing
