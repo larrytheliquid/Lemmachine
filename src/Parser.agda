@@ -7,7 +7,7 @@ open import Data.String
 open import Data.Maybe
 open import Data.Sum
 open import Data.Product hiding (_×_)
-open import Data.List hiding (_++_)
+open import Data.List hiding (_++_; [_])
 open import Relation.Binary.PropositionalEquality1
 open import Spiky
 open import Spike
@@ -25,7 +25,7 @@ read-Value-String h p ('\r' ∷ '\n' ∷ xs) with Value h | p
 read-Value-String h p (x ∷ xs) with read-Value-String h p xs
 ... | nothing = nothing
 ... | just (a , ys) with Value h | p
-... | ._ | refl = just ( fromList [ x ] ++ a  , ys )
+... | ._ | refl = just ( fromList (x ∷ []) ++ a  , ys )
 
 read-Value-ℕ : {m : Method} → (h : Header m) → Value h ≡₁ ℕ → List Char → Maybe (Value h × List Char)
 read-Value-ℕ h p [] = nothing
