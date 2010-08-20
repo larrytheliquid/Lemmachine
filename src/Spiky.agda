@@ -6,7 +6,7 @@ open import Data.Char
 open import Data.String
 open import Data.Nat
 open import Data.List
-open import Data.Vec hiding (_>>=_)
+open import Data.Vec hiding (_>>=_; toList)
 open import Data.Sum
 open import Data.Product hiding (_×_)
 open import Data
@@ -21,7 +21,7 @@ mutual
     DAR-RANGE : ℕ → ℕ → U
     SINGLE : (u : U) → El u → U
     VEC : U → ℕ → U
-    METHOD REQUEST-URI HTTP-VERSION : U
+    METHOD REQUEST-URI : U
     HEADER : Method → U
     VALUE : {m : Method} → Header m → U
 
@@ -34,7 +34,6 @@ mutual
   El (VEC u n) = Vec (El u) n
   El METHOD = Method
   El REQUEST-URI = Request-URI
-  El HTTP-VERSION = HTTP-Version
   El (HEADER m) = Header m
   El (VALUE h) = Value h
 
@@ -74,14 +73,18 @@ x >>= y = Use x y
 char : Char → Format
 char c = Base (DAR (toNat c))
 
-postulate
-  str : String → Format
+str : String → Format
+str s = chars (toList s)
+  where
+  chars : List Char → Format
+  chars [] = End
+  chars (x ∷ xs) = char x >>- chars xs
 
 DIGIT = Base (DAR-RANGE (toNat '0') (toNat '9'))
 SP    = Base (DAR 32)
 CR    = Base (DAR 13)
 LF    = Base (DAR 10)
-CRLF  = And CR LF
+CRLF  = CR >>- LF
 
 HTTP-Version-Format =
   str "HTTP" >>
@@ -94,8 +97,8 @@ HTTP-Version-Format =
   where
 
   f : ℕ → ℕ → Format
-  f 0 9 = End -- Base (SINGLE HTTP-VERSION http/0:9)
-  f 1 0 = End -- Base (SINGLE HTTP-VERSION http/1:0)
+  f 0 9 = End
+  f 1 0 = End
   f _ _ = Fail
 
 Value-Format : {m : Method} → Header m → Format
@@ -174,6 +177,6 @@ Request-Format =
   SP >>
   Base REQUEST-URI >>-
   SP >>
-  Base HTTP-VERSION >>-
+  HTTP-Version-Format >>-
   CRLF >>  
   Method-Format m

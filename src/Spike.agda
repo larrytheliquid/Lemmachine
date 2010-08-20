@@ -8,9 +8,6 @@ data Method : Set where
 
 Request-URI = String
 
-data HTTP-Version : Set where
-  http/0:9 http/1:0 : HTTP-Version
-
 data GET-Header : Set where
   Pragma : GET-Header
   Authorization From : GET-Header
