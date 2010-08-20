@@ -3,6 +3,7 @@ open import Data.Empty
 open import Data.Unit
 open import Data.Bool
 open import Data.Char
+open import Data.String
 open import Data.Nat
 open import Data.List
 open import Data.Vec hiding (_>>=_)
@@ -73,11 +74,29 @@ x >>= y = Use x y
 char : Char → Format
 char c = Base (DAR (toNat c))
 
+postulate
+  str : String → Format
+
 DIGIT = Base (DAR-RANGE (toNat '0') (toNat '9'))
 SP    = Base (DAR 32)
 CR    = Base (DAR 13)
 LF    = Base (DAR 10)
 CRLF  = And CR LF
+
+HTTP-Version-Format =
+  str "HTTP" >>
+  char '/' >> 
+  Base NAT >>= λ major →
+  char '.' >>
+  Base NAT >>= λ minor →
+  f major minor
+
+  where
+
+  f : ℕ → ℕ → Format
+  f 0 9 = End -- Base (SINGLE HTTP-VERSION http/0:9)
+  f 1 0 = End -- Base (SINGLE HTTP-VERSION http/1:0)
+  f _ _ = Fail
 
 Value-Format : {m : Method} → Header m → Format
 Value-Format {POST} Content-Length = Between 1 ∞ DIGIT
