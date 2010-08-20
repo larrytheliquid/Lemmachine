@@ -18,14 +18,23 @@ read-ℕ x with within? x (toNat '0') (toNat '9')
 ... | false = nothing
 ... | true = just (toNat x ∸ toNat '0')
 
-read-Value-String : {m : Method} → (h : Header m) → Value h ≡₁ String → List Char → Maybe (Value h × List Char)
-read-Value-String h p [] = nothing
-read-Value-String h p ('\r' ∷ '\n' ∷ xs) with Value h | p
-... | ._ | refl = just ("" , '\r' ∷ '\n' ∷ xs)
-read-Value-String h p (x ∷ xs) with read-Value-String h p xs
+read-to-SP : List Char → Maybe (String × List Char)
+read-to-SP [] = nothing
+read-to-SP (' ' ∷ xs) = just ("" , ' ' ∷ xs)
+read-to-SP (x ∷ xs) with read-to-SP xs
 ... | nothing = nothing
-... | just (a , ys) with Value h | p
-... | ._ | refl = just ( fromList (x ∷ []) ++ a  , ys )
+... | just (a , ys) = just ( fromList (x ∷ []) ++ a  , ys )
+
+read-to-CRLF : List Char → Maybe (String × List Char)
+read-to-CRLF [] = nothing
+read-to-CRLF ('\r' ∷ '\n' ∷ xs) = just ("" , '\r' ∷ '\n' ∷ xs)
+read-to-CRLF (x ∷ xs) with read-to-CRLF xs
+... | nothing = nothing
+... | just (a , ys) = just ( fromList (x ∷ []) ++ a  , ys )
+
+read-Value-String : {m : Method} → (h : Header m) → Value h ≡₁ String → List Char → Maybe (Value h × List Char)
+read-Value-String h p xs with Value h | p
+... | ._ | refl = read-to-CRLF xs
 
 read-Value-ℕ : {m : Method} → (h : Header m) → Value h ≡₁ ℕ → List Char → Maybe (Value h × List Char)
 read-Value-ℕ h p [] = nothing
@@ -53,6 +62,8 @@ read METHOD ('G' ∷ 'E' ∷ 'T' ∷ xs) = just (GET , xs)
 read METHOD ('H' ∷ 'E' ∷ 'A' ∷ 'D' ∷ xs) = just (HEAD , xs)
 read METHOD ('P' ∷ 'O' ∷ 'S' ∷ 'T' ∷ xs) = just (POST , xs)
 read METHOD _ = nothing
+
+read REQUEST-URI ('/' ∷ xs) = read-to-SP ('/' ∷ xs)
 
 read (HEADER GET) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
 read (HEADER GET) ('A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'o' ∷ 'r' ∷ 'i' ∷ 'z' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Authorization , xs)

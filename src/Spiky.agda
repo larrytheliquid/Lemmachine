@@ -5,13 +5,14 @@ open import Data.Bool
 open import Data.Char
 open import Data.String
 open import Data.Nat
-open import Data.List
-open import Data.Vec hiding (_>>=_; toList)
+open import Data.List hiding ([_])
+open import Data.Vec hiding (_>>=_; toList; [_])
 open import Data.Sum
 open import Data.Product hiding (_×_)
-open import Data
+open import Data hiding ([_])
 open import Spike
 
+infixr 3 _∣_
 infixr 1 _>>_ _>>-_ _>>=_
 
 mutual 
@@ -69,6 +70,12 @@ x >>- y = And x y
 
 _>>=_ : (f : Format) → (⟦ f ⟧ → Format) → Format
 x >>= y = Use x y
+
+_∣_ : Format → Format → Format
+x ∣ y = Or x y
+
+[_] : Format → Format
+[ x ] = Between 0 1 x
 
 char : Char → Format
 char c = Base (DAR (toNat c))
