@@ -2,7 +2,7 @@ module Data where
 open import Data.Bool
 open import Data.Char
 open import Data.Nat
-open import Data.List hiding ([_])
+open import Data.List hiding ([_]; drop)
 
 infixr 2 _×_
 infixr 5 _∷_
@@ -10,6 +10,21 @@ infixl 8 _^_
 
 ∞ : ℕ
 ∞ = 0
+
+-- not a strict substring
+data SubString : List Char → Set where
+  [] : SubString []
+  _∷_  : ∀ {xs} x → SubString xs → SubString (x ∷ xs)
+  skip : ∀ {xs x} → SubString xs → SubString (x ∷ xs)
+
+forget : {xs : List Char} → SubString xs → List Char
+forget [] = []
+forget (x ∷ xs) = x ∷ forget xs
+forget (skip xs) = forget xs
+
+remember : (xs : List Char) → SubString xs
+remember [] = []
+remember (x ∷ xs) = x ∷ remember xs
 
 _^_ : ℕ → ℕ → ℕ
 n ^ zero = 1
