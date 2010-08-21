@@ -8,6 +8,7 @@ open import Data.Maybe
 open import Data.Sum
 open import Data.Product hiding (_×_)
 open import Data.List hiding (_++_; [_])
+open import Data.Vec hiding (_++_; fromList)
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality1
 open import Spiky
@@ -75,7 +76,10 @@ read (SINGLE (HEADER POST) Content-Type) (_ ∷ _)   | just (Content-Type , ys) 
 -- TODO: Single via Decidable equality on other values + types
 read (SINGLE _ _) (x ∷ xs) = nothing
 
-read (VEC u n) (x ∷ xs) = {!!}
+read (STR zero) (x ∷ xs) = just ([] , (x ∷ xs))
+read (STR (suc n)) (x ∷ xs) with read (STR n) xs
+... | nothing = nothing
+... | just (str , ys) = just (x ∷ str , ys)
 
 read METHOD ('G' ∷ 'E' ∷ 'T' ∷ xs)       = just (GET , xs)
 read METHOD ('H' ∷ 'E' ∷ 'A' ∷ 'D' ∷ xs) = just (HEAD , xs)

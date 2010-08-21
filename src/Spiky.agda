@@ -21,7 +21,7 @@ mutual
     DAR : ℕ → U
     DAR-RANGE : ℕ → ℕ → U
     SINGLE : (u : U) → El u → U
-    VEC : U → ℕ → U
+    STR : ℕ → U
     METHOD REQUEST-URI : U
     HEADER : Method → U
     VALUE : {m : Method} → Header m → U
@@ -32,7 +32,7 @@ mutual
   El (DAR n) = Dar n
   El (DAR-RANGE n m) = DarRange n m true
   El (SINGLE _ x) = Single x
-  El (VEC u n) = Vec (El u) n
+  El (STR n) = Vec Char n
   El METHOD = Method
   El REQUEST-URI = Request-URI
   El (HEADER m) = Header m
@@ -172,7 +172,7 @@ POST-Format =
     ) >>-
 
     CRLF >>
-    Base (VEC CHAR n)
+    Base (STR n)
 
 Method-Format : Method → Format
 Method-Format GET  = GET-Format
