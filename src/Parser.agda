@@ -8,6 +8,7 @@ open import Data.Maybe
 open import Data.Sum
 open import Data.Product hiding (_×_)
 open import Data.List hiding (_++_; [_])
+open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality1
 open import Spiky
 open import Spike
@@ -58,7 +59,15 @@ read NAT (x ∷ xs) with read-ℕ x
 ... | nothing = nothing
 ... | just n = just (n , xs)
 
-read METHOD ('G' ∷ 'E' ∷ 'T' ∷ xs) = just (GET , xs)
+read (DAR n) (x ∷ xs) with Data.Nat._≟_ n (toNat x)
+... | no _  = nothing
+... | yes p rewrite p = just (dar x , xs)
+
+read (DAR-RANGE n m) (x ∷ xs) with Data.Bool._≟_ true (within? x n m)
+... | no _ = nothing
+... | yes p rewrite p = just (dar x , xs)
+
+read METHOD ('G' ∷ 'E' ∷ 'T' ∷ xs)       = just (GET , xs)
 read METHOD ('H' ∷ 'E' ∷ 'A' ∷ 'D' ∷ xs) = just (HEAD , xs)
 read METHOD ('P' ∷ 'O' ∷ 'S' ∷ 'T' ∷ xs) = just (POST , xs)
 read METHOD _ = nothing
