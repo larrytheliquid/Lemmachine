@@ -21,6 +21,8 @@ data HEAD-Header : Set where
 
 data POST-Header : Set where
   Date Pragma : POST-Header
+  Authorization From : POST-Header
+  Referer User-Agent : POST-Header
   Content-Encoding : POST-Header
 
   Content-Length : POST-Header

@@ -97,3 +97,13 @@ equivalent response on some future request.
 
 A valid Content-Length field value is required on all HTTP/1.0 request
 messages containing an entity body.
+
+
+A SubString may need to be strict to be useful, although we can
+jump out and back into simple types internally
+
+Between could just be a HEADERS where they are read until CRLFCRLF
+
+specific types for optional vs required headers
+
+Somewhere needs an "upto", e.g. CRLFCRLF

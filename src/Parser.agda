@@ -52,8 +52,6 @@ read-Value-ℕ h p (x ∷ xs) with read-Value-ℕ h p xs
 ... | just m | ._ | refl = just ( m + n  , ys )
 
 read : (u : U) → List Char → Maybe (El u × List Char)
-read _ [] = nothing
-
 read CHAR (x ∷ xs) = just (x , xs)
 
 read NAT (x ∷ xs) with read-ℕ x
@@ -76,6 +74,7 @@ read (SINGLE (HEADER POST) Content-Type) (_ ∷ _)   | just (Content-Type , ys) 
 -- TODO: Single via Decidable equality on other values + types
 read (SINGLE _ _) (x ∷ xs) = nothing
 
+read (STR zero) [] = just ([] , [])
 read (STR zero) (x ∷ xs) = just ([] , (x ∷ xs))
 read (STR (suc n)) (x ∷ xs) with read (STR n) xs
 ... | nothing = nothing
@@ -106,6 +105,10 @@ read (HEADER HEAD) _ = nothing
 
 read (HEADER POST) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
 read (HEADER POST) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
+read (HEADER POST) ('A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'o' ∷ 'r' ∷ 'i' ∷ 'z' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Authorization , xs)
+read (HEADER POST) ('F' ∷ 'r' ∷ 'o' ∷ 'm' ∷ xs) = just (From , xs)
+read (HEADER POST) ('R' ∷ 'e' ∷ 'f' ∷ 'e' ∷ 'r' ∷ 'e' ∷ 'r' ∷ xs) = just (Referer , xs)
+read (HEADER POST) ('U' ∷ 's' ∷ 'e' ∷ 'r' ∷ '-' ∷ 'A' ∷ 'g' ∷ 'e' ∷ 'n' ∷ 't' ∷ xs) = just (User-Agent , xs)
 read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'E' ∷ 'n' ∷ 'c' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'n' ∷ 'g' ∷ xs) = just (Content-Encoding , xs)
 read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
 read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
@@ -126,9 +129,15 @@ read (VALUE {HEAD} User-Agent) xs    = read-Value-String {HEAD} User-Agent refl 
 
 read (VALUE {POST} Date) xs             = read-Value-String {POST} Date refl xs
 read (VALUE {POST} Pragma) xs           = read-Value-String {POST} Pragma refl xs
+read (VALUE {POST} Authorization) xs    = read-Value-String {POST} Authorization refl xs
+read (VALUE {POST} From) xs             = read-Value-String {POST} From refl xs
+read (VALUE {POST} Referer) xs          = read-Value-String {POST} Referer refl xs
+read (VALUE {POST} User-Agent) xs       = read-Value-String {POST} User-Agent refl xs
 read (VALUE {POST} Content-Encoding) xs = read-Value-String {POST} Content-Encoding refl xs
 read (VALUE {POST} Content-Length) xs   = read-Value-ℕ {POST} Content-Length refl xs
 read (VALUE {POST} Content-Type) xs     = read-Value-String {POST} Content-Type refl xs
+
+read _ [] = nothing
 
 parse : (f : Format) → List Char → Maybe (⟦ f ⟧ × List Char)
 parse Fail _ = nothing
@@ -156,3 +165,8 @@ parse (Use f₁ f₂) xs with parse f₁ xs
 ... | just (a , ys) with parse (f₂ a) ys
 ... | nothing = nothing
 ... | just (b , zs) = just ((a , b) , zs)
+
+Request-Parse = Maybe (⟦ Request-Format ⟧ × List Char)
+
+parse-request : List Char → Request-Parse
+parse-request xs = parse Request-Format xs
