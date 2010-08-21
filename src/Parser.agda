@@ -67,12 +67,23 @@ read (DAR-RANGE n m) (x ∷ xs) with Data.Bool._≟_ true (within? x n m)
 ... | no _ = nothing
 ... | yes p rewrite p = just (dar x , xs)
 
+read (SINGLE (HEADER POST) y) (x ∷ xs) with read (HEADER POST) (x ∷ xs)
+... | nothing = nothing
+read (SINGLE (HEADER POST) Content-Length) (_ ∷ _) | just (Content-Length , ys) = just (single Content-Length , ys)
+read (SINGLE (HEADER POST) Content-Type) (_ ∷ _)   | just (Content-Type , ys)   = just (single Content-Type , ys)
+... | just _ = nothing
+-- TODO: Single via Decidable equality on other values + types
+read (SINGLE _ _) (x ∷ xs) = nothing
+
+read (VEC u n) (x ∷ xs) = {!!}
+
 read METHOD ('G' ∷ 'E' ∷ 'T' ∷ xs)       = just (GET , xs)
 read METHOD ('H' ∷ 'E' ∷ 'A' ∷ 'D' ∷ xs) = just (HEAD , xs)
 read METHOD ('P' ∷ 'O' ∷ 'S' ∷ 'T' ∷ xs) = just (POST , xs)
 read METHOD _ = nothing
 
 read REQUEST-URI ('/' ∷ xs) = read-to-SP ('/' ∷ xs)
+read REQUEST-URI (_ ∷ _) = nothing
 
 read (HEADER GET) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
 read (HEADER GET) ('A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'o' ∷ 'r' ∷ 'i' ∷ 'z' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Authorization , xs)
@@ -114,8 +125,6 @@ read (VALUE {POST} Pragma) xs           = read-Value-String {POST} Pragma refl x
 read (VALUE {POST} Content-Encoding) xs = read-Value-String {POST} Content-Encoding refl xs
 read (VALUE {POST} Content-Length) xs   = read-Value-ℕ {POST} Content-Length refl xs
 read (VALUE {POST} Content-Type) xs     = read-Value-String {POST} Content-Type refl xs
-
-read _ _ = {!!}
 
 parse : (f : Format) → List Char → Maybe (⟦ f ⟧ × List Char)
 parse Fail _ = nothing
