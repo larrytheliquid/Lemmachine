@@ -49,15 +49,6 @@ read-to-CRLF (x ∷ xs) with read-to-CRLF xs
 ... | nothing = nothing
 ... | just (a , ys) = just ( fromList (x ∷ []) ++ a  , ys )
 
-read-Value-String : {m : Method} → (h : Header m) → Value h ≡₁ String → List Char → Maybe (Value h × List Char)
-read-Value-String h p xs with Value h | p
-... | ._ | refl = read-to-CRLF xs
-
-read-Value-ℕ : {m : Method} → (h : Header m) → Value h ≡₁ ℕ → List Char → Maybe (Value h × List Char)
-read-Value-ℕ h p [] = nothing
-read-Value-ℕ h p xs with Value h | p
-... | ._ | refl = read-Decimal xs
-
 read : (u : U) → List Char → Maybe (El u × List Char)
 read CHAR (x ∷ xs) = just (x , xs)
 
@@ -119,28 +110,28 @@ read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' 
 read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
 read (HEADER POST) _ = nothing
 
-read (VALUE {GET} Pragma) xs            = read-Value-String {GET} Pragma refl xs
-read (VALUE {GET} Authorization) xs     = read-Value-String {GET} Authorization refl xs
-read (VALUE {GET} From) xs              = read-Value-String {GET} From refl xs
-read (VALUE {GET} If-Modified-Since) xs = read-Value-String {GET} If-Modified-Since refl xs
-read (VALUE {GET} Referer) xs           = read-Value-String {GET} Referer refl xs
-read (VALUE {GET} User-Agent) xs        = read-Value-String {GET} User-Agent refl xs
+read (VALUE {GET} Pragma) xs            = read-to-CRLF xs
+read (VALUE {GET} Authorization) xs     = read-to-CRLF xs
+read (VALUE {GET} From) xs              = read-to-CRLF xs
+read (VALUE {GET} If-Modified-Since) xs = read-to-CRLF xs
+read (VALUE {GET} Referer) xs           = read-to-CRLF xs
+read (VALUE {GET} User-Agent) xs        = read-to-CRLF xs
 
-read (VALUE {HEAD} Pragma) xs        = read-Value-String {HEAD} Pragma refl xs
-read (VALUE {HEAD} Authorization) xs = read-Value-String {HEAD} Authorization refl xs
-read (VALUE {HEAD} From) xs          = read-Value-String {HEAD} From refl xs
-read (VALUE {HEAD} Referer) xs       = read-Value-String {HEAD} Referer refl xs
-read (VALUE {HEAD} User-Agent) xs    = read-Value-String {HEAD} User-Agent refl xs
+read (VALUE {HEAD} Pragma) xs        = read-to-CRLF xs
+read (VALUE {HEAD} Authorization) xs = read-to-CRLF xs
+read (VALUE {HEAD} From) xs          = read-to-CRLF xs
+read (VALUE {HEAD} Referer) xs       = read-to-CRLF xs
+read (VALUE {HEAD} User-Agent) xs    = read-to-CRLF xs
 
-read (VALUE {POST} Date) xs             = read-Value-String {POST} Date refl xs
-read (VALUE {POST} Pragma) xs           = read-Value-String {POST} Pragma refl xs
-read (VALUE {POST} Authorization) xs    = read-Value-String {POST} Authorization refl xs
-read (VALUE {POST} From) xs             = read-Value-String {POST} From refl xs
-read (VALUE {POST} Referer) xs          = read-Value-String {POST} Referer refl xs
-read (VALUE {POST} User-Agent) xs       = read-Value-String {POST} User-Agent refl xs
-read (VALUE {POST} Content-Encoding) xs = read-Value-String {POST} Content-Encoding refl xs
-read (VALUE {POST} Content-Length) xs   = read-Value-ℕ {POST} Content-Length refl xs
-read (VALUE {POST} Content-Type) xs     = read-Value-String {POST} Content-Type refl xs
+read (VALUE {POST} Date) xs             = read-to-CRLF xs
+read (VALUE {POST} Pragma) xs           = read-to-CRLF xs
+read (VALUE {POST} Authorization) xs    = read-to-CRLF xs
+read (VALUE {POST} From) xs             = read-to-CRLF xs
+read (VALUE {POST} Referer) xs          = read-to-CRLF xs
+read (VALUE {POST} User-Agent) xs       = read-to-CRLF xs
+read (VALUE {POST} Content-Encoding) xs = read-to-CRLF xs
+read (VALUE {POST} Content-Length) xs   = read-Decimal xs
+read (VALUE {POST} Content-Type) xs     = read-to-CRLF xs
 
 read _ [] = nothing
 
