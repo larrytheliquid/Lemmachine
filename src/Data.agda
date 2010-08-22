@@ -34,20 +34,20 @@ _^_ : ℕ → ℕ → ℕ
 n ^ zero = 1
 n ^ (suc m) = n * (n ^ (m))
 
-fold-Decimal : ∀ {place} → Vec ℕ (suc place) → ℕ
-fold-Decimal {zero} (x ∷ []) = x
-fold-Decimal {suc n} (x ∷ xs) = x * 10 ^ (suc n) + fold-Decimal xs
-
 data Decimal : ℕ → ℕ → Set where
   [_] : (n : ℕ) → Decimal 1 n
   _∷_ : ∀ {place val} → (n : ℕ) → Decimal place val → Decimal (suc place) (n * 10 ^ place + val)
 
+decimal : ∀ {place val} → Decimal place val → ℕ
+decimal {_} {val} _ = val
+
+fold-Decimal : ∀ {place} → Vec ℕ (suc place) → ℕ
+fold-Decimal {zero} (x ∷ []) = x
+fold-Decimal {suc n} (x ∷ xs) = x * 10 ^ (suc n) + fold-Decimal xs
+
 read-Decimal : ∀ {n} → (xs : Vec ℕ (suc n)) → Decimal (suc n) (fold-Decimal xs)
 read-Decimal {zero} (x ∷ []) = [ x ]
 read-Decimal {suc n} (x ∷ xs) = x ∷ read-Decimal xs
-
-decimal : ∀ {place val} → Decimal place val → ℕ
-decimal {_} {val} _ = val
 
 data Single {A : Set} : A → Set where
   single : (x : A) → Single x
