@@ -1,6 +1,12 @@
 Lemmachine
 ==========
 
+## Status ##
+
+A proof of concept of compositonal web app testing (described below) can be shown satisfactorily using this branch. Current work is towards a complete [static validator for HTTP 0.9 + 1.0](http://github.com/larrytheliquid/Lemmachine/tree/rfc1945) (a requirement of HTTP 1.1, which will be the subsequent work effort).
+
+## Description ##
+
 Lemmachine is a REST'ful web framework that makes it easy to get HTTP right by exposing users to overridable hooks with sane defaults. The main architecture is a copy of Erlang-based [Webmachine](http://webmachine.basho.com), which is currently the best documentation reference (for hooks & general design).
 
 Lemmachine stands out from the dynamically typed Webmachine by being written in dependently typed
@@ -13,10 +19,6 @@ The big goal is to show that in service oriented architectures, proofs of indivi
 Another goal is for Lemmachine to come with proofs against the default resource (as it already does). Any hooks the user does not override can be given to the user for free by the framework! Anything that is overridden can generate proofs parameterized only by the extra information the user would need to provide. This would be a major boost in productivity compared to traditional languages whose libraries cannot come with tests for the user that have language-level semantics for real proposition reuse!
 
 Lemmachine currently uses the Haskell [Hack](http://github.com/nfjinjing/hack) abstraction so it can run on several Haskell webservers. Because Agda compiles to Haskell and has an FFI, existing Haskell code can be integrated quite easily.
-
-## Status ##
-
-The project is still in development and rapidly changing. Lemmas and proofs exist for status resolution, and you can now run resources! The focus will now comprise of a gradual direct translation of RFC 2616 sections into dependent type theory.
 
 ## Setup ##
 
