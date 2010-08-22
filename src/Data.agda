@@ -2,6 +2,7 @@ module Data where
 open import Data.Bool
 open import Data.Char
 open import Data.Nat
+open import Data.Maybe
 open import Data.List hiding ([_]; drop)
 open import Data.Vec hiding ([_])
 
@@ -45,9 +46,13 @@ fold-Decimal : ∀ {place} → Vec ℕ (suc place) → ℕ
 fold-Decimal {zero} (x ∷ []) = x
 fold-Decimal {suc n} (x ∷ xs) = x * 10 ^ (suc n) + fold-Decimal xs
 
-read-Decimal : ∀ {n} → (xs : Vec ℕ (suc n)) → Decimal (suc n) (fold-Decimal xs)
-read-Decimal {zero} (x ∷ []) = [ x ]
-read-Decimal {suc n} (x ∷ xs) = x ∷ read-Decimal xs
+to-Decimal : ∀ {n} → (xs : Vec ℕ (suc n)) → Decimal (suc n) (fold-Decimal xs)
+to-Decimal {zero} (x ∷ []) = [ x ]
+to-Decimal {suc n} (x ∷ xs) = x ∷ to-Decimal xs
+
+maybe-decimal : ∀ {n} → (xs : Vec ℕ n) → Maybe ℕ
+maybe-decimal [] = nothing
+maybe-decimal (x ∷ xs) = just (decimal (to-Decimal (x ∷ xs)))
 
 data Single {A : Set} : A → Set where
   single : (x : A) → Single x

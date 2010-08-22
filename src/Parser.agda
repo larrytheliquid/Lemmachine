@@ -15,10 +15,25 @@ open import Spiky
 open import Spike
 open import Data
 
-read-ℕ : Char → Maybe ℕ
-read-ℕ x with within? x (toNat '0') (toNat '9')
+read-Digit : Char → Maybe ℕ
+read-Digit x with within? x (toNat '0') (toNat '9')
 ... | false = nothing
 ... | true = just (toNat x ∸ toNat '0')
+
+read-Digits : List Char → Maybe (List ℕ × List Char)
+read-Digits [] = nothing
+read-Digits (x ∷ xs) with read-Digit x
+... | nothing = nothing
+... | just n with read-Digits xs
+... | nothing = just (n ∷ [] , xs)
+... | just (ns , ys) = just (n ∷ ns , ys)
+
+read-Decimal : List Char → Maybe (ℕ × List Char)
+read-Decimal xs with read-Digits xs
+... | nothing = nothing
+... | just (ns , ys) with maybe-decimal (Data.Vec.fromList ns)
+... | nothing = nothing
+... | just n = just (n , ys)
 
 read-to-SP : List Char → Maybe (String × List Char)
 read-to-SP [] = nothing
@@ -40,23 +55,13 @@ read-Value-String h p xs with Value h | p
 
 read-Value-ℕ : {m : Method} → (h : Header m) → Value h ≡₁ ℕ → List Char → Maybe (Value h × List Char)
 read-Value-ℕ h p [] = nothing
-read-Value-ℕ h p (x ∷ '\r' ∷ '\n' ∷ xs) with Value h | p
-... | ._ | refl with read-ℕ x
-... | nothing = nothing
-... | just n = just (n , '\r' ∷ '\n' ∷ xs)
-read-Value-ℕ h p (x ∷ xs) with read-Value-ℕ h p xs
-... | nothing = nothing
-... | just (n , ys) with read-ℕ x | Value h | p
-... | nothing | _ | _ = nothing
--- TODO: use correct num
-... | just m | ._ | refl = just ( m + n  , ys )
+read-Value-ℕ h p xs with Value h | p
+... | ._ | refl = read-Decimal xs
 
 read : (u : U) → List Char → Maybe (El u × List Char)
 read CHAR (x ∷ xs) = just (x , xs)
 
-read NAT (x ∷ xs) with read-ℕ x
-... | nothing = nothing
-... | just n = just (n , xs)
+read NAT xs = read-Decimal xs
 
 read (DAR n) (x ∷ xs) with Data.Nat._≟_ n (toNat x)
 ... | no _  = nothing

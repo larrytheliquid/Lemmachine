@@ -36,11 +36,11 @@ parsed-head = parse-request (toList raw-head)
 
 raw-post = here-doc "
 POST / HTTP/1.0\r
-Content-Length: 8\r
+Content-Length: 14\r
 Content-Type: text/plain\r
 User-Agent: Lemmachine\r
 \r
-Centauri
+Split The Atom
 "
 
 parsed-post : Request-Parse
