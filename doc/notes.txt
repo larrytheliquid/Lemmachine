@@ -107,3 +107,12 @@ Between could just be a HEADERS where they are read until CRLFCRLF
 specific types for optional vs required headers
 
 Somewhere needs an "upto", e.g. CRLFCRLF
+
+uri = upto SP
+header = upto CRLF
+somewhere(header) = upto CRLFCRLF
+body = vec char c-l
+
+format vs base / parse vs read
+
+read-Decimal

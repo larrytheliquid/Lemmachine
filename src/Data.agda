@@ -3,6 +3,7 @@ open import Data.Bool
 open import Data.Char
 open import Data.Nat
 open import Data.List hiding ([_]; drop)
+open import Data.Vec hiding ([_])
 
 infixr 2 _×_
 infixr 5 _∷_
@@ -10,6 +11,9 @@ infixl 8 _^_
 
 ∞ : ℕ
 ∞ = 0
+
+data _×_ (A B : Set) : Set where
+  _,_ : A → B → A × B
 
 -- not a strict substring
 data SubString : List Char → Set where
@@ -30,9 +34,20 @@ _^_ : ℕ → ℕ → ℕ
 n ^ zero = 1
 n ^ (suc m) = n * (n ^ (m))
 
+fold-Decimal : ∀ {place} → Vec ℕ (suc place) → ℕ
+fold-Decimal {zero} (x ∷ []) = x
+fold-Decimal {suc n} (x ∷ xs) = x * 10 ^ (suc n) + fold-Decimal xs
+
 data Decimal : ℕ → ℕ → Set where
   [_] : (n : ℕ) → Decimal 1 n
   _∷_ : ∀ {place val} → (n : ℕ) → Decimal place val → Decimal (suc place) (n * 10 ^ place + val)
+
+read-Decimal : ∀ {n} → (xs : Vec ℕ (suc n)) → Decimal (suc n) (fold-Decimal xs)
+read-Decimal {zero} (x ∷ []) = [ x ]
+read-Decimal {suc n} (x ∷ xs) = x ∷ read-Decimal xs
+
+decimal : ∀ {place val} → Decimal place val → ℕ
+decimal {_} {val} _ = val
 
 data Single {A : Set} : A → Set where
   single : (x : A) → Single x
@@ -65,9 +80,6 @@ within? c start end = toBool lower ∧ toBool higher
 
 data DarRange (start end : ℕ) : Bool → Set where
   dar : (c : Char) → DarRange start end (within? c start end)
-
-data _×_ (A B : Set): Set where
-  _,_ : A → B → A × B
 
 data Dar : ℕ → Set where
   dar : (c : Char) → Dar (toNat c)
