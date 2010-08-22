@@ -16,6 +16,12 @@ infixl 8 _^_
 data _×_ (A B : Set) : Set where
   _,_ : A → B → A × B
 
+proj₁ : ∀ {A B} → A × B → A
+proj₁ (x , y) = x
+
+proj₂ : ∀ {A B} → A × B → B
+proj₂ (x , y) = y
+
 -- not a strict substring
 data SubString : List Char → Set where
   [] : SubString []

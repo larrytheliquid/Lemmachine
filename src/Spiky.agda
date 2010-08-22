@@ -144,14 +144,18 @@ HEAD-Format =
 POST-Format : Format
 POST-Format =
   Upto End-Headers (
-    Base (SINGLE POST-HEADER Content-Length) >>= λ c-l →
+    Base (SINGLE POST-HEADER Content-Length) >>= λ h →
     char ':' >>
     SP >>
-    Base (VALUE (proj c-l)) >>= λ n →
+    Base (VALUE (proj h)) >>-
     CRLF >>
-    
-    f c-l n
-  ) where
+    End
+  ) >>= λ c-l →
+
+  f (Data.Product.proj₁ c-l) (Data.proj₁ (Data.Product.proj₂ c-l))
+
+  where
+
   f : (s : Single {Header POST} Content-Length) → Value (proj s) → Format
   f (single ._) n =
     Upto End-Headers (

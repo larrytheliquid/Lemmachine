@@ -57,3 +57,15 @@ Split The Atom
 
 parsed-jumbled-post : Request-Parse
 parsed-jumbled-post = parse-request (toList raw-jumbled-post)
+
+raw-jumbalaya-post = here-doc "
+POST / HTTP/1.0\r
+User-Agent: Lemmachine\r
+Content-Type: text/plain\r
+Content-Length: 33\r
+\r
+jumbalaya & fried pickles, please
+"
+
+parsed-jumbalaya-post : Request-Parse
+parsed-jumbalaya-post = parse-request (toList raw-jumbalaya-post)
