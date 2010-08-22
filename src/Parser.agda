@@ -139,8 +139,11 @@ parse : (f : Format) → List Char → Maybe (⟦ f ⟧ × List Char)
 parse Fail _ = nothing
 parse End xs = just (tt , xs)
 parse (Base u) xs = read u xs
--- TODO: actually parse towards any later match
-parse (Somewhere f) xs = parse f xs
+parse (Upto _ _) [] = nothing
+parse (Upto end f) (x ∷ xs) with parse end (x ∷ xs) | parse f (x ∷ xs) | parse (Upto end f) xs
+... | nothing | just ans | _             = just ans
+... | nothing | nothing  | just (a , ys) = just (a , x ∷ ys)
+... | _       | _        | _             = nothing
 -- TODO: actually parse Many for a first stab
 parse (Between n m f) xs = parse f xs
 parse (Skip f₁ f₂) xs with parse f₁ xs

@@ -34,7 +34,7 @@ User-Agent: Lemmachine\r
 parsed-head : Request-Parse
 parsed-head = parse-request (toList raw-head)
 
-raw-post = here-doc "
+raw-ordered-post = here-doc "
 POST / HTTP/1.0\r
 Content-Length: 14\r
 Content-Type: text/plain\r
@@ -43,5 +43,17 @@ User-Agent: Lemmachine\r
 Split The Atom
 "
 
-parsed-post : Request-Parse
-parsed-post = parse-request (toList raw-post)
+parsed-ordered-post : Request-Parse
+parsed-ordered-post = parse-request (toList raw-ordered-post)
+
+raw-jumbled-post = here-doc "
+POST / HTTP/1.0\r
+Content-Length: 14\r
+User-Agent: Lemmachine\r
+Content-Type: text/plain\r
+\r
+Split The Atom
+"
+
+parsed-jumbled-post : Request-Parse
+parsed-jumbled-post = parse-request (toList raw-jumbled-post)

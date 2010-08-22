@@ -46,7 +46,7 @@ mutual
   data Format : Set where
     Fail End : Format
     Base : U → Format
-    Somewhere : Format → Format
+    Upto : Format → Format → Format
     Between : ℕ → ℕ → Format → Format
     Skip Or And : Format → Format → Format
     Use : (f : Format) → (⟦ f ⟧ → Format) → Format
@@ -55,7 +55,7 @@ mutual
   ⟦ Fail ⟧ = ⊥
   ⟦ End ⟧ = ⊤
   ⟦ Base u ⟧ = El u
-  ⟦ Somewhere f ⟧ = ⟦ f ⟧
+  ⟦ Upto _ f ⟧ = ⟦ f ⟧
   ⟦ Between x y f ⟧ = ⟦ f ⟧
   ⟦ Skip _ f ⟧ = ⟦ f ⟧
   ⟦ Or f₁ f₂ ⟧ = ⟦ f₁ ⟧ ⊎ ⟦ f₂ ⟧
@@ -92,6 +92,7 @@ SP    = Base (DAR 32)
 CR    = Base (DAR 13)
 LF    = Base (DAR 10)
 CRLF  = CR >>- LF
+End-Headers  = CRLF >>- CRLF
 
 HTTP-Version-Format =
   str "HTTP" >>
@@ -142,7 +143,7 @@ HEAD-Format =
 
 POST-Format : Format
 POST-Format =
-  Somewhere (
+  Upto End-Headers (
     Base (SINGLE POST-HEADER Content-Length) >>= λ c-l →
     char ':' >>
     SP >>
@@ -153,7 +154,7 @@ POST-Format =
   ) where
   f : (s : Single {Header POST} Content-Length) → Value (proj s) → Format
   f (single ._) n =
-    Somewhere (
+    Upto End-Headers (
       Base (SINGLE POST-HEADER Content-Type) >>= λ h →
       char ':' >>
       SP >>

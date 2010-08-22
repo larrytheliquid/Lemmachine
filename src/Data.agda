@@ -42,7 +42,7 @@ data Decimal : ℕ → ℕ → Set where
 decimal : ∀ {place val} → Decimal place val → ℕ
 decimal {_} {val} _ = val
 
-fold-Decimal : ∀ {place} → Vec ℕ (suc place) → ℕ
+fold-Decimal : ∀ {n} → Vec ℕ (suc n) → ℕ
 fold-Decimal {zero} (x ∷ []) = x
 fold-Decimal {suc n} (x ∷ xs) = x * 10 ^ (suc n) + fold-Decimal xs
 

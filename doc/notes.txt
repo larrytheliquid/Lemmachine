@@ -116,3 +116,17 @@ body = vec char c-l
 format vs base / parse vs read
 
 read-Decimal
+
+if we parse an answer here, return it regardless of any possible
+answer we will find in the rest of the string
+
+a, b, c, d, e, \r, \n, \r, \n, x, y, z
+
+x = a
+x = b
+x = c
+
+(DE, \r, \n, \r, \n, x, y, z)
+
+... | nothing | just ans | _             = just ans
+could be specialized to ensure uniqueness
