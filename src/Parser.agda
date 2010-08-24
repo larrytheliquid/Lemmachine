@@ -144,8 +144,13 @@ parse (Upto end f) (x ∷ xs) with parse end (x ∷ xs) | parse f (x ∷ xs) | p
 ... | nothing | just ans | _             = just ans
 ... | nothing | nothing  | just (a , ys) = just (a , x ∷ ys)
 ... | _       | _        | _             = nothing
--- TODO: actually parse Many for a first stab
-parse (Between n m f) xs = parse f xs
+parse (Slurp f) [] = just ([] , [])
+parse (Slurp f) (x ∷ xs) with parse f (x ∷ xs) | parse (Slurp f) xs
+... | _ | nothing = nothing -- never happens
+... | nothing | just ([] , zs) = just ([] , x ∷ zs)
+... | nothing | just (as , zs) = just (as , zs)
+... | just (a , ys) | just ([] , _)  = just (a ∷ [] , ys)
+... | just (a , _)  | just (as , zs) = just (a ∷ as , zs)
 parse (Skip f₁ f₂) xs with parse f₁ xs
 ... | nothing = nothing
 ... | just (_ , ys) = parse f₂ ys

@@ -47,7 +47,7 @@ mutual
     Fail End : Format
     Base : U → Format
     Upto : Format → Format → Format
-    Between : ℕ → ℕ → Format → Format
+    Slurp : Format → Format
     Skip Or And : Format → Format → Format
     Use : (f : Format) → (⟦ f ⟧ → Format) → Format
 
@@ -56,7 +56,7 @@ mutual
   ⟦ End ⟧ = ⊤
   ⟦ Base u ⟧ = El u
   ⟦ Upto _ f ⟧ = ⟦ f ⟧
-  ⟦ Between x y f ⟧ = ⟦ f ⟧
+  ⟦ Slurp f ⟧ = List ⟦ f ⟧
   ⟦ Skip _ f ⟧ = ⟦ f ⟧
   ⟦ Or f₁ f₂ ⟧ = ⟦ f₁ ⟧ ⊎ ⟦ f₂ ⟧
   ⟦ And f₁ f₂ ⟧ = ⟦ f₁ ⟧ × ⟦ f₂ ⟧
@@ -73,9 +73,6 @@ x >>= y = Use x y
 
 _∣_ : Format → Format → Format
 x ∣ y = Or x y
-
-[_] : Format → Format
-[ x ] = Between 0 1 x
 
 char : Char → Format
 char c = Base (DAR (toNat c))
@@ -109,13 +106,9 @@ HTTP-Version-Format =
   f 1 0 = End
   f _ _ = Fail
 
-Value-Format : {m : Method} → Header m → Format
-Value-Format {POST} Content-Length = Between 1 ∞ DIGIT
-Value-Format _ = Fail
-
 GET-Format : Format
 GET-Format =
-  Between 0 ∞ (
+  Slurp (
     Base GET-HEADER >>= λ h →
     char ':' >>
     SP >>
@@ -129,7 +122,7 @@ GET-Format =
 
 HEAD-Format : Format
 HEAD-Format =
-  Between 0 ∞ (
+  Slurp (
     Base HEAD-HEADER >>= λ h →
     char ':' >>
     SP >>
@@ -167,7 +160,7 @@ POST-Format =
       End
     ) >>-
 
-    Between 0 ∞ (
+    Slurp (
       Base POST-HEADER >>= λ h →
       char ':' >>
       SP >>

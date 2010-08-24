@@ -18,6 +18,7 @@ here-doc str with toList str
 
 raw-get = here-doc "
 GET / HTTP/1.0\r
+From: larrytheliquid@gmail.com\r
 User-Agent: Lemmachine\r
 \r\n
 "
@@ -25,8 +26,17 @@ User-Agent: Lemmachine\r
 parsed-get : Request-Parse
 parsed-get = parse-request (toList raw-get)
 
+raw-headerless = here-doc "
+GET / HTTP/1.0\r
+\r\n
+"
+
+parsed-headerless : Request-Parse
+parsed-headerless = parse-request (toList raw-headerless)
+
 raw-head = here-doc "
 HEAD / HTTP/1.0\r
+From: larrytheliquid@gmail.com\r
 User-Agent: Lemmachine\r
 \r\n
 "
@@ -38,6 +48,7 @@ raw-ordered-post = here-doc "
 POST / HTTP/1.0\r
 Content-Length: 14\r
 Content-Type: text/plain\r
+From: larrytheliquid@gmail.com\r
 User-Agent: Lemmachine\r
 \r
 Split The Atom
@@ -49,6 +60,7 @@ parsed-ordered-post = parse-request (toList raw-ordered-post)
 raw-jumbled-post = here-doc "
 POST / HTTP/1.0\r
 Content-Length: 14\r
+From: larrytheliquid@gmail.com\r
 User-Agent: Lemmachine\r
 Content-Type: text/plain\r
 \r
@@ -62,6 +74,7 @@ raw-jumbalaya-post = here-doc "
 POST / HTTP/1.0\r
 User-Agent: Lemmachine\r
 Content-Type: text/plain\r
+From: larrytheliquid@gmail.com\r
 Content-Length: 33\r
 \r
 jumbalaya & fried pickles, please
