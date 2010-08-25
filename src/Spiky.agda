@@ -22,7 +22,7 @@ mutual
     DAR-RANGE : ℕ → ℕ → U
     SINGLE : (u : U) → El u → U
     STR : ℕ → U
-    METHOD REQUEST-URI : U
+    METHOD REQUEST-URI REASON-PHRASE : U
     HEADER : Method → U
     VALUE : {m : Method} → Header m → U
 
@@ -35,6 +35,7 @@ mutual
   El (STR n) = Vec Char n
   El METHOD = Method
   El REQUEST-URI = Request-URI
+  El REASON-PHRASE = Reason-Phrase
   El (HEADER m) = Header m
   El (VALUE h) = Value h
 
@@ -185,3 +186,17 @@ Request-Format =
   HTTP-Version-Format >>-
   CRLF >>  
   Method-Format m
+
+Status-Code-Format =
+  DIGIT >>-
+  DIGIT >>-
+  DIGIT
+
+Response-Format =
+  HTTP-Version-Format >>-
+  SP >>
+  Status-Code-Format >>-
+  SP >>
+  Base REASON-PHRASE >>-
+  CRLF >>
+  End

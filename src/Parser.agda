@@ -84,6 +84,8 @@ read METHOD _ = nothing
 read REQUEST-URI ('/' ∷ xs) = read-to-SP ('/' ∷ xs)
 read REQUEST-URI (_ ∷ _) = nothing
 
+read REASON-PHRASE xs = read-to-CRLF xs
+
 read (HEADER GET) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
 read (HEADER GET) ('A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'o' ∷ 'r' ∷ 'i' ∷ 'z' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Authorization , xs)
 read (HEADER GET) ('F' ∷ 'r' ∷ 'o' ∷ 'm' ∷ xs) = just (From , xs)
@@ -174,3 +176,8 @@ Request-Parse = Maybe (⟦ Request-Format ⟧ × List Char)
 
 parse-request : List Char → Request-Parse
 parse-request xs = parse Request-Format xs
+
+Response-Parse = Maybe (⟦ Response-Format ⟧ × List Char)
+
+parse-response : List Char → Response-Parse
+parse-response xs = parse Response-Format xs

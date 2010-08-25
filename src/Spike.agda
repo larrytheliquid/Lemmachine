@@ -7,6 +7,7 @@ data Method : Set where
   GET HEAD POST : Method
 
 Request-URI = String
+Reason-Phrase = String
 
 data GET-Header : Set where
   Pragma : GET-Header
