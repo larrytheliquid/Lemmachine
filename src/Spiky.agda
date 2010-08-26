@@ -211,6 +211,15 @@ GET-Response-Format =
     End
   ) >>-
 
+  Slurp (
+    Base GET-RESPONSE-HEADER >>= λ h →
+    char ':' >>
+    SP >>
+    Base (RESPONSE-VALUE h) >>-
+    CRLF >>
+    End
+  ) >>-
+
   CRLF >>
   End
 
@@ -244,6 +253,15 @@ POST-Response-Format =
     char ':' >>
     SP >>
     Base (RESPONSE-VALUE (proj h)) >>-
+    CRLF >>
+    End
+  ) >>-
+
+  Slurp (
+    Base POST-RESPONSE-HEADER >>= λ h →
+    char ':' >>
+    SP >>
+    Base (RESPONSE-VALUE h) >>-
     CRLF >>
     End
   ) >>-
