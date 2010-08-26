@@ -136,18 +136,26 @@ read (VALUE {POST} Content-Encoding) xs = read-to-CRLF xs
 read (VALUE {POST} Content-Length) xs   = read-Decimal xs
 read (VALUE {POST} Content-Type) xs     = read-to-CRLF xs
 
+read (RESPONSE-HEADER GET) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
 read (RESPONSE-HEADER GET) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
 
+read (RESPONSE-HEADER HEAD) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
 read (RESPONSE-HEADER HEAD) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
 
+read (RESPONSE-HEADER POST) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
 read (RESPONSE-HEADER POST) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
 
 read (RESPONSE-HEADER GET) _  = nothing
 read (RESPONSE-HEADER HEAD) _ = nothing
 read (RESPONSE-HEADER POST) _ = nothing
 
+read (RESPONSE-VALUE {GET} Date) xs  = read-to-CRLF xs
 read (RESPONSE-VALUE {GET} Pragma) xs  = read-to-CRLF xs
+
+read (RESPONSE-VALUE {HEAD} Date) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {HEAD} Pragma) xs = read-to-CRLF xs
+
+read (RESPONSE-VALUE {POST} Date) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {POST} Pragma) xs = read-to-CRLF xs
 
 read _ [] = nothing
@@ -192,7 +200,8 @@ Request-Parse = Maybe (⟦ Request-Format ⟧ × List Char)
 parse-request : List Char → Request-Parse
 parse-request xs = parse Request-Format xs
 
-Response-Parse = Maybe (⟦ Response-Format ⟧ × List Char)
+Response-Parse : Method → Set
+Response-Parse m = Maybe (⟦ Response-Format m ⟧ × List Char)
 
-parse-response : List Char → Response-Parse
-parse-response xs = parse Response-Format xs
+parse-response : (m : Method) → List Char → Response-Parse m
+parse-response m xs = parse (Response-Format m) xs

@@ -200,14 +200,13 @@ Status-Code-Format =
   DIGIT >>-
   DIGIT
 
-HEAD-Response-Format : Format
-HEAD-Response-Format =
-  Slurp (
-    -- TODO: head response header
-    Base HEAD-HEADER >>= λ h →
+GET-Response-Format : Format
+GET-Response-Format =
+  Upto End-Headers (
+    Base (SINGLE GET-RESPONSE-HEADER Date) >>= λ h →
     char ':' >>
     SP >>
-    Base (VALUE h) >>-
+    Base (RESPONSE-VALUE (proj h)) >>-
     CRLF >>
     End
   ) >>-
@@ -215,7 +214,50 @@ HEAD-Response-Format =
   CRLF >>
   End
 
-Response-Format =
+HEAD-Response-Format : Format
+HEAD-Response-Format =
+  Upto End-Headers (
+    Base (SINGLE HEAD-RESPONSE-HEADER Date) >>= λ h →
+    char ':' >>
+    SP >>
+    Base (RESPONSE-VALUE (proj h)) >>-
+    CRLF >>
+    End
+  ) >>-
+
+  Slurp (
+    Base HEAD-RESPONSE-HEADER >>= λ h →
+    char ':' >>
+    SP >>
+    Base (RESPONSE-VALUE h) >>-
+    CRLF >>
+    End
+  ) >>-
+
+  CRLF >>
+  End
+
+POST-Response-Format : Format
+POST-Response-Format =
+  Upto End-Headers (
+    Base (SINGLE POST-RESPONSE-HEADER Date) >>= λ h →
+    char ':' >>
+    SP >>
+    Base (RESPONSE-VALUE (proj h)) >>-
+    CRLF >>
+    End
+  ) >>-
+
+  CRLF >>
+  End
+
+Method-Response-Format : Method → Format
+Method-Response-Format GET  = GET-Response-Format
+Method-Response-Format HEAD = HEAD-Response-Format
+Method-Response-Format POST = POST-Response-Format
+
+Response-Format : Method → Format
+Response-Format m =
   HTTP-Version-Format >>-
   SP >>
   Status-Code-Format >>= λ s-c →
@@ -223,7 +265,7 @@ Response-Format =
   SP >>
   Base REASON-PHRASE >>-
   CRLF >>
-  End
+  Method-Response-Format m
 
   where
 

@@ -41,13 +41,13 @@ Value {POST} Content-Length = ℕ
 Value {POST} _ = String
 
 data GET-Response-Header : Set where
-  Pragma : GET-Response-Header
+  Date Pragma : GET-Response-Header
 
 data HEAD-Response-Header : Set where
-  Pragma : HEAD-Response-Header
+  Date Pragma : HEAD-Response-Header
 
 data POST-Response-Header : Set where
-  Pragma : POST-Response-Header
+  Date Pragma : POST-Response-Header
 
 Response-Header : Method → Set
 Response-Header GET  = GET-Response-Header
