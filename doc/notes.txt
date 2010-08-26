@@ -217,3 +217,8 @@ not recognize the request method and is not capable of supporting
 it for any resource.
 
 TODO: Pragma: no-cache for origin servers?
+
+Location header value in 3xx should be different from Request-URI
+(only matters if proxy? is true so abs_path is possible)
+
+Location also possible in 201

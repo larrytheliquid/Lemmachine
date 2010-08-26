@@ -115,6 +115,27 @@ HTTP-Version-Format =
   f 1 0 = End
   f _ _ = Fail
 
+Required-Header : (u : U) → El u → Format
+Required-Header (HEADER m) v =
+  Upto End-Headers (
+    Base (SINGLE (HEADER m) v) >>= λ h →
+    char ':' >>
+    SP >>
+    Base (VALUE (proj h)) >>-
+    CRLF >>
+    End
+  )
+Required-Header (RESPONSE-HEADER m) v =
+  Upto End-Headers (
+    Base (SINGLE (RESPONSE-HEADER m) v) >>= λ h →
+    char ':' >>
+    SP >>
+    Base (RESPONSE-VALUE (proj h)) >>-
+    CRLF >>
+    End
+  )
+Required-Header _ _ = Fail
+
 GET-Format : Format
 GET-Format =
   Slurp (
@@ -145,29 +166,14 @@ HEAD-Format =
 
 POST-Format : Format
 POST-Format =
-  Upto End-Headers (
-    Base (SINGLE POST-HEADER Content-Length) >>= λ h →
-    char ':' >>
-    SP >>
-    Base (VALUE (proj h)) >>-
-    CRLF >>
-    End
-  ) >>= λ c-l →
-
+  Required-Header POST-HEADER Content-Length >>= λ c-l →
   f (Data.Product.proj₁ c-l) (Data.proj₁ (Data.Product.proj₂ c-l))
 
   where
 
   f : (s : Single {Header POST} Content-Length) → Value (proj s) → Format
   f (single ._) n =
-    Upto End-Headers (
-      Base (SINGLE POST-HEADER Content-Type) >>= λ h →
-      char ':' >>
-      SP >>
-      Base (VALUE (proj h)) >>-
-      CRLF >>
-      End
-    ) >>-
+    Required-Header POST-HEADER Content-Type >>-
 
     Slurp (
       Base POST-HEADER >>= λ h →
@@ -202,14 +208,7 @@ Status-Code-Format =
 
 GET-Response-Format : Format
 GET-Response-Format =
-  Upto End-Headers (
-    Base (SINGLE GET-RESPONSE-HEADER Date) >>= λ h →
-    char ':' >>
-    SP >>
-    Base (RESPONSE-VALUE (proj h)) >>-
-    CRLF >>
-    End
-  ) >>-
+  Required-Header GET-RESPONSE-HEADER Date >>-
 
   Slurp (
     Base GET-RESPONSE-HEADER >>= λ h →
@@ -225,14 +224,7 @@ GET-Response-Format =
 
 HEAD-Response-Format : Format
 HEAD-Response-Format =
-  Upto End-Headers (
-    Base (SINGLE HEAD-RESPONSE-HEADER Date) >>= λ h →
-    char ':' >>
-    SP >>
-    Base (RESPONSE-VALUE (proj h)) >>-
-    CRLF >>
-    End
-  ) >>-
+  Required-Header HEAD-RESPONSE-HEADER Date >>-
 
   Slurp (
     Base HEAD-RESPONSE-HEADER >>= λ h →
@@ -248,14 +240,7 @@ HEAD-Response-Format =
 
 POST-Response-Format : Format
 POST-Response-Format =
-  Upto End-Headers (
-    Base (SINGLE POST-RESPONSE-HEADER Date) >>= λ h →
-    char ':' >>
-    SP >>
-    Base (RESPONSE-VALUE (proj h)) >>-
-    CRLF >>
-    End
-  ) >>-
+  Required-Header POST-RESPONSE-HEADER Date >>-
 
   Slurp (
     Base POST-RESPONSE-HEADER >>= λ h →
@@ -274,19 +259,37 @@ Method-Response-Format GET  = GET-Response-Format
 Method-Response-Format HEAD = HEAD-Response-Format
 Method-Response-Format POST = POST-Response-Format
 
+Location-Format : Method → ℕ → ℕ → ℕ → Format
+Location-Format GET  3 _ _ = Required-Header GET-RESPONSE-HEADER  Location
+Location-Format HEAD 3 _ _ = Required-Header HEAD-RESPONSE-HEADER Location
+Location-Format POST 3 _ _ = Required-Header POST-RESPONSE-HEADER Location
+Location-Format POST 2 0 1 = Required-Header POST-RESPONSE-HEADER Location
+Location-Format _ _ _ _ = End
+
 Response-Format : Method → Format
 Response-Format m =
   HTTP-Version-Format >>-
   SP >>
   Status-Code-Format >>= λ s-c →
-  f (nat (Data.proj₁ s-c)) >>
+  guard m 
+    (nat (Data.proj₁ s-c))
+    (nat (Data.proj₁ (Data.proj₂ s-c)))
+    (nat (Data.proj₂ (Data.proj₂ s-c)))
+  >>
   SP >>
   Base REASON-PHRASE >>-
   CRLF >>
+  Location-Format m
+    (nat (Data.proj₁ s-c))
+    (nat (Data.proj₁ (Data.proj₂ s-c)))
+    (nat (Data.proj₂ (Data.proj₂ s-c)))
+  >>-
   Method-Response-Format m
 
   where
 
-  f : ℕ → Format
-  f 1 = Fail
-  f _ = End
+  guard : Method → ℕ → ℕ → ℕ → Format
+  guard _    1 _ _ = Fail
+  guard GET  2 0 1 = Fail
+  guard HEAD 2 0 1 = Fail
+  guard _    _ _ _ = End

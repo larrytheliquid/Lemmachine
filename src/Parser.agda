@@ -67,6 +67,23 @@ read (SINGLE (HEADER POST) y) (x ∷ xs) with read (HEADER POST) (x ∷ xs)
 read (SINGLE (HEADER POST) Content-Length) (_ ∷ _) | just (Content-Length , ys) = just (single Content-Length , ys)
 read (SINGLE (HEADER POST) Content-Type) (_ ∷ _)   | just (Content-Type , ys)   = just (single Content-Type , ys)
 ... | just _ = nothing
+
+read (SINGLE (RESPONSE-HEADER GET) y) (x ∷ xs) with read (RESPONSE-HEADER GET) (x ∷ xs)
+... | nothing = nothing
+read (SINGLE (RESPONSE-HEADER GET) Date) (_ ∷ _)   | just (Date , ys)   = just (single Date , ys)
+... | just _ = nothing
+
+read (SINGLE (RESPONSE-HEADER HEAD) y) (x ∷ xs) with read (RESPONSE-HEADER HEAD) (x ∷ xs)
+... | nothing = nothing
+read (SINGLE (RESPONSE-HEADER HEAD) Date) (_ ∷ _)   | just (Date , ys)   = just (single Date , ys)
+... | just _ = nothing
+
+read (SINGLE (RESPONSE-HEADER POST) y) (x ∷ xs) with read (RESPONSE-HEADER POST) (x ∷ xs)
+... | nothing = nothing
+read (SINGLE (RESPONSE-HEADER POST) Date) (_ ∷ _)   | just (Date , ys)   = just (single Date , ys)
+read (SINGLE (RESPONSE-HEADER POST) Location) (_ ∷ _)   | just (Location , ys)   = just (single Location , ys)
+... | just _ = nothing
+
 -- TODO: Single via Decidable equality on other values + types
 read (SINGLE _ _) (x ∷ xs) = nothing
 
@@ -138,12 +155,15 @@ read (VALUE {POST} Content-Type) xs     = read-to-CRLF xs
 
 read (RESPONSE-HEADER GET) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
 read (RESPONSE-HEADER GET) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
+read (RESPONSE-HEADER GET) ('L' ∷ 'o' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Location , xs)
 
 read (RESPONSE-HEADER HEAD) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
 read (RESPONSE-HEADER HEAD) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
+read (RESPONSE-HEADER HEAD) ('L' ∷ 'o' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Location , xs)
 
 read (RESPONSE-HEADER POST) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
 read (RESPONSE-HEADER POST) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
+read (RESPONSE-HEADER POST) ('L' ∷ 'o' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Location , xs)
 
 read (RESPONSE-HEADER GET) _  = nothing
 read (RESPONSE-HEADER HEAD) _ = nothing
@@ -151,12 +171,15 @@ read (RESPONSE-HEADER POST) _ = nothing
 
 read (RESPONSE-VALUE {GET} Date) xs  = read-to-CRLF xs
 read (RESPONSE-VALUE {GET} Pragma) xs  = read-to-CRLF xs
+read (RESPONSE-VALUE {GET} Location) xs = read-to-CRLF xs
 
 read (RESPONSE-VALUE {HEAD} Date) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {HEAD} Pragma) xs = read-to-CRLF xs
+read (RESPONSE-VALUE {HEAD} Location) xs = read-to-CRLF xs
 
 read (RESPONSE-VALUE {POST} Date) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {POST} Pragma) xs = read-to-CRLF xs
+read (RESPONSE-VALUE {POST} Location) xs = read-to-CRLF xs
 
 read _ [] = nothing
 
