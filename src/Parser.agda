@@ -109,12 +109,6 @@ read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' 
 read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
 read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
 
-read (RESPONSE-HEADER GET) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
-
-read (RESPONSE-HEADER HEAD) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
-
-read (RESPONSE-HEADER POST) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
-
 read (HEADER GET) _  = nothing
 read (HEADER HEAD) _ = nothing
 read (HEADER POST) _ = nothing
@@ -141,6 +135,12 @@ read (VALUE {POST} User-Agent) xs       = read-to-CRLF xs
 read (VALUE {POST} Content-Encoding) xs = read-to-CRLF xs
 read (VALUE {POST} Content-Length) xs   = read-Decimal xs
 read (VALUE {POST} Content-Type) xs     = read-to-CRLF xs
+
+read (RESPONSE-HEADER GET) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
+
+read (RESPONSE-HEADER HEAD) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
+
+read (RESPONSE-HEADER POST) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
 
 read (RESPONSE-HEADER GET) _  = nothing
 read (RESPONSE-HEADER HEAD) _ = nothing
