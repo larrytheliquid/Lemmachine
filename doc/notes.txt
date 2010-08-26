@@ -228,3 +228,9 @@ The WWW-Authenticate response-header field must be included in 401
 
 already split method header types, probably also want to split types
 for optional/required and maybe status code restrictions/additions
+
+Upon receipt of an unauthorized request for a URI within the
+protection space, the server should respond with a challenge like the
+following:
+WWW-Authenticate: Basic realm="WallyWorld"
+... unauthorized? hook

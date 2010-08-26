@@ -259,32 +259,38 @@ Method-Response-Format GET  = GET-Response-Format
 Method-Response-Format HEAD = HEAD-Response-Format
 Method-Response-Format POST = POST-Response-Format
 
+-- TODO: Properly comply with 3xx & 201 wrt optional/required
 Location-Format : Method → ℕ → ℕ → ℕ → Format
 Location-Format GET  3 _ _ = Required-Header GET-RESPONSE-HEADER  Location
 Location-Format HEAD 3 _ _ = Required-Header HEAD-RESPONSE-HEADER Location
 Location-Format POST 3 _ _ = Required-Header POST-RESPONSE-HEADER Location
 Location-Format POST 2 0 1 = Required-Header POST-RESPONSE-HEADER Location
-Location-Format _ _ _ _ = End
+Location-Format _    _ _ _ = End
+
+WWW-Authenticate-Format : Method → ℕ → ℕ → ℕ → Format
+WWW-Authenticate-Format GET  4 0 1 = Required-Header GET-RESPONSE-HEADER  WWW-Authenticate
+WWW-Authenticate-Format HEAD 4 0 1 = Required-Header HEAD-RESPONSE-HEADER WWW-Authenticate
+WWW-Authenticate-Format POST 4 0 1 = Required-Header POST-RESPONSE-HEADER WWW-Authenticate
+WWW-Authenticate-Format _    _ _ _ = End
 
 Response-Format : Method → Format
 Response-Format m =
   HTTP-Version-Format >>-
   SP >>
   Status-Code-Format >>= λ s-c →
-  guard m 
-    (nat (Data.proj₁ s-c))
+  ( λ (n₁ n₂ n₃ : ℕ) →
+
+    guard m n₁ n₂ n₃ >>
+    SP >>
+    Base REASON-PHRASE >>-
+    CRLF >>
+    Location-Format m n₁ n₂ n₃ >>-
+    WWW-Authenticate-Format m n₁ n₂ n₃ >>-
+    Method-Response-Format m
+
+  ) (nat (Data.proj₁ s-c))
     (nat (Data.proj₁ (Data.proj₂ s-c)))
     (nat (Data.proj₂ (Data.proj₂ s-c)))
-  >>
-  SP >>
-  Base REASON-PHRASE >>-
-  CRLF >>
-  Location-Format m
-    (nat (Data.proj₁ s-c))
-    (nat (Data.proj₁ (Data.proj₂ s-c)))
-    (nat (Data.proj₂ (Data.proj₂ s-c)))
-  >>-
-  Method-Response-Format m
 
   where
 

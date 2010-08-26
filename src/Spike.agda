@@ -43,14 +43,17 @@ Value {POST} _ = String
 data GET-Response-Header : Set where
   Date Pragma : GET-Response-Header
   Location Server : GET-Response-Header
+  WWW-Authenticate : GET-Response-Header
 
 data HEAD-Response-Header : Set where
   Date Pragma : HEAD-Response-Header
   Location Server : HEAD-Response-Header
+  WWW-Authenticate : HEAD-Response-Header
 
 data POST-Response-Header : Set where
   Date Pragma : POST-Response-Header
   Location Server : POST-Response-Header
+  WWW-Authenticate : POST-Response-Header
 
 Response-Header : Method → Set
 Response-Header GET  = GET-Response-Header
