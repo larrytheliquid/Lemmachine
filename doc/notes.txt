@@ -115,3 +115,103 @@ format vs base / parse vs read
 
 
 
+All 1xx (informational), 204 (no content), and
+304 (not modified) responses must not include a body. All other
+responses must include an entity body or a Content-Length header
+field defined with a value of zero (0).
+
+Any HTTP/1.0 message containing an entity body should include a
+Content-Type header field defining the media type of that body.
+
+If the media type remains unknown, the recipient should treat it as
+type "application/octet-stream".
+
+If a request contains an entity body and Content-Length is not
+specified, and the server does not recognize or cannot calculate
+the length from other fields, then the server should send a 400
+(bad request) response.
+
+If-Modified-Since = conditional GET
+
+If an If-Modified-Since header field is included with a HEAD
+request, it should be ignored.
+
+The metainformation contained in the HTTP headers in response to a
+HEAD request should be identical to the information sent in response to a GET request.
+
+The actual function performed by the POST method is determined by the
+server and is usually dependent on the Request-URI.
+
+A successful POST does not require that the entity be created as a
+resource on the origin server or made accessible for future
+reference. That is, the action performed by the POST method might not
+result in a resource that can be identified by a URI. In this case,
+either 200 (ok) or 204 (no content) is the appropriate response
+status, depending on whether or not the response includes an entity
+ that describes the result.
+
+If a resource has been created on the origin server, the response
+should be 201 (created) and contain an entity (preferably of type
+"text/html") which describes the status of the request and refers to
+the new resource.
+
+HTTP/1.0 does not define any 1xx status
+codes and they are not a valid response to a HTTP/1.0 request.
+
+201 Created: If the action
+cannot be carried out immediately, the server must include in the
+response body a description of when the resource will be available;
+otherwise, the server should respond with 202 (accepted).
+
+The newly created resource can be referenced by the URI(s)
+returned in the entity of the response.
+
+The origin server should
+create the resource before using this Status-Code.
+
+Of the methods defined by this specification, only POST can create a
+resource.
+
+202 Accepted: The entity returned with this
+response should include an indication of the request's current
+status and either a pointer to a status monitor or some estimate of
+when the user can expect the request to be fulfilled.
+
+204 No Content: The response may include
+new metainformation in the form of entity headers, which should
+apply to the document currently in the user agent's active view.
+
+The server has fulfilled the request but there is no new
+information to send back.
+allow input
+for scripts or other actions to take place without causing a change
+to the user agent's active document view.
+
+300 Multiple Choices:
+This response code is not directly used by HTTP/1.0 applications,
+but serves as the default for interpreting the 3xx class of
+responses.
+
+The requested resource is available at one or more locations.
+Unless it was a HEAD request, the response should include an entity
+containing a list of resource characteristics and locations from
+which the user or user agent can choose the one most appropriate.
+If the server has a preferred choice, it should include the URL in
+a Location field; user agents may use this field value for
+automatic redirection.
+
+301 Moved Permanently:
+The new URL must be given by the Location field in the response.
+Unless it was a HEAD request, the Entity-Body of the response
+should contain a short note with a hyperlink to the new URL.
+
+If the 301 status code is received in response to a request using
+the POST method, the user agent must not automatically redirect the
+request unless it can be confirmed by the user, since this might
+change the conditions under which the request was issued.
+
+501 Not Implemented:
+The server does not support the functionality required to fulfill
+the request. This is the appropriate response when the server does
+not recognize the request method and is not capable of supporting
+it for any resource.

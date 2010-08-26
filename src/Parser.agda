@@ -92,14 +92,12 @@ read (HEADER GET) ('F' ∷ 'r' ∷ 'o' ∷ 'm' ∷ xs) = just (From , xs)
 read (HEADER GET) ('I' ∷ 'f' ∷ '-' ∷ 'M' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'f' ∷ 'i' ∷ 'e' ∷ 'd' ∷ '-' ∷ 'S' ∷ 'i' ∷ 'n' ∷ 'c' ∷ 'e' ∷ xs) = just (If-Modified-Since , xs)
 read (HEADER GET) ('R' ∷ 'e' ∷ 'f' ∷ 'e' ∷ 'r' ∷ 'e' ∷ 'r' ∷ xs) = just (Referer , xs)
 read (HEADER GET) ('U' ∷ 's' ∷ 'e' ∷ 'r' ∷ '-' ∷ 'A' ∷ 'g' ∷ 'e' ∷ 'n' ∷ 't' ∷ xs) = just (User-Agent , xs)
-read (HEADER GET) _ = nothing
 
 read (HEADER HEAD) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
 read (HEADER HEAD) ('A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'o' ∷ 'r' ∷ 'i' ∷ 'z' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Authorization , xs)
 read (HEADER HEAD) ('F' ∷ 'r' ∷ 'o' ∷ 'm' ∷ xs) = just (From , xs)
 read (HEADER HEAD) ('R' ∷ 'e' ∷ 'f' ∷ 'e' ∷ 'r' ∷ 'e' ∷ 'r' ∷ xs) = just (Referer , xs)
 read (HEADER HEAD) ('U' ∷ 's' ∷ 'e' ∷ 'r' ∷ '-' ∷ 'A' ∷ 'g' ∷ 'e' ∷ 'n' ∷ 't' ∷ xs) = just (User-Agent , xs)
-read (HEADER HEAD) _ = nothing
 
 read (HEADER POST) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
 read (HEADER POST) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
@@ -110,6 +108,9 @@ read (HEADER POST) ('U' ∷ 's' ∷ 'e' ∷ 'r' ∷ '-' ∷ 'A' ∷ 'g' ∷ 'e' 
 read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'E' ∷ 'n' ∷ 'c' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'n' ∷ 'g' ∷ xs) = just (Content-Encoding , xs)
 read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
 read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
+
+read (HEADER GET) _  = nothing
+read (HEADER HEAD) _ = nothing
 read (HEADER POST) _ = nothing
 
 read (VALUE {GET} Pragma) xs            = read-to-CRLF xs
@@ -134,6 +135,14 @@ read (VALUE {POST} User-Agent) xs       = read-to-CRLF xs
 read (VALUE {POST} Content-Encoding) xs = read-to-CRLF xs
 read (VALUE {POST} Content-Length) xs   = read-Decimal xs
 read (VALUE {POST} Content-Type) xs     = read-to-CRLF xs
+
+read (RESPONSE-HEADER GET) _  = nothing
+read (RESPONSE-HEADER HEAD) _ = nothing
+read (RESPONSE-HEADER POST) _ = nothing
+
+read (RESPONSE-VALUE {GET} Pragma) xs  = read-to-CRLF xs
+read (RESPONSE-VALUE {HEAD} Pragma) xs = read-to-CRLF xs
+read (RESPONSE-VALUE {POST} Pragma) xs = read-to-CRLF xs
 
 read _ [] = nothing
 

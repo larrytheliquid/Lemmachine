@@ -94,3 +94,6 @@ data DarRange (start end : ℕ) : Bool → Set where
 
 data Dar : ℕ → Set where
   dar : (c : Char) → Dar (toNat c)
+
+nat : ∀ {x y b} → DarRange x y b → ℕ
+nat (dar c) = toNat c

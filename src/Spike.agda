@@ -39,3 +39,22 @@ Value {GET}  _ = String
 Value {HEAD} _ = String
 Value {POST} Content-Length = ℕ
 Value {POST} _ = String
+
+data GET-Response-Header : Set where
+  Pragma : GET-Response-Header
+
+data HEAD-Response-Header : Set where
+  Pragma : HEAD-Response-Header
+
+data POST-Response-Header : Set where
+  Pragma : POST-Response-Header
+
+Response-Header : Method → Set
+Response-Header GET  = GET-Response-Header
+Response-Header HEAD = HEAD-Response-Header
+Response-Header POST = POST-Response-Header
+
+Response-Value : {m : Method} → Response-Header m → Set
+Response-Value {GET}  _ = String
+Response-Value {HEAD} _ = String
+Response-Value {POST} _ = String

@@ -25,6 +25,8 @@ mutual
     METHOD REQUEST-URI REASON-PHRASE : U
     HEADER : Method → U
     VALUE : {m : Method} → Header m → U
+    RESPONSE-HEADER : Method → U
+    RESPONSE-VALUE : {m : Method} → Response-Header m → U
 
   El : U → Set
   El CHAR = Char
@@ -38,10 +40,16 @@ mutual
   El REASON-PHRASE = Reason-Phrase
   El (HEADER m) = Header m
   El (VALUE h) = Value h
+  El (RESPONSE-HEADER m) = Response-Header m
+  El (RESPONSE-VALUE h) = Response-Value h
 
 GET-HEADER  = HEADER GET
 HEAD-HEADER = HEADER HEAD
 POST-HEADER = HEADER POST
+
+GET-RESPONSE-HEADER  = RESPONSE-HEADER GET
+HEAD-RESPONSE-HEADER = RESPONSE-HEADER HEAD
+POST-RESPONSE-HEADER = RESPONSE-HEADER POST
 
 mutual
   data Format : Set where
@@ -192,11 +200,33 @@ Status-Code-Format =
   DIGIT >>-
   DIGIT
 
+HEAD-Response-Format : Format
+HEAD-Response-Format =
+  Slurp (
+    -- TODO: head response header
+    Base HEAD-HEADER >>= λ h →
+    char ':' >>
+    SP >>
+    Base (VALUE h) >>-
+    CRLF >>
+    End
+  ) >>-
+
+  CRLF >>
+  End
+
 Response-Format =
   HTTP-Version-Format >>-
   SP >>
-  Status-Code-Format >>-
+  Status-Code-Format >>= λ s-c →
+  f (nat (Data.proj₁ s-c)) >>
   SP >>
   Base REASON-PHRASE >>-
   CRLF >>
   End
+
+  where
+
+  f : ℕ → Format
+  f 1 = Fail
+  f _ = End
