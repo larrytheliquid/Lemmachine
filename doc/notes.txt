@@ -85,6 +85,11 @@ invalid date format should be considered equivalent to an "expires
 immediately." Although these values are not legitimate for HTTP/1.0, a
 robust implementation is always desirable.
 
+Last-Modified below + HEAD minus If-Modified-Since
+Robust acceptance vs strict sending
+204 & 304
+Content-Encoding + Content-Type = pluggable typecheck
+
 An origin server must not send a Last-Modified date which is later
 than the server's time of message origination. In such cases, where
 the resource's last modification would indicate some time in the
@@ -234,3 +239,8 @@ protection space, the server should respond with a challenge like the
 following:
 WWW-Authenticate: Basic realm="WallyWorld"
 ... unauthorized? hook
+
+HEAD is a special exception where content-type/length/etc can
+be present without a body
+... it should be identical to GET except that If-Modified-Since
+is to be ignored

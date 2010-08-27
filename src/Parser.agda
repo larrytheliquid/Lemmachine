@@ -158,6 +158,8 @@ read (RESPONSE-HEADER GET) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) 
 read (RESPONSE-HEADER GET) ('L' ∷ 'o' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Location , xs)
 read (RESPONSE-HEADER GET) ('S' ∷ 'e' ∷ 'r' ∷ 'v' ∷ 'e' ∷ 'r' ∷ xs) = just (Server , xs)
 read (RESPONSE-HEADER GET) ('W' ∷ 'W' ∷ 'W' ∷ '-' ∷ 'A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'e' ∷ 'n' ∷ 't' ∷ 'i' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (WWW-Authenticate , xs)
+read (RESPONSE-HEADER GET) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'E' ∷ 'n' ∷ 'c' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'n' ∷ 'g' ∷ xs) = just (Content-Encoding , xs)
+read (RESPONSE-HEADER GET) ('E' ∷ 'x' ∷ 'p' ∷ 'i' ∷ 'r' ∷ 'e' ∷ 's' ∷ xs) = just (Expires , xs)
 read (RESPONSE-HEADER GET) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
 read (RESPONSE-HEADER GET) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
 
@@ -166,12 +168,18 @@ read (RESPONSE-HEADER HEAD) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs)
 read (RESPONSE-HEADER HEAD) ('L' ∷ 'o' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Location , xs)
 read (RESPONSE-HEADER HEAD) ('S' ∷ 'e' ∷ 'r' ∷ 'v' ∷ 'e' ∷ 'r' ∷ xs) = just (Server , xs)
 read (RESPONSE-HEADER HEAD) ('W' ∷ 'W' ∷ 'W' ∷ '-' ∷ 'A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'e' ∷ 'n' ∷ 't' ∷ 'i' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (WWW-Authenticate , xs)
+read (RESPONSE-HEADER HEAD) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'E' ∷ 'n' ∷ 'c' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'n' ∷ 'g' ∷ xs) = just (Content-Encoding , xs)
+read (RESPONSE-HEADER HEAD) ('E' ∷ 'x' ∷ 'p' ∷ 'i' ∷ 'r' ∷ 'e' ∷ 's' ∷ xs) = just (Expires , xs)
+read (RESPONSE-HEADER HEAD) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
+read (RESPONSE-HEADER HEAD) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
 
 read (RESPONSE-HEADER POST) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
 read (RESPONSE-HEADER POST) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
 read (RESPONSE-HEADER POST) ('L' ∷ 'o' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Location , xs)
 read (RESPONSE-HEADER POST) ('S' ∷ 'e' ∷ 'r' ∷ 'v' ∷ 'e' ∷ 'r' ∷ xs) = just (Server , xs)
 read (RESPONSE-HEADER POST) ('W' ∷ 'W' ∷ 'W' ∷ '-' ∷ 'A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'e' ∷ 'n' ∷ 't' ∷ 'i' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (WWW-Authenticate , xs)
+read (RESPONSE-HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'E' ∷ 'n' ∷ 'c' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'n' ∷ 'g' ∷ xs) = just (Content-Encoding , xs)
+read (RESPONSE-HEADER POST) ('E' ∷ 'x' ∷ 'p' ∷ 'i' ∷ 'r' ∷ 'e' ∷ 's' ∷ xs) = just (Expires , xs)
 read (RESPONSE-HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
 read (RESPONSE-HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
 
@@ -184,6 +192,8 @@ read (RESPONSE-VALUE {GET} Pragma) xs  = read-to-CRLF xs
 read (RESPONSE-VALUE {GET} Location) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {GET} Server) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {GET} WWW-Authenticate) xs = read-to-CRLF xs
+read (RESPONSE-VALUE {GET} Content-Encoding) xs = read-to-CRLF xs
+read (RESPONSE-VALUE {GET} Expires) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {GET} Content-Length) xs = read-Decimal xs
 read (RESPONSE-VALUE {GET} Content-Type) xs = read-to-CRLF xs
 
@@ -192,12 +202,18 @@ read (RESPONSE-VALUE {HEAD} Pragma) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {HEAD} Location) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {HEAD} Server) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {HEAD} WWW-Authenticate) xs = read-to-CRLF xs
+read (RESPONSE-VALUE {HEAD} Content-Encoding) xs = read-to-CRLF xs
+read (RESPONSE-VALUE {HEAD} Expires) xs = read-to-CRLF xs
+read (RESPONSE-VALUE {HEAD} Content-Length) xs = read-Decimal xs
+read (RESPONSE-VALUE {HEAD} Content-Type) xs = read-to-CRLF xs
 
 read (RESPONSE-VALUE {POST} Date) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {POST} Pragma) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {POST} Location) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {POST} Server) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {POST} WWW-Authenticate) xs = read-to-CRLF xs
+read (RESPONSE-VALUE {POST} Content-Encoding) xs = read-to-CRLF xs
+read (RESPONSE-VALUE {POST} Expires) xs = read-to-CRLF xs
 read (RESPONSE-VALUE {POST} Content-Length) xs = read-Decimal xs
 read (RESPONSE-VALUE {POST} Content-Type) xs = read-to-CRLF xs
 
