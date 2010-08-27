@@ -44,6 +44,9 @@ data GET-Response-Header : Set where
   Date Pragma : GET-Response-Header
   Location Server : GET-Response-Header
   WWW-Authenticate : GET-Response-Header
+  
+  Content-Length : GET-Response-Header
+  Content-Type : GET-Response-Header
 
 data HEAD-Response-Header : Set where
   Date Pragma : HEAD-Response-Header
@@ -55,12 +58,17 @@ data POST-Response-Header : Set where
   Location Server : POST-Response-Header
   WWW-Authenticate : POST-Response-Header
 
+  Content-Length : POST-Response-Header
+  Content-Type : POST-Response-Header
+
 Response-Header : Method → Set
 Response-Header GET  = GET-Response-Header
 Response-Header HEAD = HEAD-Response-Header
 Response-Header POST = POST-Response-Header
 
 Response-Value : {m : Method} → Response-Header m → Set
+Response-Value {GET} Content-Length = ℕ
 Response-Value {GET}  _ = String
 Response-Value {HEAD} _ = String
+Response-Value {POST} Content-Length = ℕ
 Response-Value {POST} _ = String

@@ -217,10 +217,7 @@ GET-Response-Format =
     Base (RESPONSE-VALUE h) >>-
     CRLF >>
     End
-  ) >>-
-
-  CRLF >>
-  End
+  )
 
 HEAD-Response-Format : Format
 HEAD-Response-Format =
@@ -233,10 +230,7 @@ HEAD-Response-Format =
     Base (RESPONSE-VALUE h) >>-
     CRLF >>
     End
-  ) >>-
-
-  CRLF >>
-  End
+  )
 
 POST-Response-Format : Format
 POST-Response-Format =
@@ -249,10 +243,7 @@ POST-Response-Format =
     Base (RESPONSE-VALUE h) >>-
     CRLF >>
     End
-  ) >>-
-
-  CRLF >>
-  End
+  )
 
 Method-Response-Format : Method → Format
 Method-Response-Format GET  = GET-Response-Format
@@ -273,6 +264,40 @@ WWW-Authenticate-Format HEAD 4 0 1 = Required-Header HEAD-RESPONSE-HEADER WWW-Au
 WWW-Authenticate-Format POST 4 0 1 = Required-Header POST-RESPONSE-HEADER WWW-Authenticate
 WWW-Authenticate-Format _    _ _ _ = End
 
+Entity-Body-Format : Format → Method → ℕ → ℕ → ℕ → Format
+Entity-Body-Format body _    1 _ _ = body >>- CRLF >> End
+Entity-Body-Format body _    2 0 4 = body >>- CRLF >> End
+Entity-Body-Format body _    3 0 4 = body >>- CRLF >> End
+Entity-Body-Format body HEAD _ _ _ = body >>- CRLF >> End
+
+Entity-Body-Format body GET _ _ _ =
+  Required-Header GET-RESPONSE-HEADER Content-Length >>= λ c-l →
+  f body (Data.Product.proj₁ c-l) (Data.proj₁ (Data.Product.proj₂ c-l))
+
+  where
+
+  f : Format → (s : Single {Response-Header GET} Content-Length) → Response-Value (proj s) → Format
+  f body (single ._) zero = body >>- CRLF >> End
+  f body (single ._) n =
+    Required-Header GET-RESPONSE-HEADER Content-Type >>-
+    body >>-
+    CRLF >>
+    Base (STR n)
+  
+Entity-Body-Format body POST _ _ _ =
+  Required-Header POST-RESPONSE-HEADER Content-Length >>= λ c-l →
+  f body (Data.Product.proj₁ c-l) (Data.proj₁ (Data.Product.proj₂ c-l))
+
+  where
+
+  f : Format → (s : Single {Response-Header POST} Content-Length) → Response-Value (proj s) → Format
+  f body (single ._) zero = body >>- CRLF >> End
+  f body (single ._) n =
+    Required-Header POST-RESPONSE-HEADER Content-Type >>-
+    body >>-
+    CRLF >>
+    Base (STR n)
+
 Response-Format : Method → Format
 Response-Format m =
   HTTP-Version-Format >>-
@@ -286,7 +311,7 @@ Response-Format m =
     CRLF >>
     Location-Format m n₁ n₂ n₃ >>-
     WWW-Authenticate-Format m n₁ n₂ n₃ >>-
-    Method-Response-Format m
+    Entity-Body-Format (Method-Response-Format m) m n₁ n₂ n₃
 
   ) (nat (Data.proj₁ s-c))
     (nat (Data.proj₁ (Data.proj₂ s-c)))
