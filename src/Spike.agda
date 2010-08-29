@@ -40,6 +40,21 @@ Value {HEAD} _ = String
 Value {POST} Content-Length = ℕ
 Value {POST} _ = String
 
+data Code : Set where
+  200-OK 201-Created : Code
+  202-Accepted 204-No-Content : Code
+
+  300-Multiple-Choices 301-Moved-Permanently : Code
+  302-Moved-Temporarily 304-Not-Modified : Code
+
+  400-Bad-Request 401-Unauthorized : Code
+  403-Forbidden 404-Not-Found : Code
+
+  500-Internal-Server-Error : Code
+  501-Not-Implemented : Code
+  502-Bad-Gateway : Code
+  503-Service-Unavailable : Code
+
 data GET-Response-Header : Set where
   Date Pragma : GET-Response-Header
   Location Server : GET-Response-Header
