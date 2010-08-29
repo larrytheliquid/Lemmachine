@@ -1,24 +1,33 @@
 module HTTP where
 open import Data
 open import Data.Bool
+open import Data.Nat
+open import Data.String
 open import Data.Maybe
 open import Relation.Nullary
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
 
-data Header : Set where
-  Date Pragma : Header
+Request-URI = String
+Reason-Phrase = String
 
-  Authorization From : Header
-  If-Modified-Since : Header
-  Referer User-Agent : Header
+data Header-Name : Set where
+  Date Pragma : Header-Name
 
-  Location Server : Header
-  WWW-Authenticate : Header
+  Authorization From : Header-Name
+  If-Modified-Since : Header-Name
+  Referer User-Agent : Header-Name
 
-  Allow Content-Encoding : Header
-  Content-Length Content-Type : Header
-  Expires Last-Modified : Header
+  Location Server : Header-Name
+  WWW-Authenticate : Header-Name
+
+  Allow Content-Encoding : Header-Name
+  Content-Length Content-Type : Header-Name
+  Expires Last-Modified : Header-Name
+
+Header-Value : Header-Name → Set
+Header-Value Content-Length = ℕ
+Header-Value _ = String
 
 data Method : Set where
   GET HEAD POST : Method
@@ -38,23 +47,7 @@ data Code : Set where
   502-Bad-Gateway : Code
   503-Service-Unavailable : Code
 
-data Role : Set where
-  Request-Sender : Role
-  Request-Recipient : Role
-  Response-Sender : Role
-  Response-Recipient : Role
-
-Params : Role → Set
-Params Request-Sender = Method
-Params Request-Recipient = Method
-Params Response-Sender = Method × Code
-Params Response-Recipient = Method × Code
-
-data El : (r : Role) → Params r → (required : Bool) → Set where
-  Date1 : El Request-Sender POST false
-  Date2 : ∀ {m c} → El Response-Sender (m , c) true
-
-_m≟_ : (x y : Header) → Maybe (Dec (x ≡ y))
+_m≟_ : (x y : Header-Name) → Maybe (Dec (x ≡ y))
 
 Date m≟ Date = just (yes refl)
 Pragma m≟ Pragma = just (yes refl)

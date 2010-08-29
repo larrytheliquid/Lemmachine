@@ -1,4 +1,4 @@
-module Spiky where
+module Format where
 open import Data.Empty
 open import Data.Unit
 open import Data.Bool
@@ -8,9 +8,9 @@ open import Data.Nat
 open import Data.List hiding ([_])
 open import Data.Vec hiding (_>>=_; toList; [_])
 open import Data.Sum
-open import Data.Product hiding (_×_)
+open import Data.Product
 open import Data hiding ([_])
-open import Spike
+open import HTTP
 
 infixr 3 _∣_
 infixr 1 _>>_ _>>-_ _>>=_
@@ -20,36 +20,25 @@ mutual
     CHAR NAT : U
     DAR : ℕ → U
     DAR-RANGE : ℕ → ℕ → U
-    SINGLE : (u : U) → El u → U
+    SINGLE : Header-Name → U
     STR : ℕ → U
-    METHOD REQUEST-URI REASON-PHRASE : U
-    HEADER : Method → U
-    VALUE : {m : Method} → Header m → U
-    RESPONSE-HEADER : Method → U
-    RESPONSE-VALUE : {m : Method} → Response-Header m → U
+    HEADER-NAME : U
+    HEADER-VALUE : Header-Name → U
+    METHOD : U -- CODE
+    REQUEST-URI REASON-PHRASE : U
 
   El : U → Set
   El CHAR = Char
   El NAT = ℕ
   El (DAR n) = Dar n
   El (DAR-RANGE n m) = DarRange n m true
-  El (SINGLE _ x) = Single x
+  El (SINGLE x) = Single x
   El (STR n) = Vec Char n
   El METHOD = Method
   El REQUEST-URI = Request-URI
   El REASON-PHRASE = Reason-Phrase
-  El (HEADER m) = Header m
-  El (VALUE h) = Value h
-  El (RESPONSE-HEADER m) = Response-Header m
-  El (RESPONSE-VALUE h) = Response-Value h
-
-GET-HEADER  = HEADER GET
-HEAD-HEADER = HEADER HEAD
-POST-HEADER = HEADER POST
-
-GET-RESPONSE-HEADER  = RESPONSE-HEADER GET
-HEAD-RESPONSE-HEADER = RESPONSE-HEADER HEAD
-POST-RESPONSE-HEADER = RESPONSE-HEADER POST
+  El HEADER-NAME = Header-Name
+  El (HEADER-VALUE h) = Header-Value h
 
 mutual
   data Format : Set where
@@ -115,34 +104,24 @@ HTTP-Version-Format =
   f 1 0 = End
   f _ _ = Fail
 
-Required-Header : (u : U) → El u → Format
-Required-Header (HEADER m) v =
+Required-Header : Header-Name → Format
+Required-Header h =
   Upto End-Headers (
-    Base (SINGLE (HEADER m) v) >>= λ h →
+    Base (SINGLE h) >>= λ h →
     char ':' >>
     SP >>
-    Base (VALUE (proj h)) >>-
+    Base (HEADER-VALUE (proj h)) >>-
     CRLF >>
     End
   )
-Required-Header (RESPONSE-HEADER m) v =
-  Upto End-Headers (
-    Base (SINGLE (RESPONSE-HEADER m) v) >>= λ h →
-    char ':' >>
-    SP >>
-    Base (RESPONSE-VALUE (proj h)) >>-
-    CRLF >>
-    End
-  )
-Required-Header _ _ = Fail
 
 GET-Format : Format
 GET-Format =
   Slurp (
-    Base GET-HEADER >>= λ h →
+    Base HEADER-NAME >>= λ h →
     char ':' >>
     SP >>
-    Base (VALUE h) >>-
+    Base (HEADER-VALUE h) >>-
     CRLF >>
     End
   ) >>-
@@ -150,36 +129,24 @@ GET-Format =
   CRLF >>
   End
 
-HEAD-Format : Format
-HEAD-Format =
-  Slurp (
-    Base HEAD-HEADER >>= λ h →
-    char ':' >>
-    SP >>
-    Base (VALUE h) >>-
-    CRLF >>
-    End
-  ) >>-
-
-  CRLF >>
-  End
+HEAD-Format = GET-Format
 
 POST-Format : Format
 POST-Format =
-  Required-Header POST-HEADER Content-Length >>= λ c-l →
-  f (Data.Product.proj₁ c-l) (Data.proj₁ (Data.Product.proj₂ c-l))
+  Required-Header Content-Length >>= λ c-l →
+  f (proj₁ c-l) (proj₁ (proj₂ c-l))
 
   where
 
-  f : (s : Single {Header POST} Content-Length) → Value (proj s) → Format
+  f : (s : Single Content-Length) → Header-Value (proj s) → Format
   f (single ._) n =
-    Required-Header POST-HEADER Content-Type >>-
+    Required-Header Content-Type >>-
 
     Slurp (
-      Base POST-HEADER >>= λ h →
+      Base HEADER-NAME >>= λ h →
       char ':' >>
       SP >>
-      Base (VALUE h) >>-
+      Base (HEADER-VALUE h) >>-
       CRLF >>
       End
     ) >>-
@@ -208,42 +175,19 @@ Status-Code-Format =
 
 GET-Response-Format : Format
 GET-Response-Format =
-  Required-Header GET-RESPONSE-HEADER Date >>-
+  Required-Header Date >>-
 
   Slurp (
-    Base GET-RESPONSE-HEADER >>= λ h →
+    Base HEADER-NAME >>= λ h →
     char ':' >>
     SP >>
-    Base (RESPONSE-VALUE h) >>-
+    Base (HEADER-VALUE h) >>-
     CRLF >>
     End
   )
 
-HEAD-Response-Format : Format
-HEAD-Response-Format =
-  Required-Header HEAD-RESPONSE-HEADER Date >>-
-
-  Slurp (
-    Base HEAD-RESPONSE-HEADER >>= λ h →
-    char ':' >>
-    SP >>
-    Base (RESPONSE-VALUE h) >>-
-    CRLF >>
-    End
-  )
-
-POST-Response-Format : Format
-POST-Response-Format =
-  Required-Header POST-RESPONSE-HEADER Date >>-
-
-  Slurp (
-    Base POST-RESPONSE-HEADER >>= λ h →
-    char ':' >>
-    SP >>
-    Base (RESPONSE-VALUE h) >>-
-    CRLF >>
-    End
-  )
+HEAD-Response-Format = GET-Response-Format
+POST-Response-Format = GET-Response-Format
 
 Method-Response-Format : Method → Format
 Method-Response-Format GET  = GET-Response-Format
@@ -252,48 +196,29 @@ Method-Response-Format POST = POST-Response-Format
 
 -- TODO: Properly comply with 3xx & 201 wrt optional/required
 Location-Format : Method → ℕ → ℕ → ℕ → Format
-Location-Format GET  3 _ _ = Required-Header GET-RESPONSE-HEADER  Location
-Location-Format HEAD 3 _ _ = Required-Header HEAD-RESPONSE-HEADER Location
-Location-Format POST 3 _ _ = Required-Header POST-RESPONSE-HEADER Location
-Location-Format POST 2 0 1 = Required-Header POST-RESPONSE-HEADER Location
+Location-Format _  3 _ _ = Required-Header Location
+Location-Format POST 2 0 1 = Required-Header Location
 Location-Format _    _ _ _ = End
 
-WWW-Authenticate-Format : Method → ℕ → ℕ → ℕ → Format
-WWW-Authenticate-Format GET  4 0 1 = Required-Header GET-RESPONSE-HEADER  WWW-Authenticate
-WWW-Authenticate-Format HEAD 4 0 1 = Required-Header HEAD-RESPONSE-HEADER WWW-Authenticate
-WWW-Authenticate-Format POST 4 0 1 = Required-Header POST-RESPONSE-HEADER WWW-Authenticate
-WWW-Authenticate-Format _    _ _ _ = End
+WWW-Authenticate-Format : ℕ → ℕ → ℕ → Format
+WWW-Authenticate-Format 4 0 1 = Required-Header WWW-Authenticate
+WWW-Authenticate-Format _ _ _ = End
 
 Entity-Body-Format : Format → Method → ℕ → ℕ → ℕ → Format
 Entity-Body-Format body _    1 _ _ = body >>- CRLF >> End
 Entity-Body-Format body _    2 0 4 = body >>- CRLF >> End
 Entity-Body-Format body _    3 0 4 = body >>- CRLF >> End
 Entity-Body-Format body HEAD _ _ _ = body >>- CRLF >> End
-
-Entity-Body-Format body GET _ _ _ =
-  Required-Header GET-RESPONSE-HEADER Content-Length >>= λ c-l →
-  f body (Data.Product.proj₁ c-l) (Data.proj₁ (Data.Product.proj₂ c-l))
-
-  where
-
-  f : Format → (s : Single {Response-Header GET} Content-Length) → Response-Value (proj s) → Format
-  f body (single ._) zero = body >>- CRLF >> End
-  f body (single ._) n =
-    Required-Header GET-RESPONSE-HEADER Content-Type >>-
-    body >>-
-    CRLF >>
-    Base (STR n)
-  
-Entity-Body-Format body POST _ _ _ =
-  Required-Header POST-RESPONSE-HEADER Content-Length >>= λ c-l →
-  f body (Data.Product.proj₁ c-l) (Data.proj₁ (Data.Product.proj₂ c-l))
+Entity-Body-Format body _ _ _ _ = -- GET/POST
+  Required-Header Content-Length >>= λ c-l →
+  f body (proj₁ c-l) (proj₁ (proj₂ c-l))
 
   where
 
-  f : Format → (s : Single {Response-Header POST} Content-Length) → Response-Value (proj s) → Format
+  f : Format → (s : Single Content-Length) → Header-Value (proj s) → Format
   f body (single ._) zero = body >>- CRLF >> End
   f body (single ._) n =
-    Required-Header POST-RESPONSE-HEADER Content-Type >>-
+    Required-Header Content-Type >>-
     body >>-
     CRLF >>
     Base (STR n)
@@ -310,12 +235,12 @@ Response-Format m =
     Base REASON-PHRASE >>-
     CRLF >>
     Location-Format m n₁ n₂ n₃ >>-
-    WWW-Authenticate-Format m n₁ n₂ n₃ >>-
+    WWW-Authenticate-Format n₁ n₂ n₃ >>-
     Entity-Body-Format (Method-Response-Format m) m n₁ n₂ n₃
 
-  ) (nat (Data.proj₁ s-c))
-    (nat (Data.proj₁ (Data.proj₂ s-c)))
-    (nat (Data.proj₂ (Data.proj₂ s-c)))
+  ) (nat (proj₁ s-c))
+    (nat (proj₁ (proj₂ s-c)))
+    (nat (proj₂ (proj₂ s-c)))
 
   where
 

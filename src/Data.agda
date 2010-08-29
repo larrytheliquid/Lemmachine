@@ -6,21 +6,11 @@ open import Data.Maybe
 open import Data.List hiding ([_]; drop)
 open import Data.Vec hiding ([_])
 
-infixr 2 _×_
 infixr 5 _∷_
 infixl 8 _^_
 
 ∞ : ℕ
 ∞ = 0
-
-data _×_ (A B : Set) : Set where
-  _,_ : A → B → A × B
-
-proj₁ : ∀ {A B} → A × B → A
-proj₁ (x , y) = x
-
-proj₂ : ∀ {A B} → A × B → B
-proj₂ (x , y) = y
 
 -- not a strict substring
 data SubString : List Char → Set where

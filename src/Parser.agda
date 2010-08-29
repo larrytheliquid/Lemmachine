@@ -6,13 +6,13 @@ open import Data.Char
 open import Data.String
 open import Data.Maybe
 open import Data.Sum
-open import Data.Product hiding (_×_)
+open import Data.Product
 open import Data.List hiding (_++_; [_])
 open import Data.Vec hiding (_++_; fromList)
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality1
-open import Spiky
-open import Spike
+open import Format
+open import HTTP
 open import Data
 
 read-Digit : Char → Maybe ℕ
@@ -49,6 +49,25 @@ read-to-CRLF (x ∷ xs) with read-to-CRLF xs
 ... | nothing = nothing
 ... | just (a , ys) = just ( fromList (x ∷ []) ++ a  , ys )
 
+read-Header-Name : List Char → Maybe (Header-Name × List Char)
+read-Header-Name ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
+read-Header-Name ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
+read-Header-Name ('A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'o' ∷ 'r' ∷ 'i' ∷ 'z' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Authorization , xs)
+read-Header-Name ('F' ∷ 'r' ∷ 'o' ∷ 'm' ∷ xs) = just (From , xs)
+read-Header-Name ('I' ∷ 'f' ∷ '-' ∷ 'M' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'f' ∷ 'i' ∷ 'e' ∷ 'd' ∷ '-' ∷ 'S' ∷ 'i' ∷ 'n' ∷ 'c' ∷ 'e' ∷ xs) = just (If-Modified-Since , xs)
+read-Header-Name ('R' ∷ 'e' ∷ 'f' ∷ 'e' ∷ 'r' ∷ 'e' ∷ 'r' ∷ xs) = just (Referer , xs)
+read-Header-Name ('U' ∷ 's' ∷ 'e' ∷ 'r' ∷ '-' ∷ 'A' ∷ 'g' ∷ 'e' ∷ 'n' ∷ 't' ∷ xs) = just (User-Agent , xs)
+read-Header-Name ('L' ∷ 'o' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Location , xs)
+read-Header-Name ('S' ∷ 'e' ∷ 'r' ∷ 'v' ∷ 'e' ∷ 'r' ∷ xs) = just (Server , xs)
+read-Header-Name ('W' ∷ 'W' ∷ 'W' ∷ '-' ∷ 'A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'e' ∷ 'n' ∷ 't' ∷ 'i' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (WWW-Authenticate , xs)
+read-Header-Name ('A' ∷ 'l' ∷ 'l' ∷ 'o' ∷ 'w' ∷ xs) = just (Allow , xs)
+read-Header-Name ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'E' ∷ 'n' ∷ 'c' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'n' ∷ 'g' ∷ xs) = just (Content-Encoding , xs)
+read-Header-Name ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
+read-Header-Name ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
+read-Header-Name ('E' ∷ 'x' ∷ 'p' ∷ 'i' ∷ 'r' ∷ 'e' ∷ 's' ∷ xs) = just (Expires , xs)
+read-Header-Name ('L' ∷ 'a' ∷ 's' ∷ 't' ∷ '-' ∷ 'M' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'f' ∷ 'i' ∷ 'e' ∷ 'd' ∷ xs) = just (Last-Modified , xs)
+read-Header-Name _  = nothing
+
 read : (u : U) → List Char → Maybe (El u × List Char)
 read CHAR (x ∷ xs) = just (x , xs)
 
@@ -62,30 +81,12 @@ read (DAR-RANGE n m) (x ∷ xs) with Data.Bool._≟_ true (within? x n m)
 ... | no _ = nothing
 ... | yes p rewrite p = just (dar x , xs)
 
-read (SINGLE (HEADER POST) y) (x ∷ xs) with read (HEADER POST) (x ∷ xs)
+read (SINGLE h-n) (x ∷ xs) with read-Header-Name (x ∷ xs)
 ... | nothing = nothing
-read (SINGLE (HEADER POST) Content-Length) (_ ∷ _) | just (Content-Length , ys) = just (single Content-Length , ys)
-read (SINGLE (HEADER POST) Content-Type) (_ ∷ _)   | just (Content-Type , ys)   = just (single Content-Type , ys)
-... | just _ = nothing
-
-read (SINGLE (RESPONSE-HEADER GET) y) (x ∷ xs) with read (RESPONSE-HEADER GET) (x ∷ xs)
+... | just (h-n₂ , ys) with h-n m≟ h-n₂
+... | just (yes p) rewrite p = just (single h-n₂ , ys)
+... | just (no _) = nothing
 ... | nothing = nothing
-read (SINGLE (RESPONSE-HEADER GET) Date) (_ ∷ _)   | just (Date , ys)   = just (single Date , ys)
-... | just _ = nothing
-
-read (SINGLE (RESPONSE-HEADER HEAD) y) (x ∷ xs) with read (RESPONSE-HEADER HEAD) (x ∷ xs)
-... | nothing = nothing
-read (SINGLE (RESPONSE-HEADER HEAD) Date) (_ ∷ _)   | just (Date , ys)   = just (single Date , ys)
-... | just _ = nothing
-
-read (SINGLE (RESPONSE-HEADER POST) y) (x ∷ xs) with read (RESPONSE-HEADER POST) (x ∷ xs)
-... | nothing = nothing
-read (SINGLE (RESPONSE-HEADER POST) Date) (_ ∷ _)   | just (Date , ys)   = just (single Date , ys)
-read (SINGLE (RESPONSE-HEADER POST) Location) (_ ∷ _)   | just (Location , ys)   = just (single Location , ys)
-... | just _ = nothing
-
--- TODO: Single via Decidable equality on other values + types
-read (SINGLE _ _) (x ∷ xs) = nothing
 
 read (STR zero) [] = just ([] , [])
 read (STR zero) (x ∷ xs) = just ([] , (x ∷ xs))
@@ -103,119 +104,24 @@ read REQUEST-URI (_ ∷ _) = nothing
 
 read REASON-PHRASE xs = read-to-CRLF xs
 
-read (HEADER GET) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
-read (HEADER GET) ('A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'o' ∷ 'r' ∷ 'i' ∷ 'z' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Authorization , xs)
-read (HEADER GET) ('F' ∷ 'r' ∷ 'o' ∷ 'm' ∷ xs) = just (From , xs)
-read (HEADER GET) ('I' ∷ 'f' ∷ '-' ∷ 'M' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'f' ∷ 'i' ∷ 'e' ∷ 'd' ∷ '-' ∷ 'S' ∷ 'i' ∷ 'n' ∷ 'c' ∷ 'e' ∷ xs) = just (If-Modified-Since , xs)
-read (HEADER GET) ('R' ∷ 'e' ∷ 'f' ∷ 'e' ∷ 'r' ∷ 'e' ∷ 'r' ∷ xs) = just (Referer , xs)
-read (HEADER GET) ('U' ∷ 's' ∷ 'e' ∷ 'r' ∷ '-' ∷ 'A' ∷ 'g' ∷ 'e' ∷ 'n' ∷ 't' ∷ xs) = just (User-Agent , xs)
+read HEADER-NAME xs  = read-Header-Name xs
 
-read (HEADER HEAD) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
-read (HEADER HEAD) ('A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'o' ∷ 'r' ∷ 'i' ∷ 'z' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Authorization , xs)
-read (HEADER HEAD) ('F' ∷ 'r' ∷ 'o' ∷ 'm' ∷ xs) = just (From , xs)
-read (HEADER HEAD) ('R' ∷ 'e' ∷ 'f' ∷ 'e' ∷ 'r' ∷ 'e' ∷ 'r' ∷ xs) = just (Referer , xs)
-read (HEADER HEAD) ('U' ∷ 's' ∷ 'e' ∷ 'r' ∷ '-' ∷ 'A' ∷ 'g' ∷ 'e' ∷ 'n' ∷ 't' ∷ xs) = just (User-Agent , xs)
-
-read (HEADER POST) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
-read (HEADER POST) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
-read (HEADER POST) ('A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'o' ∷ 'r' ∷ 'i' ∷ 'z' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Authorization , xs)
-read (HEADER POST) ('F' ∷ 'r' ∷ 'o' ∷ 'm' ∷ xs) = just (From , xs)
-read (HEADER POST) ('R' ∷ 'e' ∷ 'f' ∷ 'e' ∷ 'r' ∷ 'e' ∷ 'r' ∷ xs) = just (Referer , xs)
-read (HEADER POST) ('U' ∷ 's' ∷ 'e' ∷ 'r' ∷ '-' ∷ 'A' ∷ 'g' ∷ 'e' ∷ 'n' ∷ 't' ∷ xs) = just (User-Agent , xs)
-read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'E' ∷ 'n' ∷ 'c' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'n' ∷ 'g' ∷ xs) = just (Content-Encoding , xs)
-read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
-read (HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
-
-read (HEADER GET) _  = nothing
-read (HEADER HEAD) _ = nothing
-read (HEADER POST) _ = nothing
-
-read (VALUE {GET} Pragma) xs            = read-to-CRLF xs
-read (VALUE {GET} Authorization) xs     = read-to-CRLF xs
-read (VALUE {GET} From) xs              = read-to-CRLF xs
-read (VALUE {GET} If-Modified-Since) xs = read-to-CRLF xs
-read (VALUE {GET} Referer) xs           = read-to-CRLF xs
-read (VALUE {GET} User-Agent) xs        = read-to-CRLF xs
-
-read (VALUE {HEAD} Pragma) xs        = read-to-CRLF xs
-read (VALUE {HEAD} Authorization) xs = read-to-CRLF xs
-read (VALUE {HEAD} From) xs          = read-to-CRLF xs
-read (VALUE {HEAD} Referer) xs       = read-to-CRLF xs
-read (VALUE {HEAD} User-Agent) xs    = read-to-CRLF xs
-
-read (VALUE {POST} Date) xs             = read-to-CRLF xs
-read (VALUE {POST} Pragma) xs           = read-to-CRLF xs
-read (VALUE {POST} Authorization) xs    = read-to-CRLF xs
-read (VALUE {POST} From) xs             = read-to-CRLF xs
-read (VALUE {POST} Referer) xs          = read-to-CRLF xs
-read (VALUE {POST} User-Agent) xs       = read-to-CRLF xs
-read (VALUE {POST} Content-Encoding) xs = read-to-CRLF xs
-read (VALUE {POST} Content-Length) xs   = read-Decimal xs
-read (VALUE {POST} Content-Type) xs     = read-to-CRLF xs
-
-read (RESPONSE-HEADER GET) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
-read (RESPONSE-HEADER GET) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
-read (RESPONSE-HEADER GET) ('L' ∷ 'o' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Location , xs)
-read (RESPONSE-HEADER GET) ('S' ∷ 'e' ∷ 'r' ∷ 'v' ∷ 'e' ∷ 'r' ∷ xs) = just (Server , xs)
-read (RESPONSE-HEADER GET) ('W' ∷ 'W' ∷ 'W' ∷ '-' ∷ 'A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'e' ∷ 'n' ∷ 't' ∷ 'i' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (WWW-Authenticate , xs)
-read (RESPONSE-HEADER GET) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'E' ∷ 'n' ∷ 'c' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'n' ∷ 'g' ∷ xs) = just (Content-Encoding , xs)
-read (RESPONSE-HEADER GET) ('E' ∷ 'x' ∷ 'p' ∷ 'i' ∷ 'r' ∷ 'e' ∷ 's' ∷ xs) = just (Expires , xs)
-read (RESPONSE-HEADER GET) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
-read (RESPONSE-HEADER GET) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
-
-read (RESPONSE-HEADER HEAD) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
-read (RESPONSE-HEADER HEAD) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
-read (RESPONSE-HEADER HEAD) ('L' ∷ 'o' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Location , xs)
-read (RESPONSE-HEADER HEAD) ('S' ∷ 'e' ∷ 'r' ∷ 'v' ∷ 'e' ∷ 'r' ∷ xs) = just (Server , xs)
-read (RESPONSE-HEADER HEAD) ('W' ∷ 'W' ∷ 'W' ∷ '-' ∷ 'A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'e' ∷ 'n' ∷ 't' ∷ 'i' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (WWW-Authenticate , xs)
-read (RESPONSE-HEADER HEAD) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'E' ∷ 'n' ∷ 'c' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'n' ∷ 'g' ∷ xs) = just (Content-Encoding , xs)
-read (RESPONSE-HEADER HEAD) ('E' ∷ 'x' ∷ 'p' ∷ 'i' ∷ 'r' ∷ 'e' ∷ 's' ∷ xs) = just (Expires , xs)
-read (RESPONSE-HEADER HEAD) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
-read (RESPONSE-HEADER HEAD) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
-
-read (RESPONSE-HEADER POST) ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
-read (RESPONSE-HEADER POST) ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
-read (RESPONSE-HEADER POST) ('L' ∷ 'o' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'i' ∷ 'o' ∷ 'n' ∷ xs) = just (Location , xs)
-read (RESPONSE-HEADER POST) ('S' ∷ 'e' ∷ 'r' ∷ 'v' ∷ 'e' ∷ 'r' ∷ xs) = just (Server , xs)
-read (RESPONSE-HEADER POST) ('W' ∷ 'W' ∷ 'W' ∷ '-' ∷ 'A' ∷ 'u' ∷ 't' ∷ 'h' ∷ 'e' ∷ 'n' ∷ 't' ∷ 'i' ∷ 'c' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (WWW-Authenticate , xs)
-read (RESPONSE-HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'E' ∷ 'n' ∷ 'c' ∷ 'o' ∷ 'd' ∷ 'i' ∷ 'n' ∷ 'g' ∷ xs) = just (Content-Encoding , xs)
-read (RESPONSE-HEADER POST) ('E' ∷ 'x' ∷ 'p' ∷ 'i' ∷ 'r' ∷ 'e' ∷ 's' ∷ xs) = just (Expires , xs)
-read (RESPONSE-HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'L' ∷ 'e' ∷ 'n' ∷ 'g' ∷ 't' ∷ 'h' ∷ xs) = just (Content-Length , xs)
-read (RESPONSE-HEADER POST) ('C' ∷ 'o' ∷ 'n' ∷ 't' ∷ 'e' ∷ 'n' ∷ 't' ∷ '-' ∷ 'T' ∷ 'y' ∷ 'p' ∷ 'e' ∷ xs) = just (Content-Type , xs)
-
-read (RESPONSE-HEADER GET) _  = nothing
-read (RESPONSE-HEADER HEAD) _ = nothing
-read (RESPONSE-HEADER POST) _ = nothing
-
-read (RESPONSE-VALUE {GET} Date) xs  = read-to-CRLF xs
-read (RESPONSE-VALUE {GET} Pragma) xs  = read-to-CRLF xs
-read (RESPONSE-VALUE {GET} Location) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {GET} Server) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {GET} WWW-Authenticate) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {GET} Content-Encoding) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {GET} Expires) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {GET} Content-Length) xs = read-Decimal xs
-read (RESPONSE-VALUE {GET} Content-Type) xs = read-to-CRLF xs
-
-read (RESPONSE-VALUE {HEAD} Date) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {HEAD} Pragma) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {HEAD} Location) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {HEAD} Server) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {HEAD} WWW-Authenticate) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {HEAD} Content-Encoding) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {HEAD} Expires) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {HEAD} Content-Length) xs = read-Decimal xs
-read (RESPONSE-VALUE {HEAD} Content-Type) xs = read-to-CRLF xs
-
-read (RESPONSE-VALUE {POST} Date) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {POST} Pragma) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {POST} Location) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {POST} Server) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {POST} WWW-Authenticate) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {POST} Content-Encoding) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {POST} Expires) xs = read-to-CRLF xs
-read (RESPONSE-VALUE {POST} Content-Length) xs = read-Decimal xs
-read (RESPONSE-VALUE {POST} Content-Type) xs = read-to-CRLF xs
+read (HEADER-VALUE Date) xs = read-to-CRLF xs
+read (HEADER-VALUE Pragma) xs = read-to-CRLF xs
+read (HEADER-VALUE Authorization) xs = read-to-CRLF xs
+read (HEADER-VALUE From) xs = read-to-CRLF xs
+read (HEADER-VALUE If-Modified-Since) xs = read-to-CRLF xs
+read (HEADER-VALUE Referer) xs = read-to-CRLF xs
+read (HEADER-VALUE User-Agent) xs = read-to-CRLF xs
+read (HEADER-VALUE Location) xs = read-to-CRLF xs
+read (HEADER-VALUE Server) xs = read-to-CRLF xs
+read (HEADER-VALUE WWW-Authenticate) xs = read-to-CRLF xs
+read (HEADER-VALUE Allow) xs = read-to-CRLF xs
+read (HEADER-VALUE Content-Encoding) xs = read-to-CRLF xs
+read (HEADER-VALUE Content-Length) xs = read-Decimal xs
+read (HEADER-VALUE Content-Type) xs = read-to-CRLF xs
+read (HEADER-VALUE Expires) xs = read-to-CRLF xs
+read (HEADER-VALUE Last-Modified) xs = read-to-CRLF xs
 
 read _ [] = nothing
 
