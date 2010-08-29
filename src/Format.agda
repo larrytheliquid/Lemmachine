@@ -154,19 +154,28 @@ POST-Format =
     CRLF >>
     Base (STR n)
 
-Method-Format : Method → Format
-Method-Format GET  = GET-Format
-Method-Format HEAD = HEAD-Format
-Method-Format POST = POST-Format
+Remaining-Format : Method → Format
+Remaining-Format GET  = GET-Format
+Remaining-Format HEAD = HEAD-Format
+Remaining-Format POST = POST-Format
+
+Method-Format : Format
+Method-Format = str "GET" ∣ str "HEAD" ∣ str "POST"
+
+read-Method : ⟦ Method-Format ⟧ → Method
+read-Method (inj₁ _) = GET
+read-Method (inj₂ (inj₁ _)) = HEAD
+read-Method (inj₂ (inj₂ _)) = POST
 
 Request-Format =
-  Base METHOD >>= λ m →
+  Method-Format >>= λ m → (λ (m : Method) →
   SP >>
   Base REQUEST-URI >>-
   SP >>
   HTTP-Version-Format >>-
   CRLF >>  
-  Method-Format m
+  Remaining-Format m
+  ) (read-Method m)
 
 Status-Code-Format =
   DIGIT >>-
