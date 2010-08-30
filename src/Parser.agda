@@ -94,11 +94,6 @@ read (STR (suc n)) (x ∷ xs) with read (STR n) xs
 ... | nothing = nothing
 ... | just (str , ys) = just (x ∷ str , ys)
 
-read METHOD ('G' ∷ 'E' ∷ 'T' ∷ xs)       = just (GET , xs)
-read METHOD ('H' ∷ 'E' ∷ 'A' ∷ 'D' ∷ xs) = just (HEAD , xs)
-read METHOD ('P' ∷ 'O' ∷ 'S' ∷ 'T' ∷ xs) = just (POST , xs)
-read METHOD _ = nothing
-
 read REQUEST-URI ('/' ∷ xs) = read-to-SP ('/' ∷ xs)
 read REQUEST-URI (_ ∷ _) = nothing
 

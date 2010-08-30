@@ -15,31 +15,41 @@ open import HTTP
 infixr 3 _∣_
 infixr 1 _>>_ _>>-_ _>>=_
 
-mutual 
-  data U : Set where
-    CHAR NAT : U
-    DAR : ℕ → U
-    DAR-RANGE : ℕ → ℕ → U
-    SINGLE : Header-Name → U
-    STR : ℕ → U
-    HEADER-NAME : U
-    HEADER-VALUE : Header-Name → U
-    METHOD CODE : U
-    REQUEST-URI REASON-PHRASE : U
+data Uh : Set where
+  METHOD CODE : Uh
+  REQUEST-URI REASON-PHRASE : Uh
+  HEADER-NAME : Uh
+  HEADER-VALUE : HTTP.Header-Name → Uh
 
-  El : U → Set
-  El CHAR = Char
-  El NAT = ℕ
-  El (DAR n) = Dar n
-  El (DAR-RANGE n m) = DarRange n m true
-  El (SINGLE x) = Single x
-  El (STR n) = Vec Char n
-  El METHOD = Method
-  El CODE = Code
-  El REQUEST-URI = Request-URI
-  El REASON-PHRASE = Reason-Phrase
-  El HEADER-NAME = Header-Name
-  El (HEADER-VALUE h) = Header-Value h
+Elh : Uh → Set
+Elh METHOD = HTTP.Method
+Elh CODE = HTTP.Code
+Elh REQUEST-URI = HTTP.Request-URI
+Elh REASON-PHRASE = HTTP.Reason-Phrase
+Elh HEADER-NAME = HTTP.Header-Name
+Elh (HEADER-VALUE h) = HTTP.Header-Value h
+
+data U : Set where
+  CHAR NAT : U
+  DAR : ℕ → U
+  DAR-RANGE : ℕ → ℕ → U
+  SINGLE : Header-Name → U
+  STR : ℕ → U
+  HEADER-NAME : U
+  HEADER-VALUE : Header-Name → U
+  REQUEST-URI REASON-PHRASE : U
+
+El : U → Set
+El CHAR = Char
+El NAT = ℕ
+El (DAR n) = Dar n
+El (DAR-RANGE n m) = DarRange n m true
+El (SINGLE x) = Single x
+El (STR n) = Vec Char n
+El REQUEST-URI = Request-URI
+El REASON-PHRASE = Reason-Phrase
+El HEADER-NAME = Header-Name
+El (HEADER-VALUE h) = Header-Value h
 
 mutual
   data Format : Set where
@@ -160,31 +170,25 @@ Remaining-Format GET  = GET-Format
 Remaining-Format HEAD = HEAD-Format
 Remaining-Format POST = POST-Format
 
-Method-Format : Format
-Method-Format = str "GET" ∣ str "HEAD" ∣ str "POST"
+to-Format : Uh → Format
 
-read-Method : ⟦ Method-Format ⟧ → Method
-read-Method (inj₁ _) = GET
-read-Method (inj₂ (inj₁ _)) = HEAD
-read-Method (inj₂ (inj₂ _)) = POST
+to-Format METHOD =
+  str "GET" ∣ str "HEAD" ∣ str "POST"
 
-Request-Format =
-  Method-Format >>= λ m → (λ (m : Method) →
-  SP >>
-  Base REQUEST-URI >>-
-  SP >>
-  HTTP-Version-Format >>-
-  CRLF >>  
-  Remaining-Format m
-  ) (read-Method m)
-
-Code-Format =
+to-Format CODE =
   Base (DAR-RANGE (toNat '2') (toNat '5')) >>-
   DIGIT >>-
   DIGIT
 
-read-Code : ⟦ Code-Format ⟧ → Code
-read-Code x with nat (proj₁ x) | nat (proj₁ (proj₂ x)) | nat (proj₂ (proj₂ x))
+to-Format _ = Fail
+
+read-Format : (u : Uh) → ⟦ to-Format u ⟧ → Elh u
+
+read-Format METHOD (inj₁ _) = GET
+read-Format METHOD (inj₂ (inj₁ _)) = HEAD
+read-Format METHOD (inj₂ (inj₂ _)) = POST
+
+read-Format CODE x with nat (proj₁ x) | nat (proj₁ (proj₂ x)) | nat (proj₂ (proj₂ x))
 ... | 2 | 0 | 0 = 200-OK
 ... | 2 | 0 | 1 = 201-Created
 ... | 2 | 0 | 2 = 202-Accepted
@@ -205,6 +209,21 @@ read-Code x with nat (proj₁ x) | nat (proj₁ (proj₂ x)) | nat (proj₂ (pro
 ... | 5 | 0 | 3 = 503-Service-Unavailable
 ... | 5 | _ | _ = 500-Internal-Server-Error
 ... | _ | _ | _ = 500-Internal-Server-Error
+
+read-Format REQUEST-URI ()
+read-Format REASON-PHRASE ()
+read-Format HEADER-NAME ()
+read-Format (HEADER-VALUE _) ()
+
+Request-Format =
+  to-Format METHOD >>= λ m → (λ (m : Method) →
+  SP >>
+  Base REQUEST-URI >>-
+  SP >>
+  HTTP-Version-Format >>-
+  CRLF >>  
+  Remaining-Format m
+  ) (read-Format METHOD m)
 
 GET-Response-Format : Format
 GET-Response-Format =
@@ -262,7 +281,7 @@ Response-Format : Method → Format
 Response-Format m =
   HTTP-Version-Format >>-
   SP >>
-  Code-Format >>= λ c →
+  to-Format CODE >>= λ c →
   ( λ (c : Code) →
 
     guard m c >>
@@ -273,7 +292,7 @@ Response-Format m =
     WWW-Authenticate-Format c >>-
     Entity-Body-Format (Method-Response-Format m) m c
 
-  ) (read-Code c)
+  ) (read-Format CODE c)
 
   where
 
