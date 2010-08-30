@@ -19,15 +19,15 @@ data Uh : Set where
   METHOD CODE : Uh
   REQUEST-URI REASON-PHRASE : Uh
   HEADER-NAME : Uh
-  HEADER-VALUE : HTTP.Header-Name → Uh
+  HEADER-VALUE : Header-Name → Uh
 
 Elh : Uh → Set
-Elh METHOD = HTTP.Method
-Elh CODE = HTTP.Code
-Elh REQUEST-URI = HTTP.Request-URI
-Elh REASON-PHRASE = HTTP.Reason-Phrase
-Elh HEADER-NAME = HTTP.Header-Name
-Elh (HEADER-VALUE h) = HTTP.Header-Value h
+Elh METHOD = Method
+Elh CODE = Code
+Elh REQUEST-URI = Request-URI
+Elh REASON-PHRASE = Reason-Phrase
+Elh HEADER-NAME = Header-Name
+Elh (HEADER-VALUE h) = Header-Value h
 
 data U : Set where
   CHAR NAT : U
@@ -180,6 +180,29 @@ to-Format CODE =
   DIGIT >>-
   DIGIT
 
+to-Format HEADER-NAME =
+  str "Date" ∣
+  str "Pragma" ∣
+  str "Authorization" ∣
+  str "From" ∣
+  str "If-Modified-Since" ∣
+  str "Referer" ∣
+  str "User-Agent" ∣
+  str "Location" ∣
+  str "Server" ∣
+  str "WWW-Authenticate" ∣
+  str "Allow" ∣
+  str "Content-Encoding" ∣
+  str "Content-Length" ∣
+  str "Content-Type" ∣
+  str "Expires" ∣
+  str "Last-Modified"
+
+to-Format (HEADER-VALUE Content-Length) =
+  Base NAT
+
+to-Format (HEADER-VALUE _) = Fail
+
 to-Format _ = Fail
 
 read-Format : (u : Uh) → ⟦ to-Format u ⟧ → Elh u
@@ -212,8 +235,44 @@ read-Format CODE x with nat (proj₁ x) | nat (proj₁ (proj₂ x)) | nat (proj�
 
 read-Format REQUEST-URI ()
 read-Format REASON-PHRASE ()
-read-Format HEADER-NAME ()
-read-Format (HEADER-VALUE _) ()
+
+read-Format HEADER-NAME x with x
+... | (inj₁ _)                       = Date
+... | (inj₂ (inj₁ _))                 = Pragma
+... | (inj₂ (inj₂ (inj₁ _)))          = Authorization
+... | (inj₂ (inj₂ (inj₂ (inj₁ _))))    = From
+... | (inj₂ (inj₂ (inj₂ (inj₂ x₂)))) with x₂
+... | (inj₁ _)                        = If-Modified-Since
+... | (inj₂ (inj₁ _))                  = Referer
+... | (inj₂ (inj₂ (inj₁ _)))           = User-Agent
+... | (inj₂ (inj₂ (inj₂ (inj₁ _))))     = Location
+... | (inj₂ (inj₂ (inj₂ (inj₂ x₃)))) with x₃
+... | (inj₁ _)                        = Server
+... | (inj₂ (inj₁ _))                  = WWW-Authenticate
+... | (inj₂ (inj₂ (inj₁ _)))           = Allow
+... | (inj₂ (inj₂ (inj₂ (inj₁ _))))     = Content-Encoding
+... | (inj₂ (inj₂ (inj₂ (inj₂ x₄)))) with x₄
+... | (inj₁ _)                        = Content-Length
+... | (inj₂ (inj₁ _))                  = Content-Type
+... | (inj₂ (inj₂ (inj₁ _)))           = Expires
+... | (inj₂ (inj₂ (inj₂ _)))           = Last-Modified
+
+read-Format (HEADER-VALUE Date) ()
+read-Format (HEADER-VALUE Pragma) ()
+read-Format (HEADER-VALUE Authorization) ()
+read-Format (HEADER-VALUE From) ()
+read-Format (HEADER-VALUE If-Modified-Since) ()
+read-Format (HEADER-VALUE Referer) ()
+read-Format (HEADER-VALUE User-Agent) ()
+read-Format (HEADER-VALUE Location) ()
+read-Format (HEADER-VALUE Server) ()
+read-Format (HEADER-VALUE WWW-Authenticate) ()
+read-Format (HEADER-VALUE Allow) ()
+read-Format (HEADER-VALUE Content-Encoding) ()
+read-Format (HEADER-VALUE Content-Length) n = n
+read-Format (HEADER-VALUE Content-Type) ()
+read-Format (HEADER-VALUE Expires) ()
+read-Format (HEADER-VALUE Last-Modified) ()
 
 Request-Format =
   to-Format METHOD >>= λ m → (λ (m : Method) →
