@@ -24,7 +24,7 @@ mutual
     STR : ℕ → U
     HEADER-NAME : U
     HEADER-VALUE : Header-Name → U
-    METHOD : U -- CODE
+    METHOD CODE : U
     REQUEST-URI REASON-PHRASE : U
 
   El : U → Set
@@ -35,6 +35,7 @@ mutual
   El (SINGLE x) = Single x
   El (STR n) = Vec Char n
   El METHOD = Method
+  El CODE = Code
   El REQUEST-URI = Request-URI
   El REASON-PHRASE = Reason-Phrase
   El HEADER-NAME = Header-Name
@@ -177,10 +178,33 @@ Request-Format =
   Remaining-Format m
   ) (read-Method m)
 
-Status-Code-Format =
-  DIGIT >>-
+Code-Format =
+  Base (DAR-RANGE (toNat '2') (toNat '5')) >>-
   DIGIT >>-
   DIGIT
+
+read-Code : ⟦ Code-Format ⟧ → Code
+read-Code x with nat (proj₁ x) | nat (proj₁ (proj₂ x)) | nat (proj₂ (proj₂ x))
+... | 2 | 0 | 0 = 200-OK
+... | 2 | 0 | 1 = 201-Created
+... | 2 | 0 | 2 = 202-Accepted
+... | 2 | _ | _ = 200-OK
+... | 3 | 0 | 0 = 300-Multiple-Choices
+... | 3 | 0 | 1 = 301-Moved-Permanently
+... | 3 | 0 | 2 = 302-Moved-Temporarily
+... | 3 | 0 | 4 = 304-Not-Modified
+... | 3 | _ | _ = 300-Multiple-Choices
+... | 4 | 0 | 0 = 400-Bad-Request
+... | 4 | 0 | 1 = 401-Unauthorized
+... | 4 | 0 | 3 = 403-Forbidden
+... | 4 | 0 | 4 = 404-Not-Found
+... | 4 | _ | _ = 400-Bad-Request
+... | 5 | 0 | 0 = 500-Internal-Server-Error
+... | 5 | 0 | 1 = 501-Not-Implemented
+... | 5 | 0 | 2 = 502-Bad-Gateway
+... | 5 | 0 | 3 = 503-Service-Unavailable
+... | 5 | _ | _ = 500-Internal-Server-Error
+... | _ | _ | _ = 500-Internal-Server-Error
 
 GET-Response-Format : Format
 GET-Response-Format =
@@ -204,21 +228,23 @@ Method-Response-Format HEAD = HEAD-Response-Format
 Method-Response-Format POST = POST-Response-Format
 
 -- TODO: Properly comply with 3xx & 201 wrt optional/required
-Location-Format : Method → ℕ → ℕ → ℕ → Format
-Location-Format _  3 _ _ = Required-Header Location
-Location-Format POST 2 0 1 = Required-Header Location
-Location-Format _    _ _ _ = End
+Location-Format : Method → Code → Format
+Location-Format _    300-Multiple-Choices  = Required-Header Location
+Location-Format _    301-Moved-Permanently = Required-Header Location
+Location-Format _    302-Moved-Temporarily = Required-Header Location
+Location-Format _    304-Not-Modified      = Required-Header Location
+Location-Format POST 201-Created           = Required-Header Location
+Location-Format _    _                     = End
 
-WWW-Authenticate-Format : ℕ → ℕ → ℕ → Format
-WWW-Authenticate-Format 4 0 1 = Required-Header WWW-Authenticate
-WWW-Authenticate-Format _ _ _ = End
+WWW-Authenticate-Format : Code → Format
+WWW-Authenticate-Format 401-Unauthorized = Required-Header WWW-Authenticate
+WWW-Authenticate-Format _ = End
 
-Entity-Body-Format : Format → Method → ℕ → ℕ → ℕ → Format
-Entity-Body-Format body _    1 _ _ = body >>- CRLF >> End
-Entity-Body-Format body _    2 0 4 = body >>- CRLF >> End
-Entity-Body-Format body _    3 0 4 = body >>- CRLF >> End
-Entity-Body-Format body HEAD _ _ _ = body >>- CRLF >> End
-Entity-Body-Format body _ _ _ _ = -- GET/POST
+Entity-Body-Format : Format → Method → Code → Format
+Entity-Body-Format body _    204-No-Content   = body >>- CRLF >> End
+Entity-Body-Format body _    304-Not-Modified = body >>- CRLF >> End
+Entity-Body-Format body HEAD _                = body >>- CRLF >> End
+Entity-Body-Format body _    _ = -- GET/POST
   Required-Header Content-Length >>= λ c-l →
   f body (proj₁ c-l) (proj₁ (proj₂ c-l))
 
@@ -236,25 +262,22 @@ Response-Format : Method → Format
 Response-Format m =
   HTTP-Version-Format >>-
   SP >>
-  Status-Code-Format >>= λ s-c →
-  ( λ (n₁ n₂ n₃ : ℕ) →
+  Code-Format >>= λ c →
+  ( λ (c : Code) →
 
-    guard m n₁ n₂ n₃ >>
+    guard m c >>
     SP >>
     Base REASON-PHRASE >>-
     CRLF >>
-    Location-Format m n₁ n₂ n₃ >>-
-    WWW-Authenticate-Format n₁ n₂ n₃ >>-
-    Entity-Body-Format (Method-Response-Format m) m n₁ n₂ n₃
+    Location-Format m c >>-
+    WWW-Authenticate-Format c >>-
+    Entity-Body-Format (Method-Response-Format m) m c
 
-  ) (nat (proj₁ s-c))
-    (nat (proj₁ (proj₂ s-c)))
-    (nat (proj₂ (proj₂ s-c)))
+  ) (read-Code c)
 
   where
 
-  guard : Method → ℕ → ℕ → ℕ → Format
-  guard _    1 _ _ = Fail
-  guard GET  2 0 1 = Fail
-  guard HEAD 2 0 1 = Fail
-  guard _    _ _ _ = End
+  guard : Method → Code → Format
+  guard GET  201-Created = Fail
+  guard HEAD 201-Created = Fail
+  guard _    _           = End

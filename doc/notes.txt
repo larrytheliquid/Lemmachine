@@ -244,3 +244,8 @@ HEAD is a special exception where content-type/length/etc can
 be present without a body
 ... it should be identical to GET except that If-Modified-Since
 is to be ignored
+
+
+Servers should
+return the status code 501 (not implemented) if the method is
+unrecognized or not implemented.
