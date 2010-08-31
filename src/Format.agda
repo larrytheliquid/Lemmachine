@@ -15,29 +15,17 @@ open import HTTP
 infixr 3 _∣_
 infixr 1 _>>_ _>>-_ _>>=_
 
-data Uh : Set where
-  METHOD CODE : Uh
-  REQUEST-URI REASON-PHRASE : Uh
-  HEADER-NAME : Uh
-  HEADER-VALUE : Header-Name → Uh
-
-Elh : Uh → Set
-Elh METHOD = Method
-Elh CODE = Code
-Elh REQUEST-URI = Request-URI
-Elh REASON-PHRASE = Reason-Phrase
-Elh HEADER-NAME = Header-Name
-Elh (HEADER-VALUE h) = Header-Value h
-
 data U : Set where
   CHAR NAT : U
   DAR : ℕ → U
   DAR-RANGE : ℕ → ℕ → U
   SINGLE : Header-Name → U
   STR : ℕ → U
+  VERSION : U
+  METHOD CODE : U
+  REQUEST-URI REASON-PHRASE : U
   HEADER-NAME : U
   HEADER-VALUE : Header-Name → U
-  REQUEST-URI REASON-PHRASE : U
 
 El : U → Set
 El CHAR = Char
@@ -46,6 +34,9 @@ El (DAR n) = Dar n
 El (DAR-RANGE n m) = DarRange n m true
 El (SINGLE x) = Single x
 El (STR n) = Vec Char n
+El VERSION = Version
+El METHOD = Method
+El CODE = Code
 El REQUEST-URI = Request-URI
 El REASON-PHRASE = Reason-Phrase
 El HEADER-NAME = Header-Name
@@ -99,21 +90,6 @@ CR    = Base (DAR 13)
 LF    = Base (DAR 10)
 CRLF  = CR >>- LF
 End-Headers  = CRLF >>- CRLF
-
-HTTP-Version-Format =
-  str "HTTP" >>
-  char '/' >> 
-  Base NAT >>= λ major →
-  char '.' >>
-  Base NAT >>= λ minor →
-  f major minor
-
-  where
-
-  f : ℕ → ℕ → Format
-  f 0 9 = End
-  f 1 0 = End
-  f _ _ = Fail
 
 Required-Header : Header-Name → Format
 Required-Header h =
@@ -170,119 +146,14 @@ Remaining-Format GET  = GET-Format
 Remaining-Format HEAD = HEAD-Format
 Remaining-Format POST = POST-Format
 
-to-Format : Uh → Format
-
-to-Format METHOD =
-  str "GET" ∣ str "HEAD" ∣ str "POST"
-
-to-Format CODE =
-  Base (DAR-RANGE (toNat '2') (toNat '5')) >>-
-  DIGIT >>-
-  DIGIT
-
-to-Format HEADER-NAME =
-  str "Date" ∣
-  str "Pragma" ∣
-  str "Authorization" ∣
-  str "From" ∣
-  str "If-Modified-Since" ∣
-  str "Referer" ∣
-  str "User-Agent" ∣
-  str "Location" ∣
-  str "Server" ∣
-  str "WWW-Authenticate" ∣
-  str "Allow" ∣
-  str "Content-Encoding" ∣
-  str "Content-Length" ∣
-  str "Content-Type" ∣
-  str "Expires" ∣
-  str "Last-Modified"
-
-to-Format (HEADER-VALUE Content-Length) =
-  Base NAT
-
-to-Format (HEADER-VALUE _) = Fail
-
-to-Format _ = Fail
-
-read-Format : (u : Uh) → ⟦ to-Format u ⟧ → Elh u
-
-read-Format METHOD (inj₁ _) = GET
-read-Format METHOD (inj₂ (inj₁ _)) = HEAD
-read-Format METHOD (inj₂ (inj₂ _)) = POST
-
-read-Format CODE x with nat (proj₁ x) | nat (proj₁ (proj₂ x)) | nat (proj₂ (proj₂ x))
-... | 2 | 0 | 0 = 200-OK
-... | 2 | 0 | 1 = 201-Created
-... | 2 | 0 | 2 = 202-Accepted
-... | 2 | _ | _ = 200-OK
-... | 3 | 0 | 0 = 300-Multiple-Choices
-... | 3 | 0 | 1 = 301-Moved-Permanently
-... | 3 | 0 | 2 = 302-Moved-Temporarily
-... | 3 | 0 | 4 = 304-Not-Modified
-... | 3 | _ | _ = 300-Multiple-Choices
-... | 4 | 0 | 0 = 400-Bad-Request
-... | 4 | 0 | 1 = 401-Unauthorized
-... | 4 | 0 | 3 = 403-Forbidden
-... | 4 | 0 | 4 = 404-Not-Found
-... | 4 | _ | _ = 400-Bad-Request
-... | 5 | 0 | 0 = 500-Internal-Server-Error
-... | 5 | 0 | 1 = 501-Not-Implemented
-... | 5 | 0 | 2 = 502-Bad-Gateway
-... | 5 | 0 | 3 = 503-Service-Unavailable
-... | 5 | _ | _ = 500-Internal-Server-Error
-... | _ | _ | _ = 500-Internal-Server-Error
-
-read-Format REQUEST-URI ()
-read-Format REASON-PHRASE ()
-
-read-Format HEADER-NAME x with x
-... | (inj₁ _)                       = Date
-... | (inj₂ (inj₁ _))                 = Pragma
-... | (inj₂ (inj₂ (inj₁ _)))          = Authorization
-... | (inj₂ (inj₂ (inj₂ (inj₁ _))))    = From
-... | (inj₂ (inj₂ (inj₂ (inj₂ x₂)))) with x₂
-... | (inj₁ _)                        = If-Modified-Since
-... | (inj₂ (inj₁ _))                  = Referer
-... | (inj₂ (inj₂ (inj₁ _)))           = User-Agent
-... | (inj₂ (inj₂ (inj₂ (inj₁ _))))     = Location
-... | (inj₂ (inj₂ (inj₂ (inj₂ x₃)))) with x₃
-... | (inj₁ _)                        = Server
-... | (inj₂ (inj₁ _))                  = WWW-Authenticate
-... | (inj₂ (inj₂ (inj₁ _)))           = Allow
-... | (inj₂ (inj₂ (inj₂ (inj₁ _))))     = Content-Encoding
-... | (inj₂ (inj₂ (inj₂ (inj₂ x₄)))) with x₄
-... | (inj₁ _)                        = Content-Length
-... | (inj₂ (inj₁ _))                  = Content-Type
-... | (inj₂ (inj₂ (inj₁ _)))           = Expires
-... | (inj₂ (inj₂ (inj₂ _)))           = Last-Modified
-
-read-Format (HEADER-VALUE Date) ()
-read-Format (HEADER-VALUE Pragma) ()
-read-Format (HEADER-VALUE Authorization) ()
-read-Format (HEADER-VALUE From) ()
-read-Format (HEADER-VALUE If-Modified-Since) ()
-read-Format (HEADER-VALUE Referer) ()
-read-Format (HEADER-VALUE User-Agent) ()
-read-Format (HEADER-VALUE Location) ()
-read-Format (HEADER-VALUE Server) ()
-read-Format (HEADER-VALUE WWW-Authenticate) ()
-read-Format (HEADER-VALUE Allow) ()
-read-Format (HEADER-VALUE Content-Encoding) ()
-read-Format (HEADER-VALUE Content-Length) n = n
-read-Format (HEADER-VALUE Content-Type) ()
-read-Format (HEADER-VALUE Expires) ()
-read-Format (HEADER-VALUE Last-Modified) ()
-
 Request-Format =
-  to-Format METHOD >>= λ m → (λ (m : Method) →
+  Base METHOD >>= λ m →
   SP >>
   Base REQUEST-URI >>-
   SP >>
-  HTTP-Version-Format >>-
+  Base VERSION >>-
   CRLF >>  
   Remaining-Format m
-  ) (read-Format METHOD m)
 
 GET-Response-Format : Format
 GET-Response-Format =
@@ -338,20 +209,16 @@ Entity-Body-Format body _    _ = -- GET/POST
 
 Response-Format : Method → Format
 Response-Format m =
-  HTTP-Version-Format >>-
+  Base VERSION >>-
   SP >>
-  to-Format CODE >>= λ c →
-  ( λ (c : Code) →
-
-    guard m c >>
-    SP >>
-    Base REASON-PHRASE >>-
-    CRLF >>
-    Location-Format m c >>-
-    WWW-Authenticate-Format c >>-
-    Entity-Body-Format (Method-Response-Format m) m c
-
-  ) (read-Format CODE c)
+  Base CODE >>= λ c →
+  guard m c >>
+  SP >>
+  Base REASON-PHRASE >>-
+  CRLF >>
+  Location-Format m c >>-
+  WWW-Authenticate-Format c >>-
+  Entity-Body-Format (Method-Response-Format m) m c
 
   where
 

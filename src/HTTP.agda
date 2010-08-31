@@ -8,6 +8,9 @@ open import Relation.Nullary
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
 
+data Version : Set where
+  HTTP/1∶0 : Version
+
 Request-URI = String
 Reason-Phrase = String
 

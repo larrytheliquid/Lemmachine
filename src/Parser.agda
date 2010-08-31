@@ -49,6 +49,45 @@ read-to-CRLF (x ∷ xs) with read-to-CRLF xs
 ... | nothing = nothing
 ... | just (a , ys) = just ( fromList (x ∷ []) ++ a  , ys )
 
+read-Version : List Char → Maybe (Version × List Char)
+read-Version ('H' ∷ 'T' ∷ 'T' ∷ 'P' ∷ '/' ∷ '1' ∷ '.' ∷ '0' ∷ xs) = just (HTTP/1∶0 , xs)
+read-Version _ = nothing
+
+read-Method : List Char → Maybe (Method × List Char)
+read-Method ('G' ∷ 'E' ∷ 'T' ∷ xs) = just (GET , xs)
+read-Method ('H' ∷ 'E' ∷ 'A' ∷ 'D' ∷ xs) = just (HEAD , xs)
+read-Method ('P' ∷ 'O' ∷ 'S' ∷ 'T' ∷ xs) = just (POST , xs)
+read-Method _ = nothing
+
+read-Code : List Char → Maybe (Code × List Char)
+read-Code (x ∷ y ∷ z ∷ xs) with read-Digit x | read-Digit y | read-Digit z
+... | nothing | _       | _ = nothing
+... | _       | nothing | _ = nothing
+... | _       | _       | nothing = nothing
+... | just n₁ | just n₂ | just n₃ with n₁ | n₂ | n₃
+... | 2 | 0 | 0 = just (200-OK , xs)
+... | 2 | 0 | 1 = just (201-Created , xs)
+... | 2 | 0 | 2 = just (202-Accepted , xs)
+... | 2 | _ | _ = just (200-OK , xs)
+... | 3 | 0 | 0 = just (300-Multiple-Choices , xs)
+... | 3 | 0 | 1 = just (301-Moved-Permanently , xs)
+... | 3 | 0 | 2 = just (302-Moved-Temporarily , xs)
+... | 3 | 0 | 4 = just (304-Not-Modified , xs)
+... | 3 | _ | _ = just (300-Multiple-Choices , xs)
+... | 4 | 0 | 0 = just (400-Bad-Request , xs)
+... | 4 | 0 | 1 = just (401-Unauthorized , xs)
+... | 4 | 0 | 3 = just (403-Forbidden , xs)
+... | 4 | 0 | 4 = just (404-Not-Found , xs)
+... | 4 | _ | _ = just (400-Bad-Request , xs)
+... | 5 | 0 | 0 = just (500-Internal-Server-Error , xs)
+... | 5 | 0 | 1 = just (501-Not-Implemented , xs)
+... | 5 | 0 | 2 = just (502-Bad-Gateway , xs)
+... | 5 | 0 | 3 = just (503-Service-Unavailable , xs)
+... | 5 | _ | _ = just (500-Internal-Server-Error , xs)
+... | _ | _ | _ = nothing
+
+read-Code _ = nothing
+
 read-Header-Name : List Char → Maybe (Header-Name × List Char)
 read-Header-Name ('D' ∷ 'a' ∷ 't' ∷ 'e' ∷ xs) = just (Date , xs)
 read-Header-Name ('P' ∷ 'r' ∷ 'a' ∷ 'g' ∷ 'm' ∷ 'a' ∷ xs) = just (Pragma , xs)
@@ -93,6 +132,10 @@ read (STR zero) (x ∷ xs) = just ([] , (x ∷ xs))
 read (STR (suc n)) (x ∷ xs) with read (STR n) xs
 ... | nothing = nothing
 ... | just (str , ys) = just (x ∷ str , ys)
+
+read VERSION xs = read-Version xs
+read METHOD xs = read-Method xs
+read CODE   xs = read-Code xs
 
 read REQUEST-URI ('/' ∷ xs) = read-to-SP ('/' ∷ xs)
 read REQUEST-URI (_ ∷ _) = nothing
