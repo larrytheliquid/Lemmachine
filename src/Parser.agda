@@ -1,4 +1,5 @@
 module Parser where
+open import Data.Empty
 open import Data.Unit
 open import Data.Bool
 open import Data.Nat
@@ -134,15 +135,18 @@ read (STR (suc n)) (x ∷ xs) with read (STR n) xs
 ... | just (str , ys) = just (x ∷ str , ys)
 
 read VERSION xs = read-Version xs
-read METHOD xs = read-Method xs
-read CODE   xs = read-Code xs
+read METHOD  xs = read-Method xs
+read CODE    xs = read-Code xs
 
-read REQUEST-URI ('/' ∷ xs) = read-to-SP ('/' ∷ xs)
-read REQUEST-URI (_ ∷ _) = nothing
+read REQUEST-URI ('/' ∷ xs) with read-to-SP ('/' ∷ xs) | read-to-CRLF ('/' ∷ xs)
+... | just ans | _        = just ans
+... | nothing  | just ans = just ans
+... | nothing  | nothing  = nothing
+read REQUEST-URI (_ ∷ _)  = nothing
 
 read REASON-PHRASE xs = read-to-CRLF xs
 
-read HEADER-NAME xs  = read-Header-Name xs
+read HEADER-NAME   xs = read-Header-Name xs
 
 read (HEADER-VALUE Date) xs = read-to-CRLF xs
 read (HEADER-VALUE Pragma) xs = read-to-CRLF xs
@@ -203,8 +207,14 @@ Request-Parse = Maybe (⟦ Request-Format ⟧ × List Char)
 parse-request : List Char → Request-Parse
 parse-request xs = parse Request-Format xs
 
-Response-Parse : Method → Set
-Response-Parse m = Maybe (⟦ Response-Format m ⟧ × List Char)
+Response-Parse : Request-Parse → Set
+Response-Parse nothing = Maybe ⊥
+Response-Parse (just req) with proj₁ req
+... | inj₁ (m , _) = Maybe (⟦ Response-Format (just m) ⟧ × List Char)
+... | inj₂ _       = Maybe (⟦ Response-Format nothing ⟧ × List Char)
 
-parse-response : (m : Method) → List Char → Response-Parse m
-parse-response m xs = parse (Response-Format m) xs
+parse-response : (req : Request-Parse) → List Char → Response-Parse req
+parse-response nothing _ = nothing
+parse-response (just req) xs with proj₁ req
+... | inj₁ (m , _) = parse (Response-Format (just m)) xs
+... | inj₂ _       = parse (Response-Format nothing) xs

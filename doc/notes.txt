@@ -249,3 +249,20 @@ is to be ignored
 Servers should
 return the status code 501 (not implemented) if the method is
 unrecognized or not implemented.
+
+
+with to-Format all of the former -Format definitions get replaced by a
+universe code for them, a function to the Format, and a function to
+the type it eventually gets parsed into
+
+need to think about how additional header fields would be extended. it
+might just be a hook to add more
+although we would then also need to prevent certain headers from being
+used before yielding to a hook
+since Plus is left-biased, it could be used to set up a chain that
+ends in End, where each previous Plus >> Fails
+
+generated type should eventually be self contained with restraints
+might work nicely where current is [Ulh] that goes to Elh
+
+http 0.9 detection via Plus

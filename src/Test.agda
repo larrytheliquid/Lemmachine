@@ -16,15 +16,46 @@ here-doc str with toList str
   chomp ('\n' ∷ []) = []
   chomp (x ∷ xs) = x ∷ chomp xs
 
-raw-get = here-doc "
+raw-simple-request = here-doc "
+GET /foo\r\n
+"
+
+parsed-simple-request : Request-Parse
+parsed-simple-request = parse-request (toList raw-simple-request)
+
+raw-simple-response = here-doc "
+bar!
+"
+
+parsed-simple-response : Response-Parse parsed-simple-request
+parsed-simple-response = parse-response 
+  parsed-simple-request 
+  (toList raw-simple-response)
+
+raw-get-request = here-doc "
 GET / HTTP/1.0\r
 From: larrytheliquid@gmail.com\r
 User-Agent: Lemmachine\r
 \r\n
 "
 
-parsed-get : Request-Parse
-parsed-get = parse-request (toList raw-get)
+parsed-get-request : Request-Parse
+parsed-get-request = parse-request (toList raw-get-request)
+
+raw-get-response = here-doc "
+HTTP/1.0 200 OK\r
+Date: Fri, 03 Sep 2010 19:33:51 GMT\r
+Server: Lemmachine\r
+Content-Length: 31\r
+Content-Type: text/plain\r
+\r
+Great success, I very exciiite!
+"
+
+parsed-get-response : Response-Parse parsed-get-request
+parsed-get-response = parse-response
+  parsed-get-request
+  (toList raw-get-response)
 
 raw-headerless = here-doc "
 GET / HTTP/1.0\r

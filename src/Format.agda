@@ -7,6 +7,7 @@ open import Data.String
 open import Data.Nat
 open import Data.List hiding ([_])
 open import Data.Vec hiding (_>>=_; toList; [_])
+open import Data.Maybe
 open import Data.Sum
 open import Data.Product
 open import Data hiding ([_])
@@ -91,6 +92,13 @@ LF    = Base (DAR 10)
 CRLF  = CR >>- LF
 End-Headers  = CRLF >>- CRLF
 
+Simple-Request-Format =
+  str "GET" >>
+  SP >>
+  Base REQUEST-URI >>-
+  CRLF >>
+  End
+
 Required-Header : Header-Name → Format
 Required-Header h =
   Upto End-Headers (
@@ -146,7 +154,7 @@ Remaining-Format GET  = GET-Format
 Remaining-Format HEAD = HEAD-Format
 Remaining-Format POST = POST-Format
 
-Request-Format =
+Full-Request-Format =
   Base METHOD >>= λ m →
   SP >>
   Base REQUEST-URI >>-
@@ -154,6 +162,12 @@ Request-Format =
   Base VERSION >>-
   CRLF >>  
   Remaining-Format m
+
+Request-Format =
+  Full-Request-Format ∣ Simple-Request-Format
+
+Simple-Response-Format =
+  Slurp (Base CHAR)
 
 GET-Response-Format : Format
 GET-Response-Format =
@@ -207,8 +221,8 @@ Entity-Body-Format body _    _ = -- GET/POST
     CRLF >>
     Base (STR n)
 
-Response-Format : Method → Format
-Response-Format m =
+Full-Response-Format : Method → Format
+Full-Response-Format m =
   Base VERSION >>-
   SP >>
   Base CODE >>= λ c →
@@ -226,3 +240,7 @@ Response-Format m =
   guard GET  201-Created = Fail
   guard HEAD 201-Created = Fail
   guard _    _           = End
+
+Response-Format : Maybe Method → Format
+Response-Format nothing  = Simple-Response-Format
+Response-Format (just m) = Full-Response-Format m
