@@ -1,10 +1,10 @@
-module Test where
+module Lemmachine.Test where
 open import Data.Char
 open import Data.String
 open import Data.Maybe
 open import Data.Product
 open import Data.List
-open import Parser
+open import Lemmachine
 
 here-doc : String → String
 here-doc str with toList str

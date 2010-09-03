@@ -1,4 +1,4 @@
-module Data where
+module Lemmachine.Data where
 open import Data.Bool
 open import Data.Char
 open import Data.Nat

@@ -1,4 +1,4 @@
-module Parser where
+module Lemmachine.Parser where
 open import Data.Empty
 open import Data.Unit
 open import Data.Bool
@@ -12,9 +12,11 @@ open import Data.List hiding (_++_; [_])
 open import Data.Vec hiding (_++_; fromList)
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality1
-open import Format
-open import HTTP
-open import Data
+open import Lemmachine.HTTP
+open import Lemmachine.Data
+open import Lemmachine.Format
+open import Lemmachine.Format.Request
+open import Lemmachine.Format.Response
 
 read-Digit : Char → Maybe ℕ
 read-Digit x with within? x (toNat '0') (toNat '9')

@@ -1,5 +1,5 @@
-module HTTP where
-open import Data
+module Lemmachine.HTTP where
+open import Lemmachine.Data
 open import Data.Bool
 open import Data.Nat
 open import Data.String
