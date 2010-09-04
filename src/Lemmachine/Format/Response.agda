@@ -55,12 +55,20 @@ Entity-Body-Format x m c =
   f m c (proj₁ c-l) (proj₁ (proj₂ c-l))
   where
   f : Method → Code → (s : Single Content-Length) → Header-Value (proj s) → Format
-  f HEAD _                    _           _    = End
-  f _    300-Multiple-Choices  (single ._) zero    = Fail
-  f _    301-Moved-Permanently (single ._) zero    = Fail
-  f _    302-Moved-Temporarily (single ._) zero    = Fail
-  f _    304-Not-Modified      (single ._) (suc _) = Fail
-  f _    _                     (single ._) n       = Base (STR n)
+  f HEAD _                         _           _    = End
+  f _    201-Created               (single ._) zero = Fail
+  f _    202-Accepted              (single ._) zero = Fail
+  f _    300-Multiple-Choices      (single ._) zero = Fail
+  f _    301-Moved-Permanently     (single ._) zero = Fail
+  f _    302-Moved-Temporarily     (single ._) zero = Fail
+  f _    400-Bad-Request           (single ._) zero = Fail
+  f _    401-Unauthorized          (single ._) zero = Fail
+  f _    404-Not-Found             (single ._) zero = Fail
+  f _    500-Internal-Server-Error (single ._) zero = Fail
+  f _    501-Not-Implemented       (single ._) zero = Fail
+  f _    502-Bad-Gateway           (single ._) zero = Fail
+  f _    503-Service-Unavailable   (single ._) zero = Fail
+  f _    _                         (single ._) n    = Base (STR n)
 
 Full-Response-Format : Method → Format
 Full-Response-Format m =
