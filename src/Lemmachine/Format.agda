@@ -102,4 +102,16 @@ Required-Header h =
     End
   )
 
+Optional-Header : Header-Name → Format
+Optional-Header h = Required-Header h ∣ End
 
+Disallow-Other-Headers : Format
+Disallow-Other-Headers =
+  Or (
+    Base HEADER-NAME >>= λ h →
+    char ':' >>
+    SP >>
+    Base (HEADER-VALUE h) >>-
+    CRLF >>
+    Fail
+  ) End

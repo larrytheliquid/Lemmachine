@@ -266,3 +266,19 @@ generated type should eventually be self contained with restraints
 might work nicely where current is [Ulh] that goes to Elh
 
 http 0.9 detection via Plus
+
+get rid of all the *-Response-*
+
+can do a Plus (read-header >> Fail, else End) as a catchall for any
+header that hasn't already been specified
+
+HEAD needs to accept content-* and other entheads according to context
+of whether a body would have been there
+
+make Date get checked against last-modified
+
+need a created? hook for POST response
+
+ A valid Content-Length is required on all HTTP/1.0 POST requests. An
+   HTTP/1.0 server should respond with a 400 (bad request) message if it
+   cannot determine the length of the request message's content.

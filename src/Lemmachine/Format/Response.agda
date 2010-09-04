@@ -10,21 +10,20 @@ open import Lemmachine.Format.Request
 Simple-Response-Format =
   Slurp (Base CHAR)
 
-GET-Response-Format : Format
-GET-Response-Format =
+Shared-Response-Headers-Format : Format
+Shared-Response-Headers-Format =
   Required-Header Date >>-
+  Optional-Header Pragma >>-
+  Optional-Header Server >>-
+  End
 
-  Slurp (
-    Base HEADER-NAME >>= λ h →
-    char ':' >>
-    SP >>
-    Base (HEADER-VALUE h) >>-
-    CRLF >>
-    End
-  )
+HEAD-Response-Format : Format
+HEAD-Response-Format =
+  Shared-Response-Headers-Format
 
-HEAD-Response-Format = GET-Response-Format
-POST-Response-Format = GET-Response-Format
+GET-Response-Format = HEAD-Response-Format
+POST-Response-Format =
+  Shared-Response-Headers-Format
 
 Method-Response-Format : Method → Format
 Method-Response-Format GET  = GET-Response-Format
@@ -42,25 +41,25 @@ Location-Format _    _                     = End
 
 WWW-Authenticate-Format : Code → Format
 WWW-Authenticate-Format 401-Unauthorized = Required-Header WWW-Authenticate
-WWW-Authenticate-Format _ = End
+WWW-Authenticate-Format _                = End
 
 Entity-Body-Format : Format → Method → Code → Format
-Entity-Body-Format body _    204-No-Content   = body >>- CRLF >> End
-Entity-Body-Format body _    304-Not-Modified = body >>- CRLF >> End
-Entity-Body-Format body HEAD _                = body >>- CRLF >> End
-Entity-Body-Format body _    _ = -- GET/POST
+Entity-Body-Format x _    204-No-Content   = x >>- CRLF >> End
+Entity-Body-Format x _    304-Not-Modified = x >>- CRLF >> End
+Entity-Body-Format x m _ =
+  Optional-Header Allow >>-
+  Optional-Header Content-Encoding >>-
   Required-Header Content-Length >>= λ c-l →
-  f body (proj₁ c-l) (proj₁ (proj₂ c-l))
-
+  Required-Header Content-Type >>-
+  Optional-Header Expires >>-
+  Optional-Header Last-Modified >>-
+  x >>-
+  CRLF >>
+  f m (proj₁ c-l) (proj₁ (proj₂ c-l))
   where
-
-  f : Format → (s : Single Content-Length) → Header-Value (proj s) → Format
-  f body (single ._) zero = body >>- CRLF >> End
-  f body (single ._) n =
-    Required-Header Content-Type >>-
-    body >>-
-    CRLF >>
-    Base (STR n)
+  f : Method → (s : Single Content-Length) → Header-Value (proj s) → Format
+  f HEAD _           _    = End
+  f _    (single ._) n    = Base (STR n)
 
 Full-Response-Format : Method → Format
 Full-Response-Format m =
