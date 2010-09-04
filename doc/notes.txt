@@ -282,3 +282,18 @@ need a created? hook for POST response
  A valid Content-Length is required on all HTTP/1.0 POST requests. An
    HTTP/1.0 server should respond with a 400 (bad request) message if it
    cannot determine the length of the request message's content.
+
+
+if-modified-since -> cache
+
+ In this case,
+   either 200 (ok) or 204 (no content) is the appropriate response
+   status, depending on whether or not the response includes an entity
+   that describes the result.
+
+   If a resource has been created on the origin server, the response
+   should be 201 (created) and contain an entity (preferably of type
+   "text/html") which describes the status of the request and refers to
+   the new resource.
+
+preferred choice hook for 300 + including Location
