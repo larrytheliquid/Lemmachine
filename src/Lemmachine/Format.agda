@@ -89,11 +89,10 @@ SP    = Base (DAR 32)
 CR    = Base (DAR 13)
 LF    = Base (DAR 10)
 CRLF  = CR >>- LF
-End-Headers  = CRLF >>- CRLF
 
 Required-Header : Header-Name → Format
 Required-Header h =
-  Upto End-Headers (
+  Upto (CRLF >>- CRLF) (
     Base (SINGLE h) >>= λ h →
     char ':' >>
     SP >>
@@ -105,8 +104,7 @@ Required-Header h =
 Optional-Header : Header-Name → Format
 Optional-Header h = Required-Header h ∣ End
 
-Disallow-Other-Headers : Format
-Disallow-Other-Headers =
+Headers-End =
   Or (
     Base HEADER-NAME >>= λ h →
     char ':' >>
@@ -114,4 +112,5 @@ Disallow-Other-Headers =
     Base (HEADER-VALUE h) >>-
     CRLF >>
     Fail
-  ) End
+  ) End >>
+  CRLF

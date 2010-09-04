@@ -4,7 +4,7 @@ open import Lemmachine.Data hiding ([_])
 open import Lemmachine.HTTP
 open import Lemmachine.Format
 
-Simple-Request-Format =
+Simple-Format =
   str "GET" >>
   SP >>
   Base REQUEST-URI >>-
@@ -23,8 +23,7 @@ Shared-Headers-Format =
 HEAD-Format : Format
 HEAD-Format =
   Shared-Headers-Format >>-
-  Disallow-Other-Headers >>
-  CRLF >>
+  Headers-End >>
   End
 
 GET-Format =
@@ -39,11 +38,10 @@ POST-Format =
   Required-Header Content-Length >>= λ c-l →
   Required-Header Content-Type >>-
   Optional-Header Expires >>-
-  Disallow-Other-Headers >>
   f (proj₁ c-l) (proj₁ (proj₂ c-l))
   where
   f : (s : Single Content-Length) → Header-Value (proj s) → Format
-  f (single ._) n = CRLF >> Base (STR n)
+  f (single ._) n = Headers-End >> Base (STR n)
 
 Remaining-Format : Method → Format
 Remaining-Format GET  = GET-Format
@@ -60,5 +58,5 @@ Full-Request-Format =
   Remaining-Format m
 
 Request-Format =
-  Full-Request-Format ∣ Simple-Request-Format
+  Full-Request-Format ∣ Simple-Format
 

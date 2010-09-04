@@ -31,18 +31,18 @@ Method-Response-Format HEAD = HEAD-Response-Format
 Method-Response-Format POST = POST-Response-Format
 
 Location-Format : Method → Code → Format
-Location-Format _    300-Multiple-Choices  = Optional-Header Location
-Location-Format _    301-Moved-Permanently = Required-Header Location
-Location-Format _    302-Moved-Temporarily = Required-Header Location
-Location-Format _    _                     = Optional-Header Location
+Location-Format _ 300-Multiple-Choices  = Optional-Header Location
+Location-Format _ 301-Moved-Permanently = Required-Header Location
+Location-Format _ 302-Moved-Temporarily = Required-Header Location
+Location-Format _ _                     = Optional-Header Location
 
 WWW-Authenticate-Format : Code → Format
 WWW-Authenticate-Format 401-Unauthorized = Required-Header WWW-Authenticate
 WWW-Authenticate-Format _                = End
 
 Entity-Body-Format : Format → Method → Code → Format
-Entity-Body-Format x _    204-No-Content   = x >>- CRLF >> End
-Entity-Body-Format x _    304-Not-Modified = x >>- CRLF >> End
+Entity-Body-Format x _    204-No-Content   = x >>- Headers-End >> End
+Entity-Body-Format x _    304-Not-Modified = x >>- Headers-End >> End
 Entity-Body-Format x m c =
   Optional-Header Allow >>-
   Optional-Header Content-Encoding >>-
@@ -51,7 +51,7 @@ Entity-Body-Format x m c =
   Optional-Header Expires >>-
   Optional-Header Last-Modified >>-
   x >>-
-  CRLF >>
+  Headers-End >>
   f m c (proj₁ c-l) (proj₁ (proj₂ c-l))
   where
   f : Method → Code → (s : Single Content-Length) → Header-Value (proj s) → Format
