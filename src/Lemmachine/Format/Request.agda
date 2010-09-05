@@ -1,6 +1,6 @@
 module Lemmachine.Format.Request where
 open import Data.Product
-open import Lemmachine.Data hiding ([_])
+open import Lemmachine.Data
 open import Lemmachine.HTTP
 open import Lemmachine.Format
 

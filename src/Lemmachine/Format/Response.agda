@@ -2,7 +2,7 @@ module Lemmachine.Format.Response where
 open import Data.Nat
 open import Data.Maybe
 open import Data.Product
-open import Lemmachine.Data hiding ([_])
+open import Lemmachine.Data
 open import Lemmachine.HTTP
 open import Lemmachine.Format
 
@@ -16,19 +16,6 @@ Shared-Headers-Format =
   Optional-Header Server >>-
   End
 
-HEAD-Format : Format
-HEAD-Format =
-  Shared-Headers-Format
-
-GET-Format = HEAD-Format
-POST-Format =
-  Shared-Headers-Format
-
-Method-Format : Method → Format
-Method-Format GET  = GET-Format
-Method-Format HEAD = HEAD-Format
-Method-Format POST = POST-Format
-
 Location-Format : Method → Code → Format
 Location-Format _ 300-Multiple-Choices  = Optional-Header Location
 Location-Format _ 301-Moved-Permanently = Required-Header Location
@@ -39,10 +26,10 @@ WWW-Authenticate-Format : Code → Format
 WWW-Authenticate-Format 401-Unauthorized = Required-Header WWW-Authenticate
 WWW-Authenticate-Format _                = End
 
-Entity-Body-Format : Format → Method → Code → Format
-Entity-Body-Format x _    204-No-Content   = x >>- Headers-End >> End
-Entity-Body-Format x _    304-Not-Modified = x >>- Headers-End >> End
-Entity-Body-Format x m c =
+Remaining-Format : Format → Method → Code → Format
+Remaining-Format x _    204-No-Content   = x >>- Headers-End >> End
+Remaining-Format x _    304-Not-Modified = x >>- Headers-End >> End
+Remaining-Format x m c =
   Optional-Header Allow >>-
   Optional-Header Content-Encoding >>-
   Required-Header Content-Length >>= λ c-l →
@@ -80,13 +67,13 @@ Full-Format m =
   CRLF >>
   Location-Format m c >>-
   WWW-Authenticate-Format c >>-
-  Entity-Body-Format (Method-Format m) m c
+  Remaining-Format Shared-Headers-Format m c
 
   where
 
   POST-Required-For-Created : Method → Code → Format
-  POST-Required-For-Created GET  201-Created = Fail
-  POST-Required-For-Created HEAD 201-Created = Fail
+  POST-Required-For-Created POST 201-Created = End
+  POST-Required-For-Created _    201-Created = Fail
   POST-Required-For-Created _    _           = End
 
 Response-Format : Maybe Method → Format
