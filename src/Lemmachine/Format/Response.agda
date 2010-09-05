@@ -5,30 +5,29 @@ open import Data.Product
 open import Lemmachine.Data hiding ([_])
 open import Lemmachine.HTTP
 open import Lemmachine.Format
-open import Lemmachine.Format.Request
 
-Simple-Response-Format =
+Simple-Format =
   Slurp (Base CHAR)
 
-Shared-Response-Headers-Format : Format
-Shared-Response-Headers-Format =
+Shared-Headers-Format : Format
+Shared-Headers-Format =
   Required-Header Date >>-
   Optional-Header Pragma >>-
   Optional-Header Server >>-
   End
 
-HEAD-Response-Format : Format
-HEAD-Response-Format =
-  Shared-Response-Headers-Format
+HEAD-Format : Format
+HEAD-Format =
+  Shared-Headers-Format
 
-GET-Response-Format = HEAD-Response-Format
-POST-Response-Format =
-  Shared-Response-Headers-Format
+GET-Format = HEAD-Format
+POST-Format =
+  Shared-Headers-Format
 
-Method-Response-Format : Method → Format
-Method-Response-Format GET  = GET-Response-Format
-Method-Response-Format HEAD = HEAD-Response-Format
-Method-Response-Format POST = POST-Response-Format
+Method-Format : Method → Format
+Method-Format GET  = GET-Format
+Method-Format HEAD = HEAD-Format
+Method-Format POST = POST-Format
 
 Location-Format : Method → Code → Format
 Location-Format _ 300-Multiple-Choices  = Optional-Header Location
@@ -70,26 +69,26 @@ Entity-Body-Format x m c =
   f _    503-Service-Unavailable   (single ._) zero = Fail
   f _    _                         (single ._) n    = Base (STR n)
 
-Full-Response-Format : Method → Format
-Full-Response-Format m =
+Full-Format : Method → Format
+Full-Format m =
   Base VERSION >>-
   SP >>
   Base CODE >>= λ c →
-  Require-POST-If-Created m c >>
+  POST-Required-For-Created m c >>
   SP >>
   Base REASON-PHRASE >>-
   CRLF >>
   Location-Format m c >>-
   WWW-Authenticate-Format c >>-
-  Entity-Body-Format (Method-Response-Format m) m c
+  Entity-Body-Format (Method-Format m) m c
 
   where
 
-  Require-POST-If-Created : Method → Code → Format
-  Require-POST-If-Created GET  201-Created = Fail
-  Require-POST-If-Created HEAD 201-Created = Fail
-  Require-POST-If-Created _    _           = End
+  POST-Required-For-Created : Method → Code → Format
+  POST-Required-For-Created GET  201-Created = Fail
+  POST-Required-For-Created HEAD 201-Created = Fail
+  POST-Required-For-Created _    _           = End
 
 Response-Format : Maybe Method → Format
-Response-Format nothing  = Simple-Response-Format
-Response-Format (just m) = Full-Response-Format m
+Response-Format nothing  = Simple-Format
+Response-Format (just m) = Full-Format m

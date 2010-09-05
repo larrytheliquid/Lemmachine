@@ -48,7 +48,7 @@ Remaining-Format GET  = GET-Format
 Remaining-Format HEAD = HEAD-Format
 Remaining-Format POST = POST-Format
 
-Full-Request-Format =
+Full-Format =
   Base METHOD >>= λ m →
   SP >>
   Base REQUEST-URI >>-
@@ -57,6 +57,5 @@ Full-Request-Format =
   CRLF >>  
   Remaining-Format m
 
-Request-Format =
-  Full-Request-Format ∣ Simple-Format
+Request-Format = Full-Format ∣ Simple-Format
 
