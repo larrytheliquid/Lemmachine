@@ -57,6 +57,7 @@ Full-Format =
   SP >>
   Base VERSION >>-
   CRLF >>  
+
   Remaining-Format m
 
 Request-Format = Full-Format ∣ Simple-Format

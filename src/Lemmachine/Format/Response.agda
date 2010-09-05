@@ -1,6 +1,8 @@
 module Lemmachine.Format.Response where
+open import Data.Bool
 open import Data.Nat
 open import Data.Maybe
+open import Data.Sum
 open import Data.Product
 open import Lemmachine.Data
 open import Lemmachine.HTTP
@@ -8,13 +10,6 @@ open import Lemmachine.Format
 
 Simple-Format =
   Slurp (Base CHAR)
-
-Shared-Headers-Format : Format
-Shared-Headers-Format =
-  Required-Header Date >>-
-  Optional-Header Pragma >>-
-  Optional-Header Server >>-
-  End
 
 Location-Format : Method → Code → Format
 Location-Format _ 300-Multiple-Choices  = Optional-Header Location
@@ -26,21 +21,39 @@ WWW-Authenticate-Format : Code → Format
 WWW-Authenticate-Format 401-Unauthorized = Required-Header WWW-Authenticate
 WWW-Authenticate-Format _                = End
 
-Remaining-Format : Format → Method → Code → Format
-Remaining-Format x _ 304-Not-Modified =
+Last-Modified-Format : ⟦ Required-Header Date ⟧ → Format
+Last-Modified-Format (single ._ , date , tt) =
+  Optional-Header Last-Modified >>= λ l-m →
+  f l-m date
+
+  where
+
+  -- TODO: actual date comparison
+  _>?_ : Header-Value Last-Modified → Header-Value Date → Bool
+  x >? y = false
+
+  guard : (s : Single Last-Modified) → Header-Value (proj s) → Header-Value Date → Format
+  guard (single ._) l-m d with l-m >? d
+  ... | true  = Fail
+  ... | false = End
+
+  f : ⟦ Optional-Header Last-Modified ⟧ → Header-Value Date → Format
+  f (inj₁ l-m) date = guard (proj₁ l-m) (proj₁ (proj₂ l-m)) date
+  f (inj₂ tt)  _    = End
+
+Remaining-Format : ⟦ Required-Header Date ⟧ → Method → Code → Format
+Remaining-Format _ _ 304-Not-Modified =
   Optional-Header Allow >>-
   Optional-Header Expires >>-
-  x >>- 
   Headers-End >>
   End
-Remaining-Format x m c =
+Remaining-Format d m c =
   Optional-Header Allow >>-
   Optional-Header Content-Encoding >>-
   Required-Header Content-Length >>= λ c-l →
   Required-Header Content-Type >>-
   Optional-Header Expires >>-
-  Optional-Header Last-Modified >>-
-  x >>-
+  Last-Modified-Format d >>-
   Headers-End >>
   f m c (proj₁ c-l) (proj₁ (proj₂ c-l))
 
@@ -72,9 +85,13 @@ Full-Format m =
   SP >>
   Base REASON-PHRASE >>-
   CRLF >>
+
+  Required-Header Date >>= λ d →
+  Optional-Header Pragma >>-
+  Optional-Header Server >>-
   Location-Format m c >>-
   WWW-Authenticate-Format c >>-
-  Remaining-Format Shared-Headers-Format m c
+  Remaining-Format d m c
 
   where
 
