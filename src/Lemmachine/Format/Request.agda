@@ -39,7 +39,9 @@ POST-Format =
   Required-Header Content-Type >>-
   Optional-Header Expires >>-
   f (proj₁ c-l) (proj₁ (proj₂ c-l))
+
   where
+
   f : (s : Single Content-Length) → Header-Value (proj s) → Format
   f (single ._) n = Headers-End >> Base (STR n)
 

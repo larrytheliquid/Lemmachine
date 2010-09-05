@@ -27,8 +27,12 @@ WWW-Authenticate-Format 401-Unauthorized = Required-Header WWW-Authenticate
 WWW-Authenticate-Format _                = End
 
 Remaining-Format : Format → Method → Code → Format
-Remaining-Format x _    204-No-Content   = x >>- Headers-End >> End
-Remaining-Format x _    304-Not-Modified = x >>- Headers-End >> End
+Remaining-Format x _ 304-Not-Modified =
+  Optional-Header Allow >>-
+  Optional-Header Expires >>-
+  x >>- 
+  Headers-End >>
+  End
 Remaining-Format x m c =
   Optional-Header Allow >>-
   Optional-Header Content-Encoding >>-
@@ -39,8 +43,11 @@ Remaining-Format x m c =
   x >>-
   Headers-End >>
   f m c (proj₁ c-l) (proj₁ (proj₂ c-l))
+
   where
+
   f : Method → Code → (s : Single Content-Length) → Header-Value (proj s) → Format
+  f _    204-No-Content            _           _    = End
   f HEAD _                         _           _    = End
   f _    201-Created               (single ._) zero = Fail
   f _    202-Accepted              (single ._) zero = Fail
